@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020, Alexander Kapralov
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling_builder.internal.ui;
 

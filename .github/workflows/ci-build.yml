@@ -87,5 +87,5 @@ jobs:
         server: capralow.ru
         username: ${{ secrets.ftp_username }}
         password: ${{ secrets.ftp_password }}
-        server-dir: 1unit/0.1.0/
+        server-dir: modeling-builder/0.1.0/
         local-dir: repositories/ru.capralow.dt.modeling-builder.repository/target/repository/
