@@ -15,10 +15,11 @@
 	<packaging>pom</packaging>
 	<name>Tests</name>
 
-	<modules>
+<!--	<modules>
 		<module>ru.capralow.dt.modeling-builder.core.tests</module>
 		<module>ru.capralow.dt.modeling-builder.ui.tests</module>
 	</modules>
+-->
 
 	<profiles>
 		<profile>
