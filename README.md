@@ -1,7 +1,7 @@
 ﻿![Build](https://github.com/DoublesunRUS/ru.capralow.dt.modeling-builder/workflows/CI/badge.svg)
 
 
-## Экспорт конфигурации в СППР по исходникам EDT для [1C:Enterprise Development Tools](http://v8.1c.ru/overview/IDE/) 2022.1
+## Экспорт форм и модулей в СППР для [1C:Enterprise Development Tools](http://v8.1c.ru/overview/IDE/) 2022.1
 
 Минимальная версия EDT: 2022.1
 
@@ -14,4 +14,5 @@
 Для самостоятельной сборки плагина необходимо иметь доступ к сайту https://releases.1c.ru и настроить соответствующим образом Maven. Подробности настройки написаны [здесь](https://github.com/1C-Company/dt-example-plugins/blob/master/simple-plugin/README.md).
 
 ### Возможности
-Добавлена возможность экспортировать проект конфигурации или расширения для загрузки в СППР.
+Эскпорт метаданных и форм в формате yaml
+Экспорт описания методов из всех модулей в формате yaml
