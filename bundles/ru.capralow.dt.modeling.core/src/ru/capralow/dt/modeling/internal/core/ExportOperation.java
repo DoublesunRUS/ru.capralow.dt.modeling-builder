@@ -74,15 +74,15 @@ public class ExportOperation
         this.systemIdleService = systemIdleService;
         this.derivedDataManagerProvider = derivedDataManagerProvider;
         this.strategy = strategy;
-        this.debugTrace.trace("/operation", "Create export operation: " + toString()); //$NON-NLS-1$
-        this.debugTrace.traceEntry("/operation", //$NON-NLS-1$
+        this.debugTrace.trace(IExportOperation.EXPORT_OPERATION_TRACE_OPTION, "Create export operation: " + toString()); //$NON-NLS-1$
+        this.debugTrace.traceEntry(IExportOperation.EXPORT_OPERATION_TRACE_OPTION,
             new Object[] { version, (targetPath != null) ? targetPath : "n/a", eObjects }); //$NON-NLS-1$
     }
 
     @Override
     public IStatus run(final IProgressMonitor progressMonitor)
     {
-        debugTrace.trace("/operation", "Start export operation: " + toString());
+        debugTrace.trace(IExportOperation.EXPORT_OPERATION_TRACE_OPTION, "Start export operation: " + toString());
         MultiStatus operationStatus = new MultiStatus("com._1c.g5.v8.dt.export", 0,
             Messages.ExportOperation_export_operation_success, (Throwable)null);
 
@@ -116,21 +116,21 @@ public class ExportOperation
                         EObject eObject = var13[var11];
                         boolean exportSubordinatesObjects = strategy.exportSubordinatesObjects(eObject);
                         boolean exportExternalProperties = strategy.exportExternalProperties(eObject);
-                        debugTrace.trace("/operation", "Start export service");
-                        debugTrace.traceEntry("/operation/service", new Object[] { exportService, eObject,
-                            exportSubordinatesObjects, exportExternalProperties });
+                        debugTrace.trace(IExportOperation.EXPORT_OPERATION_TRACE_OPTION, "Start export service");
+                        debugTrace.traceEntry(IExportService.EXPORT_SERVICE_TRACE_OPTION, new Object[] { exportService,
+                            eObject, exportSubordinatesObjects, exportExternalProperties });
                         IStatus status = exportService.work(eObject, artifactBuilder, exportSubordinatesObjects,
                             exportExternalProperties, progressMonitor);
-                        debugTrace.traceExit("/operation/service", status);
+                        debugTrace.traceExit(IExportService.EXPORT_SERVICE_TRACE_OPTION, status);
                         operationStatus.merge(status);
                     }
 
                     if (project != null && !progressMonitor.isCanceled() && strategy.exportUnknown())
                     {
-                        debugTrace.trace("/operation", "Export Unknown artifacts");
+                        debugTrace.trace(IExportOperation.EXPORT_OPERATION_TRACE_OPTION, "Export Unknown artifacts");
                         IStatus exportUnknownArtifacts =
                             exportUnknownArtifacts(project, artifactBuilder, progressMonitor);
-                        debugTrace.traceExit("/operation", exportUnknownArtifacts);
+                        debugTrace.traceExit(IExportOperation.EXPORT_OPERATION_TRACE_OPTION, exportUnknownArtifacts);
                         operationStatus.merge(exportUnknownArtifacts);
                     }
                 }
@@ -159,7 +159,7 @@ public class ExportOperation
         }
         catch (InterruptedException | ExportException e)
         {
-            debugTrace.trace("/operation", "Export operation error", e);
+            debugTrace.trace(IExportOperation.EXPORT_OPERATION_TRACE_OPTION, "Export operation error", e);
             operationStatus.merge(CorePlugin.createErrorStatus(e.getMessage(), e));
 
         }
@@ -170,7 +170,7 @@ public class ExportOperation
         }
 
         IStatus result = sortStatuses(operationStatus);
-        debugTrace.traceExit("/operation", result);
+        debugTrace.traceExit(IExportOperation.EXPORT_OPERATION_TRACE_OPTION, result);
         return result;
     }
 
@@ -186,7 +186,7 @@ public class ExportOperation
                     new UnsupportedFilesCopyVisitor.Builder(unknownFolder, artifactBuilder)
                         .addExclusion(path -> CONFIGURATION_PART_FILE_NAME.equals(path.getFileName().toString()))
                         .putModifier(
-                            UnsupportedFilesCopyVisitor.FileExtensionPredicateBuilder.build(new String[] { ".xml" }),
+                            UnsupportedFilesCopyVisitor.FileExtensionPredicateBuilder.build(new String[] { ".xml" }), //$NON-NLS-1$
                             new LineFeedConverter.ConvertOption[] { LineFeedConverter.ConvertOption.TO_LF,
                                 LineFeedConverter.ConvertOption.WRITE_BOM })
                         .putModifier(
@@ -203,7 +203,7 @@ public class ExportOperation
             }
             catch (IOException ex)
             {
-                debugTrace.trace("/operation", "Export Unknown artifacts error", ex);
+                debugTrace.trace(IExportOperation.EXPORT_OPERATION_TRACE_OPTION, "Export Unknown artifacts error", ex);
                 return CorePlugin.createErrorStatus(ex.getMessage(), ex.getCause());
             }
         }
