@@ -62,7 +62,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: dt-unit-repository
-        path: repositories/ru.capralow.dt.modeling-builder.repository/target/repository/
+        path: repositories/ru.capralow.dt.modeling.repository/target/repository/
         
     - name: Upload JaCoCo exec data
       uses: actions/upload-artifact@v2
@@ -88,4 +88,4 @@ jobs:
         username: ${{ secrets.ftp_username }}
         password: ${{ secrets.ftp_password }}
         server-dir: modeling-builder/0.1.0/
-        local-dir: repositories/ru.capralow.dt.modeling-builder.repository/target/repository/
+        local-dir: repositories/ru.capralow.dt.modeling.repository/target/repository/

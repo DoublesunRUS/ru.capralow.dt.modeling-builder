@@ -59,7 +59,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: repo
-        path: repositories/ru.capralow.dt.modeling-builder.repository/target/repository/
+        path: repositories/ru.capralow.dt.modeling.repository/target/repository/
         
     - name: Upload JaCoCo exec data
       uses: actions/upload-artifact@v2
@@ -94,7 +94,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./repositories/ru.capralow.dt.modeling-builder.repository/target/ru.capralow.dt.modeling-builder.repository.zip
+        asset_path: ./repositories/ru.capralow.dt.modeling.repository/target/ru.capralow.dt.modeling.repository.zip
         asset_name: repo.zip
         asset_content_type: application/zip
 
@@ -106,4 +106,4 @@ jobs:
         username: ${{ secrets.ftp_username }}
         password: ${{ secrets.ftp_password }}
         server-dir: modeling-builder/latest/
-        local-dir: repositories/ru.capralow.dt.modeling-builder.repository/target/repository/
+        local-dir: repositories/ru.capralow.dt.modeling.repository/target/repository/
