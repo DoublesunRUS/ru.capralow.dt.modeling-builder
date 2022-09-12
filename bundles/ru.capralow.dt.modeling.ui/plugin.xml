@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.exportWizards">
+         <category
+               id="com._1c.g5.v8.dt.export.ui.exportCategory"
+               name="%export.category">
+         </category>
+         
+         <wizard
+               category="com._1c.g5.v8.dt.export.ui.exportCategory"
+               class="ru.capralow.dt.modeling.internal.ui.ExecutableExtensionFactory:ru.capralow.dt.modeling.internal.ui.ExportConfigurationWizard"
+               icon="icons/etool16/export.png"
+               id="com._1c.g5.v8.dt.export.ui.export"
+               name="%exportWizard.name"> 
+            <description>%exportWizard.description</description> 
+            <selection class="org.eclipse.core.resources.IResource"/> 
+         </wizard>
+   </extension>
+</plugin>

@@ -6,13 +6,13 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>ru.capralow.dt.modeling-builder</groupId>
+		<groupId>ru.capralow.dt.modeling</groupId>
 		<artifactId>bom</artifactId>
 		<version>0.1.0-SNAPSHOT</version>
 		<relativePath>./bom/pom.xml</relativePath>
 	</parent>
 
-	<groupId>ru.capralow.dt.modeling-builder</groupId>
+	<groupId>ru.capralow.dt.modeling</groupId>
 	<artifactId>parent</artifactId>
 	<version>0.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>

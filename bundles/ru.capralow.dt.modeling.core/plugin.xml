@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="exportService" name="Export Service Registry" schema="schema/exportService.exsd"/>
+   
+   <extension point="org.eclipse.ui.trace.traceComponents">
+      <component
+            id="ru.capralow.dt.modeling.component"
+            label="%component.export.label">
+         <bundle
+               name="ru.capralow.dt.modeling">
+         </bundle>
+         <bundle
+               name="ru.capralow.dt.modeling.*">
+         </bundle>
+      </component>
+   </extension>
+   
+</plugin>
