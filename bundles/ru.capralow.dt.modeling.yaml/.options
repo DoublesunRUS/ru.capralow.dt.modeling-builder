@@ -1,0 +1,5 @@
+# Copyright (C) 2022, Aleksandr Kapralov
+# Tracing options for the ru.capralow.dt.modeling.yaml plug-in
+
+# Common issues
+ru.capralow.dt.modeling.yaml/operation/exporter=false

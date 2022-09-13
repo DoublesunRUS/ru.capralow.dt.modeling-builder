@@ -83,8 +83,8 @@ public class ExportOperation
     public IStatus run(final IProgressMonitor progressMonitor)
     {
         debugTrace.trace(IExportOperation.EXPORT_OPERATION_TRACE_OPTION, "Start export operation: " + toString());
-        MultiStatus operationStatus = new MultiStatus("com._1c.g5.v8.dt.export", 0,
-            Messages.ExportOperation_export_operation_success, (Throwable)null);
+        MultiStatus operationStatus =
+            new MultiStatus(CorePlugin.ID, 0, Messages.ExportOperation_export_operation_success, (Throwable)null);
 
         try
         {
@@ -145,13 +145,20 @@ public class ExportOperation
             }
             catch (Throwable exception)
             {
-//                if (t == null) {
-//                    t = exception;
-//                } else if (t != exception) {
-//                    t.addSuppressed(exception);
-//                }
-//
-//                throw t;
+                if (t == null)
+                {
+                    t = exception;
+                }
+                else if (t != exception)
+                {
+                    t.addSuppressed(exception);
+                }
+            }
+
+            if (t != null)
+            {
+                debugTrace.trace(IExportOperation.EXPORT_OPERATION_TRACE_OPTION, "Export operation error", t);
+                operationStatus.merge(CorePlugin.createErrorStatus(t.getMessage(), t));
             }
 
             perfStats.endRun();

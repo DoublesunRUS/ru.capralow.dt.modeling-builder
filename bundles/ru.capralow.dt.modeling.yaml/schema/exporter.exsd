@@ -1,0 +1,79 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Schema file written by PDE -->
+<schema targetNamespace="ru.capralow.dt.modeling.yaml">
+
+   <annotation>
+      <appinfo>
+         <meta.schema plugin="ru.capralow.dt.modeling.yaml" id="exporter" name="Exporter Registry"/>
+      </appinfo>
+      <documentation>
+      </documentation>
+   </annotation>
+
+   <include schemaLocation="schema://com._1c.g5.v8.dt.platform/schema/runtimeCompatibility.exsd"/>
+
+   <element name="extension">
+      <annotation>
+         <appinfo>
+            <meta.element />
+         </appinfo>
+      </annotation>
+      <complexType>
+         <sequence minOccurs="1" maxOccurs="unbounded">
+            <element ref="exporter"/>
+         </sequence>
+         <attribute name="point" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute translatable="true"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="exporter">
+      <complexType>
+         <sequence>
+            <element ref="runtime"/>
+         </sequence>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  The export service implementation class
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":ru.capralow.dt.modeling.yaml.IExporter"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <annotation>
+      <appinfo>
+         <meta.section type="copyright"/>
+      </appinfo>
+      <documentation>
+         Copyright (c) 2022 Aleksandr Kapralov
+      </documentation>
+   </annotation>
+
+</schema>

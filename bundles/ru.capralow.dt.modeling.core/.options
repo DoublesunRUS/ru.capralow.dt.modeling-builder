@@ -1,0 +1,6 @@
+# Copyright (C) 2022, Aleksandr Kapralov
+# Tracing options for the ru.capralow.dt.modeling.core plug-in
+
+# Common issues
+ru.capralow.dt.modeling.core/operation=false
+ru.capralow.dt.modeling.core/operation/service=false

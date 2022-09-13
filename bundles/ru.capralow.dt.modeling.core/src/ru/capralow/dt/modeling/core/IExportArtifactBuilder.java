@@ -11,7 +11,7 @@ import java.nio.file.Path;
 public interface IExportArtifactBuilder
     extends Closeable
 {
-    OutputStream newOutputStream(Path p0) throws IOException;
+    OutputStream newOutputStream(Path paramPath) throws IOException;
 
-    void copy(Path p0, Path p1) throws IOException;
+    void copy(Path paramPath1, Path paramPath2) throws IOException;
 }

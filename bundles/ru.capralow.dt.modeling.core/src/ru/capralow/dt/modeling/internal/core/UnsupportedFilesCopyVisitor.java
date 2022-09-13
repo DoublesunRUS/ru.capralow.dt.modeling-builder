@@ -51,7 +51,7 @@ public final class UnsupportedFilesCopyVisitor
                 .map(Map.Entry::getValue);
             if (modificator.isPresent())
             {
-                Throwable t = null;
+                IOException t = null;
                 try
                 {
                     final InputStream inputStream =
@@ -77,44 +77,46 @@ public final class UnsupportedFilesCopyVisitor
                         }
                         return super.visitFile(sourcePath, attrs);
                     }
-                    finally
+                    catch (IOException exception)
                     {
-//                        if (t == null)
-//                        {
-//                            final Throwable exception;
-//                            t = exception;
-//                        }
-//                        else
-//                        {
-//                            final Throwable exception;
-//                            if (t != exception)
-//                            {
-//                                t.addSuppressed(exception);
-//                            }
-//                        }
+                        if (t == null)
+                        {
+                            t = exception;
+                        }
+                        else
+                        {
+                            if (t != exception)
+                            {
+                                t.addSuppressed(exception);
+                            }
+                        }
                         if (inputStream != null)
                         {
                             inputStream.close();
                         }
                     }
                 }
-                finally
+                catch (IOException exception2)
                 {
-//                    if (t == null)
-//                    {
-//                        final Throwable exception2;
-//                        t = exception2;
-//                    }
-//                    else
-//                    {
-//                        final Throwable exception2;
-//                        if (t != exception2)
-//                        {
-//                            t.addSuppressed(exception2);
-//                        }
-//                    }
+                    if (t == null)
+                    {
+                        t = exception2;
+                    }
+                    else
+                    {
+                        if (t != exception2)
+                        {
+                            t.addSuppressed(exception2);
+                        }
+                    }
+                }
+
+                if (t != null)
+                {
+                    throw t;
                 }
             }
+
             this.artifactBuilder.copy(sourcePath, targetPath);
         }
         return super.visitFile(sourcePath, attrs);

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="exporter" name="1C:Enterprise Development Tools Exporter" schema="schema/exporter.exsd"/>
+   <extension-point id="exporterQualifier" name="1C:Enterprise Development Tools Exporter Qualifier" schema="schema/exporterQualifier.exsd"/>
+
+   <extension
+         point="ru.capralow.dt.modeling.core.exportService">
+      <exportService
+            class="ru.capralow.dt.modeling.internal.yaml.ExecutableExtensionFactory:ru.capralow.dt.modeling.core.IExportService"
+            exportFileSupportClass="ru.capralow.dt.modeling.internal.yaml.ExecutableExtensionFactory:ru.capralow.dt.modeling.internal.yaml.ExportFileSupport">
+            <runtime>
+               <since value="com._1c.g5.v8.dt.platform.runtime.8.3.8"/>
+            </runtime>
+      </exportService>
+   </extension>
+   <extension
+         point="com._1c.g5.wiring.serviceProvider">
+      <bundle
+            symbolicName="ru.capralow.dt.modeling.yaml">
+      </bundle>
+   </extension>
+</plugin>

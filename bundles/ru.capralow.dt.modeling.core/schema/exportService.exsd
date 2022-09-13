@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
 <schema targetNamespace="ru.capralow.dt.modeling.core">
-<annotation>
+
+   <annotation>
       <appinfo>
          <meta.schema plugin="ru.capralow.dt.modeling.core" id="exportService" name="Export Service Registry"/>
       </appinfo>
       <documentation>
-         [Enter description of this extension point.]
       </documentation>
    </annotation>
 
@@ -76,10 +76,6 @@
          </attribute>
       </complexType>
    </element>
-
-
-
-
 
    <annotation>
       <appinfo>

@@ -81,6 +81,8 @@ public class UiPlugin
     @Override
     public void stop(BundleContext context) throws Exception
     {
+        injector = null;
+
         instance = null;
 
         super.stop(context);

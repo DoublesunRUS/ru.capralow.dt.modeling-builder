@@ -3,15 +3,20 @@
  */
 package ru.capralow.dt.modeling.internal.core;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.osgi.service.debug.DebugOptionsListener;
 import org.osgi.framework.BundleContext;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 
+import ru.capralow.dt.modeling.core.ExportDebugTrace;
 import ru.capralow.dt.modeling.core.ExportRuntimeModule;
 import ru.capralow.dt.modeling.core.ExternalDependenciesModule;
 
@@ -60,11 +65,17 @@ public class CorePlugin
         super.start(context);
 
         instance = this;
+
+        Dictionary<String, String> props = new Hashtable<>(4);
+        props.put("listener.symbolic.name", "ru.capralow.dt.modeling"); //$NON-NLS-1$ //$NON-NLS-2$
+        context.registerService(DebugOptionsListener.class.getName(), ExportDebugTrace.getInstance(), props);
     }
 
     @Override
     public void stop(BundleContext context) throws Exception
     {
+        injector = null;
+
         instance = null;
 
         super.stop(context);
