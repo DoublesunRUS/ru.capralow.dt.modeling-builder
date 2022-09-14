@@ -1,9 +1,7 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -15,8 +13,8 @@ import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
 import ru.capralow.dt.modeling.md.yaml.impl.MetadataFeatureNameProvider;
-import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
+import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 
 @Singleton
 public class SessionReuseAndAgeWriter
@@ -27,7 +25,7 @@ public class SessionReuseAndAgeWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         if (!(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.HTTPService)
             && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.WebService))

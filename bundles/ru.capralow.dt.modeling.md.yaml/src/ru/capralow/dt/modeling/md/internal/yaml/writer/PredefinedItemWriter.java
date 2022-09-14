@@ -1,5 +1,5 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
 
@@ -18,9 +18,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.md.yaml.IMetadataXmlElements;
-import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
+import ru.capralow.dt.modeling.md.yaml.IMetadataYamlElements;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
+import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 
 public class PredefinedItemWriter
     implements ISpecifiedElementWriter
@@ -67,7 +67,7 @@ public class PredefinedItemWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         if (feature != MdClassPackage.Literals.CATALOG_PREDEFINED__ITEMS
             && feature != MdClassPackage.Literals.CHART_OF_ACCOUNTS_PREDEFINED__ITEMS
@@ -82,10 +82,10 @@ public class PredefinedItemWriter
             && feature != MdClassPackage.Literals.CHART_OF_CHARACTERISTIC_TYPES_PREDEFINED_ITEM__CONTENT
             && feature != MdClassPackage.Literals.CHART_OF_ACCOUNTS_PREDEFINED_ITEM__CHILD_ITEMS);
         if (isContent && !predefinedItems.isEmpty())
-            writer.writeStartElement(IMetadataXmlElements.XPR.CHILD_ITEMS);
+            writer.writeStartElement(IMetadataYamlElements.XPR.CHILD_ITEMS);
         for (PredefinedItem predefinedItem : predefinedItems)
         {
-            writer.writeStartElement(IMetadataXmlElements.XPR.ITEM);
+            writer.writeStartElement(IMetadataYamlElements.XPR.ITEM);
             writer.writeElement("id", predefinedItem.getId().toString());
             for (EStructuralFeature structuralFeature : getFeaturesList(eObject.eClass()))
                 writePredefinedItemProperty(writer, predefinedItem, structuralFeature, true, version);

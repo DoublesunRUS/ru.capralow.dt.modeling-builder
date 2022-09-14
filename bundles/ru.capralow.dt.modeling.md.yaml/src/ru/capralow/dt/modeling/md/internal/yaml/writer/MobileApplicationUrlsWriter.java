@@ -1,10 +1,9 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
@@ -20,11 +19,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.md.yaml.IMetadataXmlElements;
+import ru.capralow.dt.modeling.md.yaml.IMetadataYamlElements;
 import ru.capralow.dt.modeling.md.yaml.impl.MetadataFeatureNameProvider;
-import ru.capralow.dt.modeling.yaml.IXmlElements;
-import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
+import ru.capralow.dt.modeling.yaml.IYamlElements;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
+import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 
 @Singleton
 public class MobileApplicationUrlsWriter
@@ -35,7 +34,7 @@ public class MobileApplicationUrlsWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         Preconditions.checkArgument(version.isGreaterThan(Version.V8_3_17),
             "8.3.18 format data isn't being written in older versions");
@@ -56,12 +55,12 @@ public class MobileApplicationUrlsWriter
                 if (abstractMobileApplicationUrl instanceof MobileApplicationUrl)
                 {
                     MobileApplicationUrl url = (MobileApplicationUrl)abstractMobileApplicationUrl;
-                    writer.writeStartElement(IMetadataXmlElements.V8.VALUE);
-                    writer.writeElement(IXmlElements.XSI.TYPE, IXmlElements.APP.MOBILE_APPLICATION_URL_TYPE);
-                    writer.writeTextElement(IMetadataXmlElements.APP.BASE_URL, url.getBaseUrl());
-                    writer.writeTextElement(IMetadataXmlElements.APP.USE_ANDROID, Boolean.toString(url.isUseAndroid()));
-                    writer.writeTextElement(IMetadataXmlElements.APP.USE_IOS, Boolean.toString(url.isUseIOS()));
-                    writer.writeTextElement(IMetadataXmlElements.APP.USE_WINDOWS, Boolean.toString(url.isUseWindows()));
+                    writer.writeStartElement(IMetadataYamlElements.V8.VALUE);
+                    writer.writeElement(IYamlElements.XSI.TYPE, IYamlElements.APP.MOBILE_APPLICATION_URL_TYPE);
+                    writer.writeTextElement(IMetadataYamlElements.APP.BASE_URL, url.getBaseUrl());
+                    writer.writeTextElement(IMetadataYamlElements.APP.USE_ANDROID, Boolean.toString(url.isUseAndroid()));
+                    writer.writeTextElement(IMetadataYamlElements.APP.USE_IOS, Boolean.toString(url.isUseIOS()));
+                    writer.writeTextElement(IMetadataYamlElements.APP.USE_WINDOWS, Boolean.toString(url.isUseWindows()));
                     writer.writeEndElement();
                 }
             }

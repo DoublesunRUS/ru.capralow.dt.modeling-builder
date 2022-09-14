@@ -3,8 +3,6 @@
  */
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
 
-import javax.xml.stream.XMLStreamException;
-
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
@@ -27,7 +25,7 @@ public class QNameWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         if (feature.isMany() || feature.getEType() != McorePackage.Literals.QNAME)
         {

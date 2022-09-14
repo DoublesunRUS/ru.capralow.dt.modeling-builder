@@ -193,12 +193,12 @@ public class ExportOperation
                     new UnsupportedFilesCopyVisitor.Builder(unknownFolder, artifactBuilder)
                         .addExclusion(path -> CONFIGURATION_PART_FILE_NAME.equals(path.getFileName().toString()))
                         .putModifier(
-                            UnsupportedFilesCopyVisitor.FileExtensionPredicateBuilder.build(new String[] { ".xml" }), //$NON-NLS-1$
+                            UnsupportedFilesCopyVisitor.FileExtensionPredicateBuilder.build(new String[] { ".yaml" }), //$NON-NLS-1$
                             new LineFeedConverter.ConvertOption[] { LineFeedConverter.ConvertOption.TO_LF,
                                 LineFeedConverter.ConvertOption.WRITE_BOM })
                         .putModifier(
                             UnsupportedFilesCopyVisitor.FileExtensionPredicateBuilder
-                                .build(new String[] { ".bsl", ".txt" }), //$NON-NLS-1$ //$NON-NLS-2$
+                                .build(new String[] { ".xbsl", ".txt" }), //$NON-NLS-1$ //$NON-NLS-2$
                             new LineFeedConverter.ConvertOption[] { LineFeedConverter.ConvertOption.TO_CRLF,
                                 LineFeedConverter.ConvertOption.WRITE_BOM })
                         .putModifier(
@@ -231,16 +231,20 @@ public class ExportOperation
     {
         switch (status.getSeverity())
         {
-        case Status.OK: {
+        case Status.OK:
+        {
             return status.getMessage();
         }
-        case Status.CANCEL: {
+        case Status.CANCEL:
+        {
             return Messages.ExportOperation_export_operation_canceled_by_user;
         }
-        case Status.INFO: {
+        case Status.INFO:
+        {
             return Messages.ExportOperation_export_operation_success;
         }
-        default: {
+        default:
+        {
             return (statuses.size() > 1) ? Messages.ExportOperation_export_operation_has_several_errors : MessageFormat
                 .format(Messages.ExportOperation_export_operation_has_error__0, statuses.get(0).getMessage());
         }

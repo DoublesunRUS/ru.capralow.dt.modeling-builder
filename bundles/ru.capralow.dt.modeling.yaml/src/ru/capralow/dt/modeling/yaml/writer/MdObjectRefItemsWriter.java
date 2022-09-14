@@ -6,7 +6,6 @@ package ru.capralow.dt.modeling.yaml.writer;
 import java.util.List;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
@@ -23,14 +22,13 @@ import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
 import ru.capralow.dt.modeling.yaml.IQNameProvider;
-import ru.capralow.dt.modeling.yaml.IXmlElements;
 
 @Singleton
 public class MdObjectRefItemsWriter
     implements ISpecifiedElementWriter
 {
-    private final ImmutableList<EStructuralFeature> supportedFeatures = (new ImmutableList.Builder())
-        .add((Object[])new EStructuralFeature[] { MdClassPackage.Literals.BASIC_DB_OBJECT__BASED_ON,
+    private final ImmutableList<EStructuralFeature> supportedFeatures =
+        new ImmutableList.Builder().add(new EStructuralFeature[] { MdClassPackage.Literals.BASIC_DB_OBJECT__BASED_ON,
             MdClassPackage.Literals.TABLE__BASED_ON, MdClassPackage.Literals.CONFIGURATION__DEFAULT_ROLES,
             MdClassPackage.Literals.CONFIGURATION__STANDALONE_CONFIGURATION_RESTRICTION_ROLES,
             MdClassPackage.Literals.CONFIGURATION__DEFAULT_INTERFACE, MdClassPackage.Literals.CONFIGURATION__CONTENT,
@@ -44,8 +42,7 @@ public class MdObjectRefItemsWriter
             MdClassPackage.Literals.SEQUENCE__REGISTER_RECORDS, MdClassPackage.Literals.SUBSYSTEM__CONTENT,
             MdClassPackage.Literals.SEQUENCE_DIMENSION__DOCUMENT_MAP,
             MdClassPackage.Literals.SEQUENCE_DIMENSION__REGISTER_RECORDS_MAP,
-            MdClassPackage.Literals.RECALCULATION_DIMENSION__LEADING_REGISTER_DATA })
-        .build();
+            MdClassPackage.Literals.RECALCULATION_DIMENSION__LEADING_REGISTER_DATA }).build();
 
     @Inject
     private IQNameProvider nameProvider;
@@ -58,7 +55,7 @@ public class MdObjectRefItemsWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         if (!this.supportedFeatures.contains(feature))
         {
@@ -69,7 +66,7 @@ public class MdObjectRefItemsWriter
         {
             if (writeEmpty)
             {
-                writer.writeEmptyElement(elementQName);
+//                writer.writeEmptyElement(elementQName);
             }
             return;
         }
@@ -80,25 +77,25 @@ public class MdObjectRefItemsWriter
             {
                 if (writeEmpty)
                 {
-                    writer.writeEmptyElement(elementQName);
+//                    writer.writeEmptyElement(elementQName);
                 }
             }
             else
             {
-                writer.writeStartElement(elementQName);
+                writer.writeElement(elementQName, "");
                 for (EObject item : (List<EObject>)value)
                 {
                     String ref = this.linkConverter.convert(eObject, (EReference)feature,
                         this.symbolicNameService.generateSymbolicName(item, eObject, (EReference)feature));
                     if (!Strings.isNullOrEmpty(ref))
                     {
-                        writer.writeStartElement(IXmlElements.XR.ITEM);
-                        writer.writeElement(IXmlElements.XSI.TYPE, IXmlElements.XR.MD_OBJECT_REF);
-                        writer.writeCharacters(ref);
-                        writer.writeInlineEndElement();
+//                        writer.writeStartElement(IYamlElements.XR.ITEM);
+//                        writer.writeElement(IYamlElements.XSI.TYPE, IYamlElements.XR.MD_OBJECT_REF);
+//                        writer.writeCharacters(ref);
+//                        writer.writeInlineEndElement();
                     }
                 }
-                writer.writeEndElement();
+//                writer.writeEndElement();
             }
         }
         else if (value instanceof EObject)
@@ -107,15 +104,15 @@ public class MdObjectRefItemsWriter
                 this.symbolicNameService.generateSymbolicName((EObject)value, eObject, (EReference)feature));
             if (!Strings.isNullOrEmpty(ref))
             {
-                writer.writeStartElement(elementQName);
-                writer.writeElement(IXmlElements.XSI.TYPE, IXmlElements.XR.MD_OBJECT_REF);
-                writer.writeCharacters(ref);
-                writer.writeEndElement();
+                writer.writeElement(elementQName, "");
+//                writer.writeElement(IYamlElements.XSI.TYPE, IYamlElements.XR.MD_OBJECT_REF);
+//                writer.writeCharacters(ref);
+//                writer.writeEndElement();
             }
         }
         else if (writeEmpty)
         {
-            writer.writeEmptyElement(elementQName);
+//            writer.writeEmptyElement(elementQName);
         }
     }
 }

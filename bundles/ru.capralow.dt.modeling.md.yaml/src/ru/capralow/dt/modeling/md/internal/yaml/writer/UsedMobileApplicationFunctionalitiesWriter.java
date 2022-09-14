@@ -1,5 +1,5 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
 
@@ -31,17 +31,17 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.md.yaml.IMetadataXmlElements;
+import ru.capralow.dt.modeling.md.yaml.IMetadataYamlElements;
 import ru.capralow.dt.modeling.yaml.IQNameProvider;
-import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
+import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 
 @Singleton
 public class UsedMobileApplicationFunctionalitiesWriter
     implements ISpecifiedElementWriter
 {
     @Inject
-    @Named("SmartSpecifiedElementWriter")
+    @Named(ISpecifiedElementWriter.SMART_ELEMENT_WRITER)
     private ISpecifiedElementWriter smartFeatureWriter;
 
     @Inject
@@ -49,7 +49,7 @@ public class UsedMobileApplicationFunctionalitiesWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         Preconditions.checkArgument(version.isGreaterThan(Version.V8_3_17),
             "8.3.18 format data isn't being written in older versions");
@@ -86,8 +86,8 @@ public class UsedMobileApplicationFunctionalitiesWriter
     {
         if (isNotEmptyDescription(permissionMessage.getDescription()))
         {
-            writer.writeStartElement(IMetadataXmlElements.APP.PERMISSION_MESSAGE);
-            writer.writeTextElement(IMetadataXmlElements.APP.PERMISSION, permissionMessage.getPermission());
+            writer.writeStartElement(IMetadataYamlElements.APP.PERMISSION_MESSAGE);
+            writer.writeTextElement(IMetadataYamlElements.APP.PERMISSION, permissionMessage.getPermission());
             this.smartFeatureWriter.write(writer, permissionMessage,
                 CommonPackage.Literals.REQUIRED_PERMISSION_MESSAGE__DESCRIPTION, false, version);
             writer.writeEndElement();
@@ -102,9 +102,9 @@ public class UsedMobileApplicationFunctionalitiesWriter
     private void writeUsedFunctionalityFlag(YamlStreamWriter writer, Version version,
         UsedFunctionalityFlag functionalityFlag) throws XMLStreamException, ExportException
     {
-        writer.writeStartElement(IMetadataXmlElements.APP.FUNCTIONALITY);
-        writer.writeTextElement(IMetadataXmlElements.APP.FUNCTIONALITY, functionalityFlag.getFunctionality());
-        writer.writeTextElement(IMetadataXmlElements.APP.USE, Boolean.toString(functionalityFlag.isUse()));
+        writer.writeStartElement(IMetadataYamlElements.APP.FUNCTIONALITY);
+        writer.writeTextElement(IMetadataYamlElements.APP.FUNCTIONALITY, functionalityFlag.getFunctionality());
+        writer.writeTextElement(IMetadataYamlElements.APP.USE, Boolean.toString(functionalityFlag.isUse()));
         writer.writeEndElement();
     }
 

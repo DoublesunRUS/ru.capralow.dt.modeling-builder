@@ -1,12 +1,12 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.yaml.writer;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.emf.common.util.EMap;
 import org.eclipse.emf.ecore.EObject;
@@ -23,7 +23,6 @@ import com.google.inject.Singleton;
 import ru.capralow.dt.modeling.core.ExportException;
 import ru.capralow.dt.modeling.internal.yaml.YamlPlugin;
 import ru.capralow.dt.modeling.yaml.IQNameProvider;
-import ru.capralow.dt.modeling.yaml.IXmlElements;
 
 @Singleton
 public class LocalStringMapEntryWriter
@@ -34,10 +33,10 @@ public class LocalStringMapEntryWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         Preconditions.checkArgument(
-            (feature != null && feature.isMany() && feature.getEType() == McorePackage.Literals.LOCAL_STRING_MAP_ENTRY),
+            feature != null && feature.isMany() && feature.getEType() == McorePackage.Literals.LOCAL_STRING_MAP_ENTRY,
             "Invalid feature type %s", feature);
         QName name = this.nameProvider.getElementQName(feature);
         EMap<String, String> localStringMap = (EMap<String, String>)eObject.eGet(feature);
@@ -46,59 +45,60 @@ public class LocalStringMapEntryWriter
 
     public void writeLocalString(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature,
         EMap<String, String> localString, QName elementQName, boolean writeEmpty, Version version)
-        throws XMLStreamException, ExportException
+        throws ExportException
     {
         boolean isFormattedTitle = isFormattedTitle(eObject, feature);
         if (localString != null && !localString.isEmpty())
         {
-            writer.writeStartElement(elementQName.toString());
-            if (isFormattedTitle)
-                writer.writeElement("formatted", Boolean.toString(((Decoration)eObject).isFormatted()));
+            List<Object> list = writer.addList(elementQName);
+
+//            if (isFormattedTitle)
+//            {
+//                writer.writeElement("formatted", Boolean.toString(((Decoration)eObject).isFormatted()), mainGroup);
+//            }
             for (Map.Entry<String, String> entry : (Iterable<Map.Entry<String, String>>)localString.entrySet())
             {
-                writer.writeStartElement(IXmlElements.V8.ITEM);
+                Map<String, Object> entryGroup = writer.addGroup(list);
                 String lang = entry.getKey();
                 if (lang != null && !lang.isEmpty())
                 {
-                    writer.writeStartElement(IXmlElements.V8.LANG);
-                    writer.writeCharacters(lang);
-                    writer.writeInlineEndElement();
+                    writer.writeElement("V8.LANG", lang, entryGroup);
                 }
                 else
                 {
                     if (lang == null)
+                    {
                         YamlPlugin.log(YamlPlugin.createErrorStatus("Localized string entry key cannot be null", null));
-                    writer.writeEmptyElement(IXmlElements.V8.LANG);
+                    }
+//                    writer.writeEmptyElement(IYamlElements.V8.LANG);
                 }
                 String value = entry.getValue();
                 if (value != null && !value.isEmpty())
                 {
-                    writer.writeStartElement(IXmlElements.V8.CONTENT);
-                    writer.writeCharacters(value);
-                    writer.writeInlineEndElement();
+                    writer.writeElement("V8.CONTENT", value, entryGroup);
                 }
                 else
                 {
-                    writer.writeEmptyElement(IXmlElements.V8.CONTENT);
+//                    writer.writeEmptyElement(IYamlElements.V8.CONTENT);
                 }
-                writer.writeEndElement();
             }
-            writer.writeEndElement();
         }
         else if (isFormattedTitle && ((Decoration)eObject).isFormatted())
         {
-            writer.writeEmptyElement(elementQName.toString());
-            if (isFormattedTitle)
-                writer.writeElement("formatted", Boolean.toString(((Decoration)eObject).isFormatted()));
+//            writer.writeEmptyElement(elementQName.toString());
+//            if (isFormattedTitle)
+//            {
+//                writer.writeElement("formatted", Boolean.toString(((Decoration)eObject).isFormatted()));
+//            }
         }
         else if (writeEmpty)
         {
-            writer.writeEmptyElement(elementQName.toString());
+//            writer.writeEmptyElement(elementQName.toString());
         }
     }
 
     private boolean isFormattedTitle(EObject context, EStructuralFeature feature)
     {
-        return (context instanceof Decoration && feature == FormPackage.Literals.TITLED__TITLE);
+        return context instanceof Decoration && feature == FormPackage.Literals.TITLED__TITLE;
     }
 }

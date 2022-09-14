@@ -1,5 +1,5 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
 
@@ -26,17 +26,17 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.md.yaml.IMetadataXmlElements;
+import ru.capralow.dt.modeling.md.yaml.IMetadataYamlElements;
 import ru.capralow.dt.modeling.yaml.IQNameProvider;
-import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
+import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 
 @Singleton
 public class RequiredMobileApplicationPermissions8315Writer
     implements ISpecifiedElementWriter
 {
     @Inject
-    @Named("SmartSpecifiedElementWriter")
+    @Named(ISpecifiedElementWriter.SMART_ELEMENT_WRITER)
     private ISpecifiedElementWriter smartFeatureWriter;
 
     @Inject
@@ -44,7 +44,7 @@ public class RequiredMobileApplicationPermissions8315Writer
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         Preconditions.checkArgument(version.isGreaterThan(Version.V8_3_14),
             "8.3.15 format data isn't being written in older versions");
@@ -83,9 +83,9 @@ public class RequiredMobileApplicationPermissions8315Writer
         RequiredMobileApplicationPermissions permissions, RequiredPermission permission)
         throws XMLStreamException, ExportException
     {
-        writer.writeStartElement(IMetadataXmlElements.APP.PERMISSION);
-        writer.writeTextElement(IMetadataXmlElements.APP.PERMISSION, permissions);
-        writer.writeTextElement(IMetadataXmlElements.APP.USE, Boolean.toString(permission.isUse()));
+        writer.writeStartElement(IMetadataYamlElements.APP.PERMISSION);
+        writer.writeTextElement(IMetadataYamlElements.APP.PERMISSION, permissions);
+        writer.writeTextElement(IMetadataYamlElements.APP.USE, Boolean.toString(permission.isUse()));
         this.smartFeatureWriter.write(writer, permission, CommonPackage.Literals.REQUIRED_PERMISSION__DESCRIPTION,
             false, version);
         writer.writeEndElement();

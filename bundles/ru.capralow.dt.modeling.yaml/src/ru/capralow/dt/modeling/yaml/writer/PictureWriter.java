@@ -1,12 +1,11 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.yaml.writer;
 
 import java.text.MessageFormat;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -26,12 +25,11 @@ import com.google.inject.Inject;
 import ru.capralow.dt.modeling.core.ExportException;
 import ru.capralow.dt.modeling.internal.yaml.YamlPlugin;
 import ru.capralow.dt.modeling.yaml.IQNameProvider;
-import ru.capralow.dt.modeling.yaml.IXmlElements;
 
 public class PictureWriter
     implements ISpecifiedElementWriter
 {
-    private static final String PICTURE_EXTENSION_KEY = "picture.extension";
+    private static final String PICTURE_EXTENSION_KEY = "picture.extension"; //$NON-NLS-1$
 
     @Inject
     private IQNameProvider nameProvider;
@@ -41,39 +39,40 @@ public class PictureWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
-        Preconditions.checkArgument((feature.getEType() == McorePackage.Literals.PICTURE), "Invalid feature type in %s",
+        Preconditions.checkArgument(feature.getEType() == McorePackage.Literals.PICTURE, "Invalid feature type in %s",
             feature);
         QName featureName = this.nameProvider.getElementQName(feature);
         Picture picture = (Picture)eObject.eGet(feature);
         if (checkPicture(picture))
         {
-            writer.writeStartElement(featureName.toString());
+            writer.writeElement(featureName.toString(), "");
             writePicture(writer, picture, eObject, feature);
-            writer.writeEndElement();
+//            writer.writeEndElement();
         }
         else if (writeEmpty)
         {
-            writer.writeEmptyElement(featureName.toString());
+//            writer.writeEmptyElement(featureName.toString());
         }
     }
 
     protected final void writePictureRefContent(YamlStreamWriter writer, String reference, boolean loadTransparent)
-        throws XMLStreamException
+        throws ExportException
+
     {
-        writer.writeTextElement(IXmlElements.XR.REF, reference);
-        writer.writeTextElement(IXmlElements.XR.LOAD_TRANSPARENT, Boolean.valueOf(loadTransparent));
+        writer.writeElement("XR.REF", reference);
+        writer.writeElement("XR.LOAD_TRANSPARENT", Boolean.valueOf(loadTransparent));
     }
 
-    protected final void writePictureDefContent(YamlStreamWriter writer, String pictureName,
-        Point transparentPixel) throws XMLStreamException, ExportException
+    protected final void writePictureDefContent(YamlStreamWriter writer, String pictureName, Point transparentPixel)
+        throws ExportException
     {
-        writer.writeTextElement(IXmlElements.XR.ABS, pictureName);
-        writer.writeTextElement(IXmlElements.XR.LOAD_TRANSPARENT, Boolean.valueOf((transparentPixel != null)));
+        writer.writeElement("XR.ABS", pictureName);
+        writer.writeElement("XR.LOAD_TRANSPARENT", Boolean.valueOf(transparentPixel != null));
         if (transparentPixel != null && transparentPixel.getX() != -1 && transparentPixel.getY() != -1)
         {
-            writer.writeEmptyElement(IXmlElements.XR.TRANSPARENT_PIXEL);
+//            writer.writeEmptyElement(IYamlElements.XR.TRANSPARENT_PIXEL);
             writer.writeElement("x", Integer.toString(transparentPixel.getX()));
             writer.writeElement("y", Integer.toString(transparentPixel.getY()));
         }
@@ -123,17 +122,21 @@ public class PictureWriter
         return false;
     }
 
-    private void writePicture(YamlStreamWriter writer, Picture picture, EObject eObject,
-        EStructuralFeature feature) throws XMLStreamException, ExportException
+    private void writePicture(YamlStreamWriter writer, Picture picture, EObject eObject, EStructuralFeature feature)
+        throws ExportException
     {
         if (picture instanceof PictureDef)
+        {
             writePictureDef(writer, (PictureDef)picture, eObject, feature);
+        }
         if (picture instanceof PictureRef)
+        {
             writePictureRef(writer, (PictureRef)picture, eObject, feature);
+        }
     }
 
     private void writePictureRef(YamlStreamWriter writer, PictureRef picture, EObject contextObject,
-        EStructuralFeature feature) throws XMLStreamException, ExportException
+        EStructuralFeature feature) throws ExportException
     {
         Picture referencePicture = picture.getPicture();
         String reference = this.symbolicNameService.generateSymbolicName(referencePicture, picture,
@@ -146,9 +149,9 @@ public class PictureWriter
     }
 
     private void writePictureDef(YamlStreamWriter writer, PictureDef picture, EObject contextObject,
-        EStructuralFeature feature) throws XMLStreamException, ExportException
+        EStructuralFeature feature) throws ExportException
     {
-        String pictureExtension = ((IBmObject)picture).bmGetProperty("picture.extension");
+        String pictureExtension = ((IBmObject)picture).bmGetProperty(PICTURE_EXTENSION_KEY);
         pictureExtension =
             ("picture".equals(pictureExtension) || pictureExtension == null) ? "" : ("." + pictureExtension);
         String pictureName = String.valueOf(Strings.toFirstUpper(feature.getName())) + pictureExtension;

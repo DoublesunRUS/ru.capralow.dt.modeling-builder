@@ -6,7 +6,6 @@ package ru.capralow.dt.modeling.yaml.writer;
 import java.util.List;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -22,7 +21,6 @@ import com.google.inject.name.Named;
 
 import ru.capralow.dt.modeling.core.ExportException;
 import ru.capralow.dt.modeling.yaml.IQNameProvider;
-import ru.capralow.dt.modeling.yaml.IXmlElements;
 
 @Singleton
 public class ChoiceParameterLinkWriter
@@ -32,7 +30,7 @@ public class ChoiceParameterLinkWriter
     private IQNameProvider nameManager;
 
     @Inject
-    @Named("SmartSpecifiedElementWriter")
+    @Named(ISpecifiedElementWriter.SMART_ELEMENT_WRITER)
     private ISpecifiedElementWriter featureWriter;
 
     @Inject
@@ -43,7 +41,7 @@ public class ChoiceParameterLinkWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         if (feature.getEType() != CommonPackage.Literals.CHOICE_PARAMETER_LINK)
         {
@@ -60,16 +58,16 @@ public class ChoiceParameterLinkWriter
             List<ChoiceParameterLink> list = (List<ChoiceParameterLink>)value;
             if (!list.isEmpty())
             {
-                writer.writeStartElement(elementQName.toString());
+                writer.writeElement(elementQName.toString(), "");
                 for (ChoiceParameterLink choiceParameterLink : list)
                 {
                     writeChoiceParameterLink(writer, choiceParameterLink, version);
                 }
-                writer.writeEndElement();
+//                writer.writeEndElement();
             }
             else if (writeEmpty)
             {
-                writer.writeEmptyElement(elementQName.toString());
+//                writer.writeEmptyElement(elementQName.toString());
             }
         }
         else
@@ -79,9 +77,9 @@ public class ChoiceParameterLinkWriter
     }
 
     private void writeChoiceParameterLink(YamlStreamWriter writer, ChoiceParameterLink choiceParameterLink,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
-        writer.writeStartElement(IXmlElements.XR.LINK);
+        writer.writeElement("XR.LINK", "");
         this.featureWriter.write(writer, choiceParameterLink,
             CommonPackage.Literals.ABSTRACT_CHOICE_PARAMETER_LINK__NAME, false, version);
         if (choiceParameterLink.getField() != null)
@@ -92,18 +90,18 @@ public class ChoiceParameterLinkWriter
                         CommonPackage.Literals.CHOICE_PARAMETER_LINK__FIELD));
             if (ref != null)
             {
-                writer.writeStartElement(IXmlElements.XR.DATA_PATH);
-                writer.writeElement(IXmlElements.XSI.TYPE, IXmlElements.XS.STRING);
-                writer.writeCharacters(ref);
-                writer.writeInlineEndElement();
+                writer.writeElement("XR.DATA_PATH", "");
+                writer.writeElement("XSI.TYPE", "XS.STRING");
+//                writer.writeCharacters(ref);
+//                writer.writeInlineEndElement();
             }
             else
             {
-                writer.writeEmptyElement(IXmlElements.XR.DATA_PATH);
+//                writer.writeEmptyElement(IYamlElements.XR.DATA_PATH);
             }
         }
         this.featureWriter.write(writer, choiceParameterLink,
             CommonPackage.Literals.ABSTRACT_CHOICE_PARAMETER_LINK__CHANGE_MODE, true, version);
-        writer.writeEndElement();
+//        writer.writeEndElement();
     }
 }

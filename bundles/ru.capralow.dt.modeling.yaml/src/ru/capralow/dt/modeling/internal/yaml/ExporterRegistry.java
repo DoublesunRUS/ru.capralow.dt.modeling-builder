@@ -112,11 +112,11 @@ public class ExporterRegistry
 
     private Map<Version, List<IExporter>> getExporters()
     {
-        if (!this.initialized)
+        if (!this.initialized || this.registry.isEmpty())
         {
             synchronized (this.lock)
             {
-                if (!this.initialized)
+                if (!this.initialized || this.registry.isEmpty())
                 {
                     Map<Version, List<IExporter>> exporters = loadExporters();
                     this.registry = exporters;
@@ -134,7 +134,7 @@ public class ExporterRegistry
             .valueOf(MessageFormat.format(Messages.ExporterRegistry_exporter_not_registered__0__version__1,
                 new Object[] { eObject.eClass().getName(), version.toString() }))
             + " all exporters by version: "
-            + (getExporters().get(version)).stream()
+            + (getExporters().getOrDefault(version, Collections.emptyList())).stream()
                 .map(item -> item.getClass().getName())
                 .collect(Collectors.joining(", "))); //$NON-NLS-1$
     }

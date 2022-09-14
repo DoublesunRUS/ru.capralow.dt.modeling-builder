@@ -45,37 +45,30 @@ public class MetadataYamlExporter
     {
         boolean res = eObject instanceof MdObject;
 
-        res = res && (eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Configuration
-            || eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.CommonModule
-            || eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.HTTPService
-            || eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Catalog
-            || eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Enum
-            || eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.InformationRegister);
+        res = res && (!(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicFeature)
+            || eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.CommonAttribute);
 
-//        res = res && (!(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicFeature)
-//            || eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.CommonAttribute);
-//
-//        res = res && (!(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicCommand)
-//            || eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.CommonCommand);
-//
-//        res = res && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicTabularSection)
-//            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicTemplate)
-//            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.ExchangePlan)
-//            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.WSReference)
-//            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.CommonPicture)
-//            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Column)
-//            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.EnumValue)
-//            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.RecalculationDimension)
-//            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.XDTOPackage)
-//            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.URLTemplate)
-//            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Method)
-//            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Operation)
-//            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Parameter)
-//            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Field)
-//            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Resource)
-//            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Dimension)
-//            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Function)
-//            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.IntegrationServiceChannel);
+        res = res && (!(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicCommand)
+            || eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.CommonCommand);
+
+        res = res && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicTabularSection)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicTemplate)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.ExchangePlan)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.WSReference)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.CommonPicture)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Column)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.EnumValue)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.RecalculationDimension)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.XDTOPackage)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.URLTemplate)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Method)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Operation)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Parameter)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Field)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Resource)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Dimension)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Function)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.IntegrationServiceChannel);
 
         return res && super.isAppropriate(version, eObject);
     }
@@ -125,12 +118,15 @@ public class MetadataYamlExporter
     protected IStatus export(MdObject mdObject, Path path, IExportContext exportContext,
         IExportArtifactBuilder artifactBuilder)
     {
-        try (OutputStream outputStream = artifactBuilder.newOutputStream(path);)
+        if (!(MetadataObjectWriter.isMdObjectSupported(mdObject)))
         {
+            return Status.OK_STATUS;
+        }
 
-            YamlStreamWriter writer = new YamlStreamWriter(outputStream);
+        try (OutputStream outputStream = artifactBuilder.newOutputStream(path);
+            YamlStreamWriter writer = new YamlStreamWriter(outputStream);)
+        {
             write(mdObject, exportContext, writer);
-
         }
 
         catch (FactoryConfigurationError | IOException | XMLStreamException | ExportException e)

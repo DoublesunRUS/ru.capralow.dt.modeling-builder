@@ -6,7 +6,6 @@ package ru.capralow.dt.modeling.yaml.writer;
 import java.util.Collection;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.ecore.EObject;
@@ -30,7 +29,6 @@ import com.google.inject.Inject;
 
 import ru.capralow.dt.modeling.core.ExportException;
 import ru.capralow.dt.modeling.yaml.IQNameProvider;
-import ru.capralow.dt.modeling.yaml.IXmlElements;
 
 public class ColorWriter
     implements ISpecifiedElementWriter
@@ -52,7 +50,7 @@ public class ColorWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         QName elementQName = this.nameManager.getElementQName(feature);
         if (feature.getEType() != McorePackage.Literals.COLOR)
@@ -75,7 +73,7 @@ public class ColorWriter
     }
 
     public void writeColor(YamlStreamWriter writer, EStructuralFeature feature, Color color, boolean writeEmpty,
-        QName elementQName) throws XMLStreamException, ExportException
+        QName elementQName) throws ExportException
     {
         boolean isValue = feature.getEType() == McorePackage.Literals.VALUE;
         if (color != null)
@@ -164,18 +162,18 @@ public class ColorWriter
     }
 
     private static void writeElement(YamlStreamWriter writer, QName elementQName, String text, boolean isValue)
-        throws XMLStreamException, ExportException
+        throws ExportException
     {
         if (isValue)
         {
-            writer.writeStartElement(elementQName);
-            writer.writeElement(IXmlElements.XSI.TYPE, IXmlElements.V8UI.COLOR);
-            writer.writeCharacters(text);
-            writer.writeInlineEndElement();
+//            writer.writeStartElement(elementQName);
+            writer.writeElement("XSI.TYPE", "V8UI.COLOR");
+//            writer.writeCharacters(text);
+//            writer.writeInlineEndElement();
         }
         else
         {
-            writer.writeTextElement(elementQName, text);
+            writer.writeElement(elementQName, text);
         }
     }
 

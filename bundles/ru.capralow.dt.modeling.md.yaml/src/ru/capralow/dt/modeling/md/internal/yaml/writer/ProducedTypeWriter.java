@@ -23,7 +23,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.md.yaml.IMetadataXmlElements;
 import ru.capralow.dt.modeling.md.yaml.writer.IProducedTypesOrderProvider;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
 import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
@@ -96,10 +95,10 @@ public class ProducedTypeWriter
     private void writeProducedType(YamlStreamWriter writer, String name, String category, String typeId,
         String valueTypeId) throws ExportException
     {
-        writer.writeElement(IMetadataXmlElements.NAME_ATTRIBUTE.getLocalPart(), name);
-        writer.writeElement(IMetadataXmlElements.CATEGORY_ATTRIBUTE.getLocalPart(), category);
-        writer.writeElement(IMetadataXmlElements.XR.TYPE_ID, typeId);
-        writer.writeElement(IMetadataXmlElements.XR.VALUE_ID, valueTypeId);
+//        writer.writeElement(IMetadataYamlElements.NAME_ATTRIBUTE.getLocalPart(), name);
+//        writer.writeElement(IMetadataYamlElements.CATEGORY_ATTRIBUTE.getLocalPart(), category);
+//        writer.writeElement(IMetadataYamlElements.XR.TYPE_ID, typeId);
+//        writer.writeElement(IMetadataYamlElements.XR.VALUE_ID, valueTypeId);
     }
 
     private TypeItem getType(AbstractMdType abstractMdType)

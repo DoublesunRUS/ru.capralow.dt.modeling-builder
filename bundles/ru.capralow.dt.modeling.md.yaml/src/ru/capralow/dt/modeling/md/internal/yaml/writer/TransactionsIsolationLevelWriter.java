@@ -1,9 +1,7 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -16,8 +14,8 @@ import com.google.inject.Inject;
 
 import ru.capralow.dt.modeling.core.ExportException;
 import ru.capralow.dt.modeling.yaml.IQNameProvider;
-import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
+import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 
 public class TransactionsIsolationLevelWriter
     implements ISpecifiedElementWriter
@@ -27,7 +25,7 @@ public class TransactionsIsolationLevelWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         Preconditions.checkArgument((feature.getEType() == CommonPackage.Literals.TRANSACTIONS_ISOLATION_LEVEL),
             "Invalid feature type");

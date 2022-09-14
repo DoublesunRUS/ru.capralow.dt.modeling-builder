@@ -1,5 +1,5 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
 
@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -21,9 +20,9 @@ import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.md.yaml.IMetadataXmlElements;
-import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
+import ru.capralow.dt.modeling.md.yaml.IMetadataYamlElements;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
+import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 
 public class ExtDimensionTypesWriter
     implements ISpecifiedElementWriter
@@ -36,12 +35,12 @@ public class ExtDimensionTypesWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         if (feature != MdClassPackage.Literals.CHART_OF_ACCOUNTS_PREDEFINED_ITEM__EXT_DIMENSION_TYPES)
             throw new IllegalArgumentException(String.format("Invalid feature %s, expected %s", new Object[] { feature,
                 MdClassPackage.Literals.CHART_OF_ACCOUNTS_PREDEFINED_ITEM__EXT_DIMENSION_TYPES }));
-        QName elementQName = IMetadataXmlElements.XPR.EXT_DIMENSION_TYPES;
+        QName elementQName = IMetadataYamlElements.XPR.EXT_DIMENSION_TYPES;
         List<ExtDimensionType> extDimensionTypeList = getExtDimensionTypeList(eObject.eGet(feature));
         if (extDimensionTypeList.isEmpty())
         {
@@ -52,7 +51,7 @@ public class ExtDimensionTypesWriter
             writer.writeStartElement(elementQName);
             for (ExtDimensionType extDimensionType : extDimensionTypeList)
             {
-                writer.writeStartElement(IMetadataXmlElements.XPR.EXT_DIMENSION_TYPE);
+                writer.writeStartElement(IMetadataYamlElements.XPR.EXT_DIMENSION_TYPE);
                 String ref = this.symbolicNameService.generateSymbolicName(extDimensionType.getCharacteristicType(),
                     extDimensionType, MdClassPackage.Literals.EXT_DIMENSION_TYPE__CHARACTERISTIC_TYPE);
                 if (!Strings.isNullOrEmpty(ref))

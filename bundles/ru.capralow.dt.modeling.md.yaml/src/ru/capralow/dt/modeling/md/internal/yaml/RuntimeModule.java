@@ -3,8 +3,6 @@
  */
 package ru.capralow.dt.modeling.md.internal.yaml;
 
-import java.lang.annotation.Annotation;
-
 import com._1c.g5.v8.dt.core.model.ISymLinkConverter;
 import com._1c.g5.v8.dt.md.MdRuntimeModule;
 import com.google.inject.Binder;
@@ -29,31 +27,31 @@ import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
 public class RuntimeModule
     extends MdRuntimeModule
 {
-    public Class<? extends IQNameProvider> bindIQNameProvider()
+    public Class<? extends IQNameProvider> bindIqNameProvider()
     {
-        return (Class)MetadataFeatureNameProvider.class;
+        return MetadataFeatureNameProvider.class;
     }
 
     public Class<? extends ISymLinkConverter> bindISymLinkConverter()
     {
-        return (Class)ExportMdSymLinkConverter.class;
+        return ExportMdSymLinkConverter.class;
     }
 
     public Class<? extends IProducedTypesOrderProvider> bindIProducedTypesOrderProvider()
     {
-        return (Class)ProducedTypesOrderProvider.class;
+        return ProducedTypesOrderProvider.class;
     }
 
     public Class<? extends IYamlExporterExtensionManager> bindIXmlExporterExtensionManager()
     {
-        return (Class)YamlExporterExtensionManager.class;
+        return YamlExporterExtensionManager.class;
     }
 
     public void configureIProjectFileSystemSupport(Binder binder)
     {
         binder.bind(IExportFileSystemSupport.class).to(ExportMdFilesSupport.class);
         binder.bind(ISpecifiedElementWriter.class)
-            .annotatedWith((Annotation)Names.named("SmartSpecifiedElementWriter"))
+            .annotatedWith(Names.named(ISpecifiedElementWriter.SMART_ELEMENT_WRITER))
             .to(MetadataSmartFeatureWriter.class);
     }
 
@@ -61,6 +59,6 @@ public class RuntimeModule
     {
         binder.bind(IExporterQualifier.class)
             .toInstance(UnionExporterQualifier.combine(new IExporterQualifier[] { new NativeMdObjectExporterQualifier(),
-                (IExporterQualifier)new ExtensionBasedExporterQualifier() }));
+                new ExtensionBasedExporterQualifier() }));
     }
 }

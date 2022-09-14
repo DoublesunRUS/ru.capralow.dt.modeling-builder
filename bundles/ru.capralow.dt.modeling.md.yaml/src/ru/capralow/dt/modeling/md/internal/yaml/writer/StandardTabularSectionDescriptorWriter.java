@@ -1,11 +1,9 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
 
 import java.util.List;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -18,9 +16,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.md.yaml.IMetadataXmlElements;
-import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
+import ru.capralow.dt.modeling.md.yaml.IMetadataYamlElements;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
+import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 
 @Singleton
 public class StandardTabularSectionDescriptorWriter
@@ -33,18 +31,18 @@ public class StandardTabularSectionDescriptorWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         if (feature.getEType() != MdClassPackage.Literals.STANDARD_TABULAR_SECTION_DESCRIPTION)
             throw new IllegalArgumentException(String.format("Invalid feature type in %s", new Object[] { feature }));
         Object value = eObject.eGet(feature);
         if (value instanceof List && !((List)value).isEmpty())
         {
-            writer.writeStartElement(IMetadataXmlElements.STANDARD_TABULAR_SECTIONS);
+            writer.writeStartElement(IMetadataYamlElements.STANDARD_TABULAR_SECTIONS);
             for (StandardTabularSectionDescription standardTabularSection : (List<StandardTabularSectionDescription>)value)
             {
-                writer.writeStartElement(IMetadataXmlElements.XR.STANDARD_TABULAR_SECTION);
-                writer.writeElement(IMetadataXmlElements.NAME_ATTRIBUTE.getLocalPart(),
+                writer.writeStartElement(IMetadataYamlElements.XR.STANDARD_TABULAR_SECTION);
+                writer.writeElement(IMetadataYamlElements.NAME_ATTRIBUTE.getLocalPart(),
                     standardTabularSection.getName());
                 for (EStructuralFeature structuralFeature : this.propertyOrderList)
                     this.smartFeatureWriter.write(writer, standardTabularSection, structuralFeature, true, version);

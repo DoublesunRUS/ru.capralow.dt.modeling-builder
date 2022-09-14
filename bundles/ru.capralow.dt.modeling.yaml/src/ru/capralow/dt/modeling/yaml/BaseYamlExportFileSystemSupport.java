@@ -34,17 +34,15 @@ public abstract class BaseYamlExportFileSystemSupport
 {
     protected static final String EXT = "Ext"; //$NON-NLS-1$
 
-    protected static final String DOT_XML_EXT = ".xml";
+    private static final String ROOT = ""; //$NON-NLS-1$
 
-    private static final String ROOT = "";
+    private static final String FORMS = "Forms"; //$NON-NLS-1$
 
-    private static final String FORMS = "Forms";
+    private static final String TEMPLATES = "Templates"; //$NON-NLS-1$
 
-    private static final String TEMPLATES = "Templates";
+    private static final String COMMANDS = "Commands"; //$NON-NLS-1$
 
-    private static final String COMMANDS = "Commands";
-
-    private static final String RECALCULATIONS = "Recalculations";
+    private static final String RECALCULATIONS = "Recalculations"; //$NON-NLS-1$
 
     @Inject
     private Provider<IExternalPropertyManagerRegistry> externalPropertyManagerRegistryProvider;
@@ -65,7 +63,7 @@ public abstract class BaseYamlExportFileSystemSupport
 
         if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Configuration)
         {
-            return Paths.get("", new String[0]); //$NON-NLS-1$
+            return Paths.get(ROOT, new String[0]);
         }
 
         Collection<Subsystem> mdObjectsubsystems =
@@ -135,11 +133,11 @@ public abstract class BaseYamlExportFileSystemSupport
 //        Path containerPath = getMdObjectTargetDirectory(container).resolve(container.getName());
 //        if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicForm)
 //        {
-//            return containerPath.resolve("Forms");
+//            return containerPath.resolve(FORMS);
 //        }
 //        if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicTemplate)
 //        {
-//            return containerPath.resolve("Templates");
+//            return containerPath.resolve(TEMPLATES);
 //        }
 //        if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicCommand)
 //        {

@@ -6,7 +6,6 @@ package ru.capralow.dt.modeling.md.internal.yaml.writer;
 import java.util.List;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -17,10 +16,10 @@ import com._1c.g5.v8.dt.platform.version.Version;
 import com.google.inject.Inject;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.md.yaml.IMetadataXmlElements;
+import ru.capralow.dt.modeling.md.yaml.IMetadataYamlElements;
 import ru.capralow.dt.modeling.yaml.IQNameProvider;
-import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
+import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 
 public class CommonAttributeContentItemWriter
     implements ISpecifiedElementWriter
@@ -33,7 +32,7 @@ public class CommonAttributeContentItemWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         if (feature != MdClassPackage.Literals.COMMON_ATTRIBUTE__CONTENT)
         {
@@ -54,7 +53,7 @@ public class CommonAttributeContentItemWriter
         writer.writeStartElement(elementQName);
         for (CommonAttributeContentItem item : (List<CommonAttributeContentItem>)value)
         {
-            writer.writeStartElement(IMetadataXmlElements.XR.ITEM);
+            writer.writeStartElement(IMetadataYamlElements.XR.ITEM);
             this.smartFeatureWriter.write(writer, item, MdClassPackage.Literals.COMMON_ATTRIBUTE_CONTENT_ITEM__METADATA,
                 true, version);
             this.smartFeatureWriter.write(writer, item, MdClassPackage.Literals.COMMON_ATTRIBUTE_CONTENT_ITEM__USE,

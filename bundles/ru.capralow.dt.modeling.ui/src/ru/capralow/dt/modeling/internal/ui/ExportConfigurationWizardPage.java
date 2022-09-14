@@ -3,6 +3,7 @@
  */
 package ru.capralow.dt.modeling.internal.ui;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
@@ -10,7 +11,9 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileAttribute;
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +65,6 @@ import org.eclipse.ui.PlatformUI;
 
 import com._1c.g5.ides.monitoring.BusinessEvent;
 import com._1c.g5.ides.monitoring.IMonitoringEventDispatcher;
-import com._1c.g5.v8.dt.common.FileUtil;
 import com._1c.g5.v8.dt.common.ui.dialogs.StatusDialog;
 import com._1c.g5.v8.dt.common.ui.jface.viewers.DialogSettingsBasedHistory;
 import com._1c.g5.v8.dt.core.ICoreConstants;
@@ -223,11 +225,12 @@ public class ExportConfigurationWizardPage
 
     private boolean prepareTargetPath()
     {
+        Path target = Paths.get(getTargetPathValue().getValue(), new String[0]);
+        Boolean isDirectoryTarget = isDirectoryTargetSelected.getValue();
+        Path targetDirectory = isDirectoryTarget ? target : target.getParent();
+
         try
         {
-            final Path target = Paths.get(getTargetPathValue().getValue(), new String[0]);
-            final Boolean isDirectoryTarget = isDirectoryTargetSelected.getValue();
-            final Path targetDirectory = isDirectoryTarget ? target : target.getParent();
             if (Files.notExists(targetDirectory, new LinkOption[0]))
             {
                 if (!queryYesNoQuestion(Messages.ExportConfigurationWizardPage_messageTargetDirNotExist))
@@ -244,7 +247,12 @@ public class ExportConfigurationWizardPage
                     {
                         return false;
                     }
-                    FileUtil.deleteRecursively(targetDirectory.toFile());
+
+                    Files.walk(targetDirectory)
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .filter(item -> !item.getPath().equals(targetDirectory.toAbsolutePath().toString()))
+                        .forEach(File::delete);
                 }
             }
             else if (Files.isRegularFile(target, new LinkOption[0]))
@@ -260,8 +268,9 @@ public class ExportConfigurationWizardPage
         }
         catch (IOException e)
         {
-            displayErrorDialog(
-                Messages.ExportConfigurationWizardPage_An_IO_exception_occurred_with_specified_target_path__0);
+            displayErrorDialog(MessageFormat.format(
+                Messages.ExportConfigurationWizardPage_An_IO_exception_occurred_with_specified_target_path__0,
+                targetDirectory));
             return false;
         }
     }
@@ -407,25 +416,29 @@ public class ExportConfigurationWizardPage
     {
         switch (status.getSeverity())
         {
-        case IStatus.INFO: {
+        case IStatus.INFO:
+        {
             setErrorMessage((String)null);
             setMessage(status.getMessage(), 1);
             setPageComplete(true);
             break;
         }
-        case IStatus.WARNING: {
+        case IStatus.WARNING:
+        {
             setErrorMessage((String)null);
             setMessage(status.getMessage(), 2);
             setPageComplete(true);
             break;
         }
         case IStatus.ERROR:
-        case IStatus.CANCEL: {
+        case IStatus.CANCEL:
+        {
             setErrorMessage(status.getMessage());
             setPageComplete(false);
             break;
         }
-        default: {
+        default:
+        {
             setErrorMessage((String)null);
             setMessage((String)null);
             setPageComplete(true);

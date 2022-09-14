@@ -1,10 +1,9 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.yaml.writer;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -21,7 +20,7 @@ import com.google.inject.Inject;
 
 import ru.capralow.dt.modeling.core.ExportException;
 import ru.capralow.dt.modeling.yaml.IQNameProvider;
-import ru.capralow.dt.modeling.yaml.IXmlElements;
+import ru.capralow.dt.modeling.yaml.IYamlElements;
 
 public class BorderWriter
     implements ISpecifiedElementWriter
@@ -39,7 +38,7 @@ public class BorderWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         if (feature.isMany() || feature.getEType() != McorePackage.Literals.BORDER)
         {
@@ -49,8 +48,7 @@ public class BorderWriter
         writeBorder(writer, feature, border);
     }
 
-    public void writeBorder(YamlStreamWriter writer, EStructuralFeature feature, Border border)
-        throws XMLStreamException, ExportException
+    public void writeBorder(YamlStreamWriter writer, EStructuralFeature feature, Border border) throws ExportException
     {
         if (border != null)
         {
@@ -64,10 +62,10 @@ public class BorderWriter
                     String ref = this.linkConverter.convert(border, McorePackage.Literals.BORDER_REF__BORDER,
                         this.symbolicNameService.generateSymbolicName(borderRef, border,
                             McorePackage.Literals.BORDER_REF__BORDER));
-                    writer.writeEmptyElement(elementQName);
+//                    writer.writeEmptyElement(elementQName);
                     if (isValue)
                     {
-                        writer.writeElement(IXmlElements.XSI.TYPE, IXmlElements.V8UI.BORDER);
+                        writer.writeElement(IYamlElements.XSI.TYPE, IYamlElements.V8UI.BORDER);
                     }
                     if (!Strings.isNullOrEmpty(ref))
                     {
@@ -78,17 +76,17 @@ public class BorderWriter
             else if (border instanceof BorderDef)
             {
                 BorderDef borderDef = (BorderDef)border;
-                writer.writeStartElement(elementQName);
+//                writer.writeStartElement(elementQName);
                 if (isValue)
                 {
-                    writer.writeElement(IXmlElements.XSI.TYPE, IXmlElements.V8UI.BORDER);
+                    writer.writeElement(IYamlElements.XSI.TYPE, IYamlElements.V8UI.BORDER);
                 }
                 writer.writeElement("width", String.valueOf(borderDef.getWidth()));
-                writer.writeStartElement(IXmlElements.V8UI.STYLE);
-                writer.writeElement(IXmlElements.XSI.TYPE, IXmlElements.V8UI.CONTROL_BORDER_TYPE);
-                writer.writeCharacters(borderDef.getStyle().getLiteral());
-                writer.writeInlineEndElement();
-                writer.writeEndElement();
+//                writer.writeStartElement(IXmlElements.V8UI.STYLE);
+                writer.writeElement(IYamlElements.XSI.TYPE, IYamlElements.V8UI.CONTROL_BORDER_TYPE);
+//                writer.writeCharacters(borderDef.getStyle().getLiteral());
+//                writer.writeInlineEndElement();
+//                writer.writeEndElement();
             }
             else
             {

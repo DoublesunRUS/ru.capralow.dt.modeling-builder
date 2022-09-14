@@ -8,7 +8,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -21,16 +23,21 @@ import ru.capralow.dt.modeling.core.ExportException;
 public class YamlStreamWriter
     implements AutoCloseable
 {
-    protected final OutputStreamWriter writer;
-    protected final Yaml yaml;
+    protected Yaml yaml;
+
+    protected OutputStreamWriter writer;
+
+    protected Map<String, Object> data;
 
     public YamlStreamWriter(OutputStream outputStream) throws ExportException
     {
         DumperOptions options = new DumperOptions();
-        options.setPrettyFlow(true);
+//        options.setPrettyFlow(true);
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-
+        options.setIndentWithIndicator(true);
+        options.setIndent(4);
         this.yaml = new Yaml(options);
+
         try
         {
             this.writer = new OutputStreamWriter(outputStream, "UTF-8"); //$NON-NLS-1$
@@ -39,12 +46,43 @@ public class YamlStreamWriter
         {
             throw new ExportException(e.getMessage(), e);
         }
+
+        data = new HashMap<>();
     }
 
     @Override
     public void close() throws IOException
     {
+        if (!(data.isEmpty()))
+        {
+            yaml.dump(data, writer);
+        }
         writer.close();
+        yaml = null;
+    }
+
+    public void writeElement(String localName, String value) throws ExportException
+    {
+        if (localName == null || value == null)
+        {
+            throw new ExportException(MessageFormat.format(
+                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
+                new Object[] { localName, value }));
+        }
+
+        data.put(localName, value);
+    }
+
+    public void writeElement(String localName, String value, Map<String, Object> group) throws ExportException
+    {
+        if (localName == null || value == null)
+        {
+            throw new ExportException(MessageFormat.format(
+                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
+                new Object[] { localName, value }));
+        }
+
+        group.put(localName, value);
     }
 
     public void writeElement(String localName, Object value) throws ExportException
@@ -57,21 +95,6 @@ public class YamlStreamWriter
         }
 
         writeElement(localName, String.valueOf(value));
-    }
-
-    public void writeElement(String localName, String value) throws ExportException
-    {
-        if (localName == null || value == null)
-        {
-            throw new ExportException(MessageFormat.format(
-                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
-                new Object[] { localName, value }));
-        }
-
-        Map<String, Object> data = new HashMap<>();
-        data.put(localName, value);
-
-        yaml.dump(data, writer);
     }
 
     public void writeElement(QName qName, Object value) throws ExportException
@@ -95,10 +118,7 @@ public class YamlStreamWriter
                 new Object[] { qName, value }));
         }
 
-        Map<String, Object> data = new HashMap<>();
-        data.put(qName.getLocalPart(), value);
-
-        yaml.dump(data, writer);
+        writeElement(qName.getLocalPart(), String.valueOf(value));
     }
 
     public void writeElement(QName qName, QName qValue) throws ExportException
@@ -118,6 +138,85 @@ public class YamlStreamWriter
 
         value.append(qValue.getLocalPart());
         writeElement(qName, value.toString());
+    }
+
+    public Map<String, Object> addGroup(List<Object> list) throws ExportException
+    {
+        if (list == null)
+        {
+            throw new ExportException(MessageFormat.format(
+                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
+                new Object[] { list }));
+        }
+
+        Map<String, Object> groupData = new HashMap<>();
+        list.add(groupData);
+
+        return groupData;
+    }
+
+    public Map<String, Object> addGroup(String localName) throws ExportException
+    {
+        return addGroup(localName, data);
+    }
+
+    public Map<String, Object> addGroup(QName qName) throws ExportException
+    {
+        if (qName == null)
+        {
+            throw new ExportException(MessageFormat.format(
+                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
+                new Object[] { qName }));
+        }
+
+        return addGroup(qName.getLocalPart(), data);
+    }
+
+    public Map<String, Object> addGroup(String localName, Map<String, Object> group) throws ExportException
+    {
+        if (localName == null)
+        {
+            throw new ExportException(MessageFormat.format(
+                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
+                new Object[] { localName }));
+        }
+
+        Map<String, Object> groupData = new HashMap<>();
+        group.put(localName, groupData);
+
+        return groupData;
+    }
+
+    public List<Object> addList(String localName) throws ExportException
+    {
+        return addList(localName, data);
+    }
+
+    public List<Object> addList(QName qName) throws ExportException
+    {
+        if (qName == null)
+        {
+            throw new ExportException(MessageFormat.format(
+                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
+                new Object[] { qName }));
+        }
+
+        return addList(qName.getLocalPart(), data);
+    }
+
+    public List<Object> addList(String localName, Map<String, Object> group) throws ExportException
+    {
+        if (localName == null)
+        {
+            throw new ExportException(MessageFormat.format(
+                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
+                new Object[] { localName }));
+        }
+
+        List<Object> groupData = new ArrayList<>();
+        group.put(localName, groupData);
+
+        return groupData;
     }
 
 }

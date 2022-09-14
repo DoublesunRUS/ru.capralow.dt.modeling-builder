@@ -1,5 +1,5 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
 
@@ -16,7 +16,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.md.yaml.IMetadataXmlElements;
 import ru.capralow.dt.modeling.md.yaml.impl.MetadataFeatureNameProvider;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
 import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
@@ -52,7 +51,7 @@ public class StandardAttributeWriter
         for (StandardAttribute attribute : (List<StandardAttribute>)value)
         {
 //                writer.writeStartElement(IMetadataXmlElements.XR.STANDARD_ATTRIBUTE);
-            writer.writeElement(IMetadataXmlElements.NAME_ATTRIBUTE.getLocalPart(), attribute.getName());
+            writer.writeElement("NAME_ATTRIBUTE", attribute.getName());
             for (EStructuralFeature structuralFeature : propertyStandardAttributeOrderList)
             {
                 smartFeatureWriter.write(writer, attribute, structuralFeature, true, version);

@@ -1,9 +1,7 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -15,17 +13,17 @@ import com._1c.g5.v8.dt.platform.version.Version;
 import com.google.common.base.Strings;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.md.yaml.IMetadataXmlElements;
-import ru.capralow.dt.modeling.yaml.IXmlElements;
-import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
+import ru.capralow.dt.modeling.md.yaml.IMetadataYamlElements;
+import ru.capralow.dt.modeling.yaml.IYamlElements;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
+import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 
 public class PredefinedItemCodeWriter
     implements ISpecifiedElementWriter
 {
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         if (feature != MdClassPackage.Literals.CATALOG_PREDEFINED_ITEM__CODE
             && feature != MdClassPackage.Literals.CHART_OF_ACCOUNTS_PREDEFINED_ITEM__CODE
@@ -38,19 +36,19 @@ public class PredefinedItemCodeWriter
         {
             if (objectValue instanceof NumberValue)
             {
-                writer.writeStartElement(IMetadataXmlElements.XPR.CODE);
-                writer.writeElement(IXmlElements.XSI.TYPE, IXmlElements.XS.DECIMAL);
+                writer.writeStartElement(IMetadataYamlElements.XPR.CODE);
+                writer.writeElement(IYamlElements.XSI.TYPE, IYamlElements.XS.DECIMAL);
                 writer.writeCharacters(value);
                 writer.writeInlineEndElement();
             }
             else
             {
-                writer.writeTextElement(IMetadataXmlElements.XPR.CODE, value);
+                writer.writeTextElement(IMetadataYamlElements.XPR.CODE, value);
             }
         }
         else if (writeEmpty)
         {
-            writer.writeEmptyElement(IMetadataXmlElements.XPR.CODE);
+            writer.writeEmptyElement(IMetadataYamlElements.XPR.CODE);
         }
     }
 

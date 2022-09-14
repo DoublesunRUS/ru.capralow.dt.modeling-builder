@@ -38,7 +38,7 @@ public class MetadataObjectWriter
     implements ISpecifiedElementWriter
 {
     @Inject
-    @Named("SmartSpecifiedElementWriter")
+    @Named(ISpecifiedElementWriter.SMART_ELEMENT_WRITER)
     private ISpecifiedElementWriter smartFeatureWriter;
 
     @Inject
@@ -81,11 +81,33 @@ public class MetadataObjectWriter
 
         MdObject mdObject = (MdObject)object;
 
+        if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.CommonModule)
+        {
+            writer.writeElement("ВидЭлемента", "ОбщийМодуль"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+        else if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.HTTPService)
+        {
+            writer.writeElement("ВидЭлемента", "HTTPСервис"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+        else if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Catalog)
+        {
+            writer.writeElement("ВидЭлемента", "Справочник"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+        else if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Enum)
+        {
+            writer.writeElement("ВидЭлемента", "Перечисление"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+        else if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.InformationRegister)
+        {
+            writer.writeElement("ВидЭлемента", "РегистрСведений"); //$NON-NLS-1$ //$NON-NLS-2$
+        }
+
         writer.writeElement("Ид", mdObject.getUuid()); //$NON-NLS-1$
 
         List<EStructuralFeature> innerInfoList = getInnerInfoFeatureList(mdObject, version);
         if (!innerInfoList.isEmpty())
         {
+//            writer.writeElement("--- INTERNAL_INFO", ""); //$NON-NLS-1$
             for (EStructuralFeature feature : innerInfoList)
             {
                 writeMdObjectInternalInfo(writer, version, mdObject, feature);
@@ -95,6 +117,7 @@ public class MetadataObjectWriter
         List<EStructuralFeature> propertiesList = getPropertiesFeatureList(mdObject, version);
         if (!propertiesList.isEmpty())
         {
+//            writer.writeElement("--- PROPERTIES", ""); //$NON-NLS-1$
             for (EStructuralFeature feature : propertiesList)
             {
                 writeMdObjectProperty(writer, version, mdObject, feature);
@@ -106,6 +129,7 @@ public class MetadataObjectWriter
         {
             if (!isChildObjectsListEmpty(mdObject, childFeaturesList, version))
             {
+//                writer.writeElement("--- CHILD_OBJECTS", ""); //$NON-NLS-1$
                 for (EStructuralFeature feature : childFeaturesList)
                 {
                     writeMdObjectChildObject(writer, version, mdObject, feature);
@@ -178,7 +202,7 @@ public class MetadataObjectWriter
                     int dotIndex = line.indexOf('.');
                     if (dotIndex != -1)
                     {
-//                        writer.writeTextElement(new QName(line.substring(0, dotIndex)), line.substring(dotIndex + 1));
+                        writer.writeElement(new QName(line.substring(0, dotIndex)), line.substring(dotIndex + 1));
                     }
                 }
             }
@@ -283,6 +307,17 @@ public class MetadataObjectWriter
             && feature != Literals.CONFIGURATION__KEEP_MAPPING_TO_EXTENDED_CONFIGURATION_OBJECTS_BY_IDS);
     }
 
+    public static boolean isMdObjectSupported(MdObject mdObject)
+    {
+        return !(mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.StyleItem
+            || mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Language
+            || mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.ScheduledJob
+            || mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.FunctionalOption
+            || mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Constant
+            || mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.DataProcessor
+            || mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Role);
+    }
+
     private boolean isChildObjectsListEmpty(MdObject mdObject, List<EStructuralFeature> childObjectFeatureList,
         Version version) throws ExportException
     {
@@ -316,16 +351,13 @@ public class MetadataObjectWriter
 
     private Path getConfigurationUnsupportedPart(IProject project)
     {
-        return Paths.get(project.getLocationURI()).resolve("unknown").resolve("Configuration.part"); //$NON-NLS-1$ //$NON-NLS-2$
+        Path projectPath = Paths.get(project.getLocationURI());
+        return projectPath.resolve("unknown").resolve("Configuration.part"); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     private boolean isWriteEmpty(MdObject mdObject, EStructuralFeature feature, Version version)
     {
-        if (feature == Literals.MD_OBJECT__EXTENDED_CONFIGURATION_OBJECT)
-        {
-            return false;
-        }
-        return true;
+        return !(feature == Literals.MD_OBJECT__EXTENDED_CONFIGURATION_OBJECT);
     }
 
     private static class IAvailableFeaturesByVersionProvider

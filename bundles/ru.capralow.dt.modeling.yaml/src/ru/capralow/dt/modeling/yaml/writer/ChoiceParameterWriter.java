@@ -6,7 +6,6 @@ package ru.capralow.dt.modeling.yaml.writer;
 import java.util.List;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -21,7 +20,6 @@ import com.google.inject.name.Named;
 
 import ru.capralow.dt.modeling.core.ExportException;
 import ru.capralow.dt.modeling.yaml.IQNameProvider;
-import ru.capralow.dt.modeling.yaml.IXmlElements;
 
 @Singleton
 public class ChoiceParameterWriter
@@ -31,12 +29,12 @@ public class ChoiceParameterWriter
     private IQNameProvider nameManager;
 
     @Inject
-    @Named("SmartSpecifiedElementWriter")
+    @Named(ISpecifiedElementWriter.SMART_ELEMENT_WRITER)
     private ISpecifiedElementWriter featureWriter;
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         if (feature.getEType() != CommonPackage.Literals.CHOICE_PARAMETER)
         {
@@ -53,16 +51,16 @@ public class ChoiceParameterWriter
             List<ChoiceParameter> list = (List<ChoiceParameter>)value;
             if (!list.isEmpty())
             {
-                writer.writeStartElement(elementQName.toString());
+                writer.writeElement(elementQName.toString(), "");
                 for (ChoiceParameter choiceParameter : list)
                 {
                     writeChoiceParameter(writer, choiceParameter, version);
                 }
-                writer.writeEndElement();
+//                writer.writeEndElement();
             }
             else if (writeEmpty)
             {
-                writer.writeEmptyElement(elementQName.toString());
+//                writer.writeEmptyElement(elementQName.toString());
             }
         }
         else
@@ -72,12 +70,12 @@ public class ChoiceParameterWriter
     }
 
     private void writeChoiceParameter(YamlStreamWriter writer, ChoiceParameter choiceParameter, Version version)
-        throws XMLStreamException, ExportException
+        throws ExportException
     {
-        writer.writeStartElement(IXmlElements.APP.ITEM);
+        writer.writeElement("APP.ITEM", "");
         writer.writeElement("name", Strings.nullToEmpty(choiceParameter.getName()));
         this.featureWriter.write(writer, choiceParameter, CommonPackage.Literals.CHOICE_PARAMETER__VALUE, true,
             version);
-        writer.writeEndElement();
+//        writer.writeEndElement();
     }
 }

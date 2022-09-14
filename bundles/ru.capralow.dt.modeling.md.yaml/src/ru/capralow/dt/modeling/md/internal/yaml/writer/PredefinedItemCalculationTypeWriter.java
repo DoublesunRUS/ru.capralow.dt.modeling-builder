@@ -1,12 +1,11 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
 
 import java.util.List;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
@@ -21,10 +20,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.md.yaml.IMetadataXmlElements;
+import ru.capralow.dt.modeling.md.yaml.IMetadataYamlElements;
 import ru.capralow.dt.modeling.yaml.IQNameProvider;
-import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
+import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 
 @Singleton
 public class PredefinedItemCalculationTypeWriter
@@ -41,7 +40,7 @@ public class PredefinedItemCalculationTypeWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         if (!(feature instanceof EReference) || !feature.isMany())
             throw new IllegalArgumentException(String.format("Invalid feature %s", new Object[] { feature }));
@@ -61,24 +60,24 @@ public class PredefinedItemCalculationTypeWriter
     }
 
     private void writePredefinedCalculationType(YamlStreamWriter writer, EObject eObject, EReference feature,
-        EObject value, boolean writeEmpty) throws XMLStreamException
+        EObject value, boolean writeEmpty)
     {
         if (value != null)
         {
             String ref = this.symbolicNameService.generateSymbolicName(value, eObject, feature);
             if (!Strings.isNullOrEmpty(ref))
             {
-                writer.writeTextElement(IMetadataXmlElements.XPR.CALCULATION_TYPE,
+                writer.writeTextElement(IMetadataYamlElements.XPR.CALCULATION_TYPE,
                     this.linkConverter.convert(eObject, feature, ref));
             }
             else if (writeEmpty)
             {
-                writer.writeEmptyElement(IMetadataXmlElements.XPR.CALCULATION_TYPE);
+                writer.writeEmptyElement(IMetadataYamlElements.XPR.CALCULATION_TYPE);
             }
         }
         else if (writeEmpty)
         {
-            writer.writeEmptyElement(IMetadataXmlElements.XPR.CALCULATION_TYPE);
+            writer.writeEmptyElement(IMetadataYamlElements.XPR.CALCULATION_TYPE);
         }
     }
 }

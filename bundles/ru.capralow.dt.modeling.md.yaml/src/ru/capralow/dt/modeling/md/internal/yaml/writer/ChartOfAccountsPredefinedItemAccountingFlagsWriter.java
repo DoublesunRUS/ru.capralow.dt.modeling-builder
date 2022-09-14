@@ -4,7 +4,6 @@
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
@@ -20,10 +19,10 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.md.yaml.IMetadataXmlElements;
-import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
+import ru.capralow.dt.modeling.md.yaml.IMetadataYamlElements;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
 import ru.capralow.dt.modeling.yaml.writer.ReferenceWriter;
+import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 
 @Singleton
 public class ChartOfAccountsPredefinedItemAccountingFlagsWriter
@@ -34,12 +33,12 @@ public class ChartOfAccountsPredefinedItemAccountingFlagsWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         if (feature != MdClassPackage.Literals.CHART_OF_ACCOUNTS_PREDEFINED_ITEM__ACCOUNTING_FLAGS)
             throw new IllegalArgumentException(String.format("Invalid feature %s, expected %s",
                 new Object[] { feature, MdClassPackage.Literals.CHART_OF_ACCOUNTS_PREDEFINED_ITEM__ACCOUNTING_FLAGS }));
-        QName elementQName = IMetadataXmlElements.XPR.ACCOUNTING_FLAGS;
+        QName elementQName = IMetadataYamlElements.XPR.ACCOUNTING_FLAGS;
         ChartOfAccountsPredefinedItem item = (ChartOfAccountsPredefinedItem)eObject;
         ChartOfAccounts chartOfAccounts = EcoreUtil2.getContainerOfType((EObject)item, ChartOfAccounts.class);
         EList<AccountingFlag> accountingFlags = chartOfAccounts.getAccountingFlags();
@@ -51,7 +50,7 @@ public class ChartOfAccountsPredefinedItemAccountingFlagsWriter
         writer.writeStartElement(elementQName);
         for (AccountingFlag accountingFlag : accountingFlags)
         {
-            writer.writeStartElement(IMetadataXmlElements.XPR.FLAG);
+            writer.writeStartElement(IMetadataYamlElements.XPR.FLAG);
             writer.writeElement("ref", this.referenceWriter.getReferenceRepresentation(item,
                 MdClassPackage.Literals.CHART_OF_ACCOUNTS_PREDEFINED_ITEM__ACCOUNTING_FLAGS, accountingFlag));
             writer.writeCharacters(String.valueOf(item.getAccountingFlags().contains(accountingFlag)));

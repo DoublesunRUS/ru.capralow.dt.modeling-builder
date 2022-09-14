@@ -1,5 +1,5 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.yaml.writer;
 
@@ -7,7 +7,6 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -28,7 +27,7 @@ import com.google.inject.Inject;
 
 import ru.capralow.dt.modeling.core.ExportException;
 import ru.capralow.dt.modeling.yaml.IQNameProvider;
-import ru.capralow.dt.modeling.yaml.IXmlElements;
+import ru.capralow.dt.modeling.yaml.IYamlElements;
 
 public class FontWriter
     implements ISpecifiedElementWriter
@@ -79,7 +78,7 @@ public class FontWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws XMLStreamException, ExportException
+        Version version) throws ExportException
     {
         QName elementQName = this.nameManager.getElementQName(feature);
         if (feature.isMany() || feature.getEType() != McorePackage.Literals.FONT)
@@ -91,7 +90,7 @@ public class FontWriter
     }
 
     public void writeFont(YamlStreamWriter writer, EStructuralFeature feature, Font font, QName elementQName)
-        throws XMLStreamException, ExportException
+        throws ExportException
     {
         boolean isValue = feature.getEType() == McorePackage.Literals.VALUE;
         if (font instanceof FontRef)
@@ -100,16 +99,16 @@ public class FontWriter
             Font ref = fontRef.getFont();
             if (ref != null)
             {
-                writer.writeEmptyElement(elementQName);
+//                writer.writeEmptyElement(elementQName);
                 if (isValue)
                 {
-                    writer.writeElement(IXmlElements.XSI.TYPE, IXmlElements.V8UI.FONT);
+                    writer.writeElement(IYamlElements.XSI.TYPE, IYamlElements.V8UI.FONT);
                 }
                 String refText = this.linkConverter.convert(font, McorePackage.Literals.FONT_REF__FONT,
                     this.symbolicNameService.generateSymbolicName(ref, font, McorePackage.Literals.FONT_REF__FONT));
                 if (!Strings.isNullOrEmpty(refText))
                 {
-                    writeNamespace(writer, ref);
+//                    writeNamespace(writer, ref);
                     writer.writeElement("ref", refText);
                 }
                 else
@@ -129,11 +128,17 @@ public class FontWriter
                     writer.writeElement("bold", String.valueOf(fontRef.isBold()));
                 }
                 if (fontRef.isSetItalic())
+                {
                     writer.writeElement("italic", String.valueOf(fontRef.isItalic()));
+                }
                 if (fontRef.isSetUnderline())
+                {
                     writer.writeElement("underline", String.valueOf(fontRef.isUnderline()));
+                }
                 if (fontRef.isSetStrikeout())
+                {
                     writer.writeElement("strikeout", String.valueOf(fontRef.isStrikeout()));
+                }
                 if (ref.eIsProxy())
                 {
                     String kind = null;
@@ -148,6 +153,7 @@ public class FontWriter
                         fontName = uri.segment(0);
                     }
                     if (fontName != null)
+                    {
                         if (fontName.startsWith("System"))
                         {
                             kind = "WindowsFont";
@@ -160,6 +166,7 @@ public class FontWriter
                         {
                             kind = "AutoFont";
                         }
+                    }
                     if (kind != null)
                     {
                         writer.writeElement("kind", kind);
@@ -183,7 +190,9 @@ public class FontWriter
                     throw new ExportException(Messages.FontWriter_has_unknown_font_ref);
                 }
                 if (fontRef.isSetScale())
+                {
                     writer.writeElement("scale", String.valueOf(fontRef.scale()));
+                }
             }
             else
             {
@@ -193,11 +202,15 @@ public class FontWriter
         else if (font instanceof FontDef)
         {
             FontDef fontDef = (FontDef)font;
-            writer.writeEmptyElement(elementQName);
+//            writer.writeEmptyElement(elementQName);
             if (isValue)
-                writer.writeElement(IXmlElements.XSI.TYPE, IXmlElements.V8UI.FONT);
+            {
+                writer.writeElement(IYamlElements.XSI.TYPE, IYamlElements.V8UI.FONT);
+            }
             if (fontDef.getFaceName() != null)
+            {
                 writer.writeElement("faceName", fontDef.faceName());
+            }
             writer.writeElement("height", getFontHeightRepresentation(fontDef));
             writer.writeElement("bold", String.valueOf(fontDef.isBold()));
             writer.writeElement("italic", String.valueOf(fontDef.isItalic()));
@@ -209,24 +222,40 @@ public class FontWriter
         else if (font instanceof AutoFont)
         {
             AutoFont autoFont = (AutoFont)font;
-            writer.writeEmptyElement(elementQName);
+//            writer.writeEmptyElement(elementQName);
             if (isValue)
-                writer.writeElement(IXmlElements.XSI.TYPE, IXmlElements.V8UI.FONT);
+            {
+                writer.writeElement(IYamlElements.XSI.TYPE, IYamlElements.V8UI.FONT);
+            }
             if (autoFont.isSetFaceName())
+            {
                 writer.writeElement("faceName", autoFont.faceName());
+            }
             if (autoFont.isSetHeight())
+            {
                 writer.writeElement("height", getFontHeightRepresentation(autoFont));
+            }
             if (autoFont.isSetBold())
+            {
                 writer.writeElement("bold", String.valueOf(autoFont.isBold()));
+            }
             if (autoFont.isSetItalic())
+            {
                 writer.writeElement("italic", String.valueOf(autoFont.isItalic()));
+            }
             if (autoFont.isSetUnderline())
+            {
                 writer.writeElement("underline", String.valueOf(autoFont.isUnderline()));
+            }
             if (autoFont.isSetStrikeout())
+            {
                 writer.writeElement("strikeout", String.valueOf(autoFont.isStrikeout()));
+            }
             writer.writeElement("kind", "AutoFont");
             if (autoFont.isSetStrikeout())
+            {
                 writer.writeElement("scale", String.valueOf(autoFont.scale()));
+            }
         }
         else if (font != null)
         {
@@ -241,18 +270,4 @@ public class FontWriter
         return value;
     }
 
-    private void writeNamespace(YamlStreamWriter writer, Font font) throws XMLStreamException
-    {
-        if (font instanceof com._1c.g5.v8.dt.platform.model.SystemFont)
-        {
-            if (writer.getPrefix("http://v8.1c.ru/8.1/data/ui/fonts/system") == null)
-                writer.writeNamespace("sys", "http://v8.1c.ru/8.1/data/ui/fonts/system");
-        }
-        else if (font instanceof com._1c.g5.v8.dt.mcore.StyleFont
-            || font instanceof com._1c.g5.v8.dt.platform.model.PlatformFontRef)
-        {
-            if (writer.getPrefix("http://v8.1c.ru/8.1/data/ui/style") == null)
-                writer.writeNamespace("style", "http://v8.1c.ru/8.1/data/ui/style");
-        }
-    }
 }

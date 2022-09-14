@@ -1,9 +1,10 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -20,7 +21,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.md.yaml.IMetadataXmlElements;
 import ru.capralow.dt.modeling.md.yaml.impl.MetadataFeatureNameProvider;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
 import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
@@ -43,37 +43,41 @@ public class FieldWriter
         Version version) throws ExportException
     {
         if (feature.getEType() != McorePackage.Literals.FIELD)
+        {
             throw new IllegalArgumentException(String.format("Invalid feature type in %s", new Object[] { feature }));
-        QName elementQName = this.nameProvider.getElementQName(feature);
+        }
+        QName elementQName = nameProvider.getElementQName(feature);
         if (eObject == null)
         {
             if (writeEmpty)
-                writer.writeEmptyElement(elementQName);
+            {
+//                writer.writeEmptyElement(elementQName);
+            }
             return;
         }
         Object value = eObject.eGet(feature);
         if (value instanceof List && !((List)value).isEmpty())
         {
-            writer.writeStartElement(elementQName);
+            List<Object> list = writer.addList(elementQName);
             for (Field field : (List<Field>)value)
             {
-                writer.writeStartElement(IMetadataXmlElements.XR.FIELD);
-                writer.writeCharacters(this.linkConverter.convert(eObject, (EReference)feature,
-                    this.symbolicNameService.generateSymbolicName((EObject)field, eObject, (EReference)feature)));
-                writer.writeInlineEndElement();
+                String fieldValue = linkConverter.convert(eObject, (EReference)feature,
+                    symbolicNameService.generateSymbolicName((EObject)field, eObject, (EReference)feature));
+
+                Map<String, Object> fieldGroup = writer.addGroup(list);
+                writer.writeElement("XR.FIELD", fieldValue, fieldGroup);
             }
-            writer.writeEndElement();
         }
         else if (value instanceof Field)
         {
-            writer.writeStartElement(elementQName);
-            writer.writeCharacters(this.linkConverter.convert(eObject, (EReference)feature,
-                this.symbolicNameService.generateSymbolicName((EObject)value, eObject, (EReference)feature)));
-            writer.writeInlineEndElement();
+            String fieldValue = linkConverter.convert(eObject, (EReference)feature,
+                symbolicNameService.generateSymbolicName((EObject)value, eObject, (EReference)feature));
+
+            writer.writeElement(elementQName, fieldValue);
         }
         else if (writeEmpty)
         {
-            writer.writeEmptyElement(elementQName);
+//            writer.writeEmptyElement(elementQName);
         }
     }
 }
