@@ -44,7 +44,7 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.yaml.IQNameProvider;
+import ru.capralow.dt.modeling.yaml.IqNameProvider;
 
 public class ValueWriter
     implements ISpecifiedElementWriter
@@ -68,7 +68,7 @@ public class ValueWriter
     protected ReferenceWriter referenceWriter;
 
     @Inject
-    private IQNameProvider nameManager;
+    private IqNameProvider nameManager;
 
     @Inject
     @Named(ISpecifiedElementWriter.SMART_ELEMENT_WRITER)

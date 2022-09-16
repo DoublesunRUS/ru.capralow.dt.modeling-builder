@@ -14,13 +14,13 @@ import com._1c.g5.v8.dt.platform.version.Version;
 import com.google.inject.Inject;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.yaml.IQNameProvider;
+import ru.capralow.dt.modeling.yaml.IqNameProvider;
 
 public class StandardPeriodWriter
     implements ISpecifiedElementWriter
 {
     @Inject
-    private IQNameProvider nameManager;
+    private IqNameProvider nameManager;
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,

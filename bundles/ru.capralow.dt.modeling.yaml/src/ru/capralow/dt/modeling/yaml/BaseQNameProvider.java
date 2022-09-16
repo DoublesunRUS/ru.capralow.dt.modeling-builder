@@ -12,7 +12,7 @@ import org.eclipse.xtext.util.Strings;
 import com.google.common.collect.ImmutableMap;
 
 public class BaseQNameProvider
-    implements IQNameProvider
+    implements IqNameProvider
 {
     protected final ImmutableMap<EStructuralFeature, QName> specifiedFeatureNames;
 

@@ -1,5 +1,5 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.md.yaml.impl;
 
@@ -17,10 +17,15 @@ import ru.capralow.dt.modeling.yaml.IExporterQualifier;
 public class NativeMdObjectExporterQualifier
     implements IExporterQualifier
 {
+    @Override
     public boolean qualify(IExporter exporter, Version version, EObject eObject)
     {
-        if (eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Predefined)
-            eObject = eObject.eContainer();
-        return !(eObject instanceof MdObject && ((MdObject)eObject).getObjectBelonging() != ObjectBelonging.NATIVE);
+        EObject eObject1 = eObject;
+
+        if (eObject1 instanceof com._1c.g5.v8.dt.metadata.mdclass.Predefined)
+        {
+            eObject1 = eObject.eContainer();
+        }
+        return !(eObject1 instanceof MdObject && ((MdObject)eObject1).getObjectBelonging() != ObjectBelonging.NATIVE);
     }
 }

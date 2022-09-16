@@ -29,7 +29,7 @@ import com.google.inject.name.Named;
 
 import ru.capralow.dt.modeling.core.ExportException;
 import ru.capralow.dt.modeling.md.yaml.writer.IMetadataObjectFeatureOrderProvider;
-import ru.capralow.dt.modeling.yaml.IQNameProvider;
+import ru.capralow.dt.modeling.yaml.IqNameProvider;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
 import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 
@@ -42,7 +42,7 @@ public class MetadataObjectWriter
     private ISpecifiedElementWriter smartFeatureWriter;
 
     @Inject
-    private IQNameProvider nameProvider;
+    private IqNameProvider nameProvider;
 
     @Inject
     private IMetadataObjectFeatureOrderProvider featureOrderProvider;

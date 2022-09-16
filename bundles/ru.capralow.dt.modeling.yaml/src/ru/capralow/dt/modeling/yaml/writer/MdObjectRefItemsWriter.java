@@ -21,7 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.yaml.IQNameProvider;
+import ru.capralow.dt.modeling.yaml.IqNameProvider;
 
 @Singleton
 public class MdObjectRefItemsWriter
@@ -45,7 +45,7 @@ public class MdObjectRefItemsWriter
             MdClassPackage.Literals.RECALCULATION_DIMENSION__LEADING_REGISTER_DATA }).build();
 
     @Inject
-    private IQNameProvider nameProvider;
+    private IqNameProvider nameProvider;
 
     @Inject
     private ISymLinkConverter linkConverter;

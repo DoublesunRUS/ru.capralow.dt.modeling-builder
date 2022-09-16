@@ -20,14 +20,14 @@ import ru.capralow.dt.modeling.md.yaml.impl.YamlExporterExtensionManager;
 import ru.capralow.dt.modeling.md.yaml.writer.IProducedTypesOrderProvider;
 import ru.capralow.dt.modeling.yaml.ExtensionBasedExporterQualifier;
 import ru.capralow.dt.modeling.yaml.IExporterQualifier;
-import ru.capralow.dt.modeling.yaml.IQNameProvider;
+import ru.capralow.dt.modeling.yaml.IqNameProvider;
 import ru.capralow.dt.modeling.yaml.UnionExporterQualifier;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
 
 public class RuntimeModule
     extends MdRuntimeModule
 {
-    public Class<? extends IQNameProvider> bindIqNameProvider()
+    public Class<? extends IqNameProvider> bindIqNameProvider()
     {
         return MetadataFeatureNameProvider.class;
     }

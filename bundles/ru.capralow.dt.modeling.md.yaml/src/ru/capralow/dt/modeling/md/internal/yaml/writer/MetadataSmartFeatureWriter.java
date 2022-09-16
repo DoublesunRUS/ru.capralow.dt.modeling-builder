@@ -20,7 +20,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.yaml.IQNameProvider;
+import ru.capralow.dt.modeling.yaml.IqNameProvider;
 import ru.capralow.dt.modeling.yaml.writer.ChoiceParameterLinkWriter;
 import ru.capralow.dt.modeling.yaml.writer.ChoiceParameterWriter;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
@@ -37,7 +37,7 @@ public class MetadataSmartFeatureWriter
     implements ISpecifiedElementWriter
 {
     @Inject
-    private IQNameProvider nameProvider;
+    private IqNameProvider nameProvider;
 
     @Inject
     private ReferenceWriter referenceWriter;

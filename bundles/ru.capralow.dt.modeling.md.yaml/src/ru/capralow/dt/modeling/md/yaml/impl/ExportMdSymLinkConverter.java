@@ -1,5 +1,5 @@
 /**
- *
+ * Copyright (c) 2022, Aleksandr Kapralov
  */
 package ru.capralow.dt.modeling.md.yaml.impl;
 
@@ -17,6 +17,7 @@ public class ExportMdSymLinkConverter
     @Inject
     private SubObjectsManager subObjectsManager;
 
+    @Override
     public String convert(EObject context, EReference reference, String symLink)
     {
         if (context instanceof com._1c.g5.v8.dt.metadata.mdclass.Configuration
@@ -24,13 +25,17 @@ public class ExportMdSymLinkConverter
         {
             int dotIndex = symLink.indexOf('.');
             if (dotIndex != -1)
+            {
                 return symLink.substring(dotIndex + 1);
+            }
         }
         if (this.subObjectsManager.getSubordinateObjectReferences(context.eClass()).contains(reference))
         {
             int dotIndex = symLink.indexOf('.');
             if (dotIndex != -1)
+            {
                 return symLink.substring(symLink.lastIndexOf('.') + 1);
+            }
         }
         return super.convert(context, reference, symLink);
     }

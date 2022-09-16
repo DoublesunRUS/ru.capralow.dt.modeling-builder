@@ -31,7 +31,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.yaml.IQNameProvider;
+import ru.capralow.dt.modeling.yaml.IqNameProvider;
 
 @Singleton
 public class TypeDescriptionWriter
@@ -49,7 +49,7 @@ public class TypeDescriptionWriter
         MdClassPackage.Literals.EXTERNAL_REPORT__ATTRIBUTES);
 
     @Inject
-    private IQNameProvider nameProvider;
+    private IqNameProvider nameProvider;
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,

@@ -20,38 +20,53 @@ public class BaseExportSymLinkConverter
         if (McorePackage.eINSTANCE.getFont().isSuperTypeOf(reference.getEReferenceType())
             || McorePackage.eINSTANCE.getColor().isSuperTypeOf(reference.getEReferenceType())
             || McorePackage.eINSTANCE.getBorder().isSuperTypeOf(reference.getEReferenceType()))
+        {
             return getUiSchemeLink(symLink);
+        }
         if (reference.getEType() == McorePackage.Literals.TYPE_ITEM)
+        {
             throw new AssertionError("Unsupport feature type to link convert (TypeItem)");
+        }
         return symLink;
     }
 
     private String getUiSchemeLink(String symLink)
     {
         int dotIndex = symLink.indexOf('.');
-        if (dotIndex != -1)
+        if (dotIndex == -1)
         {
-            String str;
-            switch ((str = symLink.substring(0, dotIndex)).hashCode())
-            {
-            case -1803461041:
-                if (!str.equals("System"))
-                    break;
-                return "sys:" + symLink.substring(dotIndex + 1);
-            case -1280820637:
-                if (!str.equals("Windows"))
-                    break;
-                return "win:" + symLink.substring(dotIndex + 1);
-            case 86836:
-                if (!str.equals("Web"))
-                    break;
-                return "web:" + symLink.substring(dotIndex + 1);
-            case 80227729:
-                if (!str.equals("Style"))
-                    break;
-                return "style:" + symLink.substring(dotIndex + 1);
-            }
+            return symLink;
         }
-        return symLink;
+
+        String str = symLink.substring(0, dotIndex);
+        switch (str.hashCode())
+        {
+        case -1803461041:
+            if (!str.equals("System"))
+            {
+                return symLink;
+            }
+            return "sys:" + symLink.substring(dotIndex + 1);
+        case -1280820637:
+            if (!str.equals("Windows"))
+            {
+                return symLink;
+            }
+            return "win:" + symLink.substring(dotIndex + 1);
+        case 86836:
+            if (!str.equals("Web"))
+            {
+                return symLink;
+            }
+            return "web:" + symLink.substring(dotIndex + 1);
+        case 80227729:
+            if (!str.equals("Style"))
+            {
+                return symLink;
+            }
+            return "style:" + symLink.substring(dotIndex + 1);
+        default:
+            return symLink;
+        }
     }
 }

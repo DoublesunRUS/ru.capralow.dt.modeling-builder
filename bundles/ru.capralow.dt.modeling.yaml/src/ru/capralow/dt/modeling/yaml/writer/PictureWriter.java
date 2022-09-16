@@ -24,7 +24,7 @@ import com.google.inject.Inject;
 
 import ru.capralow.dt.modeling.core.ExportException;
 import ru.capralow.dt.modeling.internal.yaml.YamlPlugin;
-import ru.capralow.dt.modeling.yaml.IQNameProvider;
+import ru.capralow.dt.modeling.yaml.IqNameProvider;
 
 public class PictureWriter
     implements ISpecifiedElementWriter
@@ -32,7 +32,7 @@ public class PictureWriter
     private static final String PICTURE_EXTENSION_KEY = "picture.extension"; //$NON-NLS-1$
 
     @Inject
-    private IQNameProvider nameProvider;
+    private IqNameProvider nameProvider;
 
     @Inject
     private ISymbolicNameService symbolicNameService;
