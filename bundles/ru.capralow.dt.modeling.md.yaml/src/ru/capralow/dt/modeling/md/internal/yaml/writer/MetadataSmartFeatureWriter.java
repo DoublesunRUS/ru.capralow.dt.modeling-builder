@@ -55,16 +55,24 @@ public class MetadataSmartFeatureWriter
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
         Version version) throws ExportException
     {
-        if (specifiedFeatureWriters.containsKey(feature))
+        if (eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Configuration
+            && feature == MdClassPackage.Literals.MD_OBJECT__NAME)
+        {
+            return;
+
+        }
+        else if (specifiedFeatureWriters.containsKey(feature))
         {
             ISpecifiedElementWriter specifiedWriter = injector.getInstance(specifiedFeatureWriters.get(feature));
             specifiedWriter.write(writer, eObject, feature, writeEmpty, version);
+
         }
         else if (specifiedClassifierWriters.containsKey(feature.getEType()))
         {
             ISpecifiedElementWriter specifiedWriter =
                 injector.getInstance(specifiedClassifierWriters.get(feature.getEType()));
             specifiedWriter.write(writer, eObject, feature, writeEmpty, version);
+
         }
         else if (feature instanceof org.eclipse.emf.ecore.EAttribute)
         {
@@ -76,10 +84,12 @@ public class MetadataSmartFeatureWriter
                     writer.writeElement(nameProvider.getElementQName(feature), eObject.eGet(feature));
                 }
             }
+
         }
         else if (feature instanceof org.eclipse.emf.ecore.EReference)
         {
             referenceWriter.write(writer, eObject, feature, writeEmpty, version);
+
         }
     }
 
@@ -88,6 +98,7 @@ public class MetadataSmartFeatureWriter
         ImmutableMap.Builder<EStructuralFeature, Class<? extends ISpecifiedElementWriter>> builder =
             ImmutableMap.builder();
 
+        builder.put(MdClassPackage.Literals.MD_OBJECT__SYNONYM, SynonymStringMapEntryWriter.class);
         builder.put(MdClassPackage.Literals.MD_OBJECT__COMMENT, ISpecifiedElementWriter.ZeroWriter.class);
 
         builder.put(MdClassPackage.Literals.CONFIGURATION__ADDITIONAL_FULL_TEXT_SEARCH_DICTIONARIES,
@@ -409,7 +420,7 @@ public class MetadataSmartFeatureWriter
         ImmutableMap.Builder<EClassifier, Class<? extends ISpecifiedElementWriter>> builder = ImmutableMap.builder();
 
 //        builder.put(MdClassPackage.Literals.CONTAINED_OBJECT, ContainedObjectsWriter.class);
-//        builder.put(MdClassPackage.Literals.OBJECT_BELONGING, ObjectBelongingWriter.class);
+        builder.put(MdClassPackage.Literals.OBJECT_BELONGING, ISpecifiedElementWriter.ZeroWriter.class);
 //        builder.put(MdClassPackage.Literals.STANDARD_ATTRIBUTE, StandardAttributeWriter.class);
         builder.put(MdClassPackage.Literals.STANDARD_TABULAR_SECTION_DESCRIPTION,
             StandardTabularSectionDescriptorWriter.class);

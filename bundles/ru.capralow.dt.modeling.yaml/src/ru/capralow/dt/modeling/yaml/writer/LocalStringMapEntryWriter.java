@@ -3,7 +3,6 @@
  */
 package ru.capralow.dt.modeling.yaml.writer;
 
-import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -21,7 +20,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.internal.yaml.YamlPlugin;
 import ru.capralow.dt.modeling.yaml.IqNameProvider;
 
 @Singleton
@@ -37,9 +35,13 @@ public class LocalStringMapEntryWriter
     {
         Preconditions.checkArgument(
             feature != null && feature.isMany() && feature.getEType() == McorePackage.Literals.LOCAL_STRING_MAP_ENTRY,
-            "Invalid feature type %s", feature);
-        QName name = this.nameProvider.getElementQName(feature);
+            Messages.ElementWriter_Invalid_feature_type_0, feature);
+
+        QName name = nameProvider.getElementQName(feature);
+
+        @SuppressWarnings("unchecked")
         EMap<String, String> localStringMap = (EMap<String, String>)eObject.eGet(feature);
+
         writeLocalString(writer, eObject, feature, localStringMap, name, writeEmpty, version);
     }
 
@@ -50,7 +52,7 @@ public class LocalStringMapEntryWriter
         boolean isFormattedTitle = isFormattedTitle(eObject, feature);
         if (localString != null && !localString.isEmpty())
         {
-            List<Object> list = writer.addList(elementQName);
+//            List<Object> list = writer.addList(elementQName);
 
 //            if (isFormattedTitle)
 //            {
@@ -58,24 +60,27 @@ public class LocalStringMapEntryWriter
 //            }
             for (Map.Entry<String, String> entry : (Iterable<Map.Entry<String, String>>)localString.entrySet())
             {
-                Map<String, Object> entryGroup = writer.addGroup(list);
-                String lang = entry.getKey();
-                if (lang != null && !lang.isEmpty())
-                {
-                    writer.writeElement("V8.LANG", lang, entryGroup);
-                }
-                else
-                {
-                    if (lang == null)
-                    {
-                        YamlPlugin.log(YamlPlugin.createErrorStatus("Localized string entry key cannot be null", null));
-                    }
-//                    writer.writeEmptyElement(IYamlElements.V8.LANG);
-                }
+//                Map<String, Object> entryGroup = writer.addGroup(list);
+//
+//                String lang = entry.getKey();
+//                if (lang != null && !lang.isEmpty())
+//                {
+//                    writer.writeElement("V8.LANG", lang, entryGroup);
+//                }
+//                else
+//                {
+//                    if (lang == null)
+//                    {
+//                        YamlPlugin.log(
+//                YamlPlugin.createErrorStatus("Localized string entry key cannot be null", null));
+//                    }
+////                    writer.writeEmptyElement(IYamlElements.V8.LANG);
+//                }
                 String value = entry.getValue();
                 if (value != null && !value.isEmpty())
                 {
-                    writer.writeElement("V8.CONTENT", value, entryGroup);
+//                    writer.writeElement("V8.CONTENT", value, entryGroup);
+                    writer.writeElement(elementQName, value);
                 }
                 else
                 {

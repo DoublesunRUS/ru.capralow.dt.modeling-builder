@@ -14,6 +14,8 @@ class Messages
 
     public static String PredefinedItemCodeWriter_unknown_type_of_predefined_item_code;
 
+    public static String ElementWriter_Invalid_feature_type_0;
+
     static
     {
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);

@@ -28,6 +28,8 @@ class Messages
 
     public static String PictureWriter_unexpected_usage_picture__0;
 
+    public static String ElementWriter_Invalid_feature_type_0;
+
     static
     {
         NLS.initializeMessages(BUNDLE_NAME, Messages.class);
