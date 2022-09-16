@@ -39,14 +39,14 @@ public class QNameWriter
             String name = qName.getName();
             if (!Strings.isNullOrEmpty(name) && !Strings.isNullOrEmpty(nsUri))
             {
-                writer.writeStartElement(featureName.toString());
-                writer.writeCharacters(':' + name);
-                writer.writeInlineEndElement();
+//                writer.writeStartElement(featureName.toString());
+                writer.writeElement("", ':' + name);
+//                writer.writeInlineEndElement();
             }
         }
         else if (writeEmpty)
         {
-            writer.writeEmptyElement(featureName.toString());
+//            writer.writeEmptyElement(featureName.toString());
         }
     }
 }

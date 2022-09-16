@@ -80,6 +80,10 @@ jobs:
         name: logs
         path: ./**/.log
 
+    - name: Copy index.html to /target/repository/
+      run: |
+        cp repositories/ru.capralow.dt.modeling.repository/index.html repositories/ru.capralow.dt.modeling.repository/target/repository/
+    
     - name: Upload repo to ftp on success
       uses: SamKirkland/FTP-Deploy-Action@4.0.0
       if: success()

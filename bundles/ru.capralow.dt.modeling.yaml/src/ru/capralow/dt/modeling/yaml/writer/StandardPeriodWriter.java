@@ -15,7 +15,6 @@ import com.google.inject.Inject;
 
 import ru.capralow.dt.modeling.core.ExportException;
 import ru.capralow.dt.modeling.yaml.IQNameProvider;
-import ru.capralow.dt.modeling.yaml.IYamlElements;
 
 public class StandardPeriodWriter
     implements ISpecifiedElementWriter
@@ -54,7 +53,7 @@ public class StandardPeriodWriter
         if (standardPeriod.getVariant() != null)
         {
 //            writer.writeStartElement(IXmlElements.V8.VARIANT);
-            writer.writeElement(IYamlElements.XSI.TYPE, IYamlElements.V8.STANDARD_PERIOD_VARIANT);
+            writer.writeElement("XSI.TYPE", "V8.STANDARD_PERIOD_VARIANT");
 //            writer.writeCharacters(standardPeriod.getVariant().toString());
 //            writer.writeInlineEndElement();
         }

@@ -16,7 +16,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.md.yaml.IMetadataYamlElements;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
 import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 
@@ -34,22 +33,28 @@ public class StandardTabularSectionDescriptorWriter
         Version version) throws ExportException
     {
         if (feature.getEType() != MdClassPackage.Literals.STANDARD_TABULAR_SECTION_DESCRIPTION)
-            throw new IllegalArgumentException(String.format("Invalid feature type in %s", new Object[] { feature }));
-        Object value = eObject.eGet(feature);
-        if (value instanceof List && !((List)value).isEmpty())
         {
-            writer.writeStartElement(IMetadataYamlElements.STANDARD_TABULAR_SECTIONS);
-            for (StandardTabularSectionDescription standardTabularSection : (List<StandardTabularSectionDescription>)value)
-            {
-                writer.writeStartElement(IMetadataYamlElements.XR.STANDARD_TABULAR_SECTION);
-                writer.writeElement(IMetadataYamlElements.NAME_ATTRIBUTE.getLocalPart(),
-                    standardTabularSection.getName());
-                for (EStructuralFeature structuralFeature : this.propertyOrderList)
-                    this.smartFeatureWriter.write(writer, standardTabularSection, structuralFeature, true, version);
-                writer.writeEndElement();
-            }
-            writer.writeEndElement();
+            throw new IllegalArgumentException(String.format("Invalid feature type in %s", new Object[] { feature }));
         }
+
+        Object value = eObject.eGet(feature);
+        if (!(value instanceof List && !((List)value).isEmpty()))
+        {
+            return;
+        }
+//            writer.writeStartElement("STANDARD_TABULAR_SECTIONS");
+        for (StandardTabularSectionDescription standardTabularSection : (List<StandardTabularSectionDescription>)value)
+        {
+//                writer.writeStartElement("XR.STANDARD_TABULAR_SECTION");
+            writer.writeElement("NAME_ATTRIBUTE", standardTabularSection.getName());
+            for (EStructuralFeature structuralFeature : this.propertyOrderList)
+            {
+                this.smartFeatureWriter.write(writer, standardTabularSection, structuralFeature, true, version);
+            }
+//                writer.writeEndElement();
+        }
+//            writer.writeEndElement();
+
     }
 
     private List<EStructuralFeature> fillFeatureOrderList()

@@ -80,15 +80,6 @@ public class ValueWriter
     @Inject
     private Provider<StandardPeriodWriter> standardPeriodWriterProvider;
 
-    @Inject
-    private BorderWriter borderWriter;
-
-    @Inject
-    private ColorWriter colorWriter;
-
-    @Inject
-    private FontWriter fontWriter;
-
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
         Version version) throws ExportException
@@ -209,7 +200,8 @@ public class ValueWriter
 //            writer.writeStartElement(elementName);
             writer.writeElement("XSI.TYPE", "XR.DESIGN_TIME_REF");
 //            writer.writeCharacters(String.format("%s.%s",
-//                new Object[] { referenceValue.getRefTypeId().toString(), referenceValue.getInstanceId().toString() }));
+//                new Object[] {
+//            referenceValue.getRefTypeId().toString(), referenceValue.getInstanceId().toString() }));
 //            writer.writeInlineEndElement();
         }
         else if (valueObject instanceof ValueList)
@@ -281,16 +273,16 @@ public class ValueWriter
         }
         else if (valueObject instanceof BorderValue)
         {
-            borderWriter.writeBorder(writer, feature, ((BorderValue)valueObject).getValue());
+//            borderWriter.writeBorder(writer, feature, ((BorderValue)valueObject).getValue());
         }
         else if (valueObject instanceof ColorValue)
         {
-            colorWriter.writeColor(writer, feature, ((ColorValue)valueObject).getValue(), writeEmpty, elementName);
+//            colorWriter.writeColor(writer, feature, ((ColorValue)valueObject).getValue(), writeEmpty, elementName);
         }
         else if (valueObject instanceof FontValue)
         {
-            fontWriter.writeFont(writer, feature, ((FontValue)valueObject).getValue(),
-                nameManager.getElementQName(feature));
+//            fontWriter.writeFont(writer, feature, ((FontValue)valueObject).getValue(),
+//                nameManager.getElementQName(feature));
         }
         else if (valueObject instanceof AccountTypeValue)
         {

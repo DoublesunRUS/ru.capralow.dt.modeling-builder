@@ -59,7 +59,8 @@ public class TypeLinkWriter
                 if (field != null)
                 {
 //                    writer.writeStartElement(IYamlElements.XR.DATA_PATH);
-//                    writer.writeCharacters(this.linkConverter.convert(typeLink, CommonPackage.Literals.TYPE_LINK__FIELD,
+//                    writer.writeCharacters(
+//                    this.linkConverter.convert(typeLink, CommonPackage.Literals.TYPE_LINK__FIELD,
 //                        this.symbolicNameService.generateSymbolicName(field, typeLink,
 //                            CommonPackage.Literals.TYPE_LINK__FIELD)));
 //                    writer.writeInlineEndElement();

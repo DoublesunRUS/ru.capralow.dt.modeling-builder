@@ -149,7 +149,8 @@ public abstract class BaseYamlExportFileSystemSupport
 //        }
 
 //        ExportDebugTrace debugTrace = ExportDebugTrace.getInstance();
-//        String message = MessageFormat.format("Trying gets target directory for unknown metadata object with uri: {0}",
+//        String message = MessageFormat.format
+//        ("Trying gets target directory for unknown metadata object with uri: {0}",
 //            new Object[] { EcoreUtil.getURI(mdObject) });
 //        debugTrace.trace(IExporter.EXPORTER_TRACE_OPTION, message);
 //        debugTrace.traceDumpStack(IExporter.EXPORTER_TRACE_OPTION);
