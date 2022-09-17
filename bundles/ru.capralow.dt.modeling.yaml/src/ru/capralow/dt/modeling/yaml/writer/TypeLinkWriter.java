@@ -3,6 +3,8 @@
  */
 package ru.capralow.dt.modeling.yaml.writer;
 
+import java.util.Map;
+
 import javax.xml.namespace.QName;
 
 import org.eclipse.emf.ecore.EObject;
@@ -18,14 +20,14 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.yaml.IqNameProvider;
+import ru.capralow.dt.modeling.yaml.IQnameProvider;
 
 @Singleton
 public class TypeLinkWriter
     implements ISpecifiedElementWriter
 {
     @Inject
-    public IqNameProvider nameProvider;
+    public IQnameProvider nameProvider;
 
     @Inject
     public ISymLinkConverter linkConverter;
@@ -35,7 +37,7 @@ public class TypeLinkWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws ExportException
+        Version version, Map<String, Object> group) throws ExportException
     {
         if (feature.getEType() != CommonPackage.Literals.TYPE_LINK)
         {
@@ -54,7 +56,7 @@ public class TypeLinkWriter
             TypeLink typeLink = (TypeLink)eObject.eGet(feature);
             if (typeLink.getField() != null || typeLink.getLinkItem() != 0)
             {
-                writer.writeElement(elementQName.toString(), "");
+                writer.writeElement(elementQName.toString(), "", group);
                 Field field = typeLink.getField();
                 if (field != null)
                 {
@@ -80,4 +82,5 @@ public class TypeLinkWriter
             }
         }
     }
+
 }

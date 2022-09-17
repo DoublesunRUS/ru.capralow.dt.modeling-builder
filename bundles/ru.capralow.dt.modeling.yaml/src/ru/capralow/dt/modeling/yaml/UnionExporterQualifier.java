@@ -14,12 +14,12 @@ import com.google.common.base.Preconditions;
 public class UnionExporterQualifier
     implements IExporterQualifier
 {
-    private final List<IExporterQualifier> qualifiers;
-
     public static IExporterQualifier combine(IExporterQualifier... qualifiers)
     {
         return new UnionExporterQualifier(Arrays.asList(qualifiers));
     }
+
+    private final List<IExporterQualifier> qualifiers;
 
     public UnionExporterQualifier(List<IExporterQualifier> qualifiers)
     {

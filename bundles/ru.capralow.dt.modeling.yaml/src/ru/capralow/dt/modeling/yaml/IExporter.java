@@ -19,16 +19,16 @@ public interface IExporter
 {
     String EXPORTER_TRACE_OPTION = "/operation/exporter"; //$NON-NLS-1$
 
-    boolean isAppropriate(Version version, EObject eObject);
-
-    IStatus work(EObject eObject, IExportContext iExportContext, IExportArtifactBuilder iExportArtifactBuilder,
-        IProgressMonitor iProgressMonitor) throws ExportException;
+    Path getOutputPath(EObject eObject, EStructuralFeature eStructuralFeature, String fileExtension, Version version)
+        throws ExportException;
 
     default Path getOutputPath(EObject eObject, EStructuralFeature feature, Version version) throws ExportException
     {
         return getOutputPath(eObject, feature, null, version);
     }
 
-    Path getOutputPath(EObject eObject, EStructuralFeature eStructuralFeature, String fileExtension, Version version)
-        throws ExportException;
+    boolean isAppropriate(Version version, EObject eObject);
+
+    IStatus work(EObject eObject, IExportContext iExportContext, IExportArtifactBuilder iExportArtifactBuilder,
+        IProgressMonitor iProgressMonitor) throws ExportException;
 }

@@ -88,20 +88,20 @@ public final class ExportDebugTrace
     }
 
     @Override
-    public void traceExit(final String option)
-    {
-        if (ExportDebugTrace.debugTrace != null)
-        {
-            ExportDebugTrace.debugTrace.traceExit(option);
-        }
-    }
-
-    @Override
     public void traceEntry(final String option, final Object[] methodArguments)
     {
         if (ExportDebugTrace.debugTrace != null)
         {
             ExportDebugTrace.debugTrace.traceEntry(option, methodArguments);
+        }
+    }
+
+    @Override
+    public void traceExit(final String option)
+    {
+        if (ExportDebugTrace.debugTrace != null)
+        {
+            ExportDebugTrace.debugTrace.traceExit(option);
         }
     }
 

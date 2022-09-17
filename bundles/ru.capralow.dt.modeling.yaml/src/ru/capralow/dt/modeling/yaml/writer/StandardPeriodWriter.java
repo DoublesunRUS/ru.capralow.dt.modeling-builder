@@ -3,6 +3,8 @@
  */
 package ru.capralow.dt.modeling.yaml.writer;
 
+import java.util.Map;
+
 import javax.xml.namespace.QName;
 
 import org.eclipse.emf.ecore.EObject;
@@ -14,17 +16,17 @@ import com._1c.g5.v8.dt.platform.version.Version;
 import com.google.inject.Inject;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.yaml.IqNameProvider;
+import ru.capralow.dt.modeling.yaml.IQnameProvider;
 
 public class StandardPeriodWriter
     implements ISpecifiedElementWriter
 {
     @Inject
-    private IqNameProvider nameManager;
+    private IQnameProvider nameManager;
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws ExportException
+        Version version, Map<String, Object> group) throws ExportException
     {
         if (feature.isMany() || feature.getEType() != McorePackage.Literals.STANDARD_PERIOD)
         {
@@ -39,7 +41,7 @@ public class StandardPeriodWriter
         if (standardPeriod != null)
         {
 //            writer.writeStartElement(elementName);
-            writeStandardPeriod(writer, standardPeriod);
+            writeStandardPeriod(writer, standardPeriod, group);
 //            writer.writeEndElement();
         }
         else if (writeEmpty)
@@ -48,12 +50,13 @@ public class StandardPeriodWriter
         }
     }
 
-    public void writeStandardPeriod(YamlStreamWriter writer, StandardPeriod standardPeriod) throws ExportException
+    public void writeStandardPeriod(YamlStreamWriter writer, StandardPeriod standardPeriod, Map<String, Object> group)
+        throws ExportException
     {
         if (standardPeriod.getVariant() != null)
         {
 //            writer.writeStartElement(IXmlElements.V8.VARIANT);
-            writer.writeElement("XSI.TYPE", "V8.STANDARD_PERIOD_VARIANT");
+            writer.writeElement("XSI.TYPE", "V8.STANDARD_PERIOD_VARIANT", group);
 //            writer.writeCharacters(standardPeriod.getVariant().toString());
 //            writer.writeInlineEndElement();
         }

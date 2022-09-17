@@ -42,6 +42,13 @@ public class ExporterRegistry
     private Object lock = new Object();
 
     @Override
+    public boolean exporterExists(Version version, EObject eObject)
+    {
+        return (getExporters().getOrDefault(version, Collections.emptyList())).stream()
+            .anyMatch(e -> e.isAppropriate(version, eObject));
+    }
+
+    @Override
     public IExporter getExporter(Version version, EObject eObject) throws ExportException
     {
         return getExporters().getOrDefault(version, Collections.emptyList())
@@ -51,11 +58,55 @@ public class ExporterRegistry
             .orElseThrow(() -> createExportNotRegistredException(version, eObject));
     }
 
-    @Override
-    public boolean exporterExists(Version version, EObject eObject)
+    private ExportException createExportNotRegistredException(Version version, EObject eObject)
     {
-        return (getExporters().getOrDefault(version, Collections.emptyList())).stream()
-            .anyMatch(e -> e.isAppropriate(version, eObject));
+        return new ExportException(String
+            .valueOf(MessageFormat.format(Messages.ExporterRegistry_exporter_not_registered__0__version__1,
+                new Object[] { eObject.eClass().getName(), version.toString() }))
+            + " all exporters by version: "
+            + (getExporters().getOrDefault(version, Collections.emptyList())).stream()
+                .map(item -> item.getClass().getName())
+                .collect(Collectors.joining(", "))); //$NON-NLS-1$
+    }
+
+    private Map<Version, List<IExporter>> getExporters()
+    {
+        if (!this.initialized || this.registry.isEmpty())
+        {
+            synchronized (this.lock)
+            {
+                if (!this.initialized || this.registry.isEmpty())
+                {
+                    Map<Version, List<IExporter>> exporters = loadExporters();
+                    this.registry = exporters;
+                    this.initialized = true;
+                    return exporters;
+                }
+            }
+        }
+        return this.registry;
+    }
+
+    private List<Version> getVersions(IConfigurationElement configurationElement)
+    {
+        List<Version> versions = Lists.newArrayList();
+        byte b;
+        int i;
+        IConfigurationElement[] arrayOfIConfigurationElement = configurationElement.getChildren(ATT_RUNTIME);
+        for (i = arrayOfIConfigurationElement.length, b = 0; b < i;)
+        {
+            IConfigurationElement runtimeElement = arrayOfIConfigurationElement[b];
+            try
+            {
+                versions.addAll(RuntimeCompatibility.computeVersions(runtimeElement));
+            }
+            catch (CoreException e)
+            {
+                YamlPlugin.log(e.getStatus());
+            }
+            b++;
+        }
+        return versions;
     }
 
     private Map<Version, List<IExporter>> loadExporters()
@@ -86,56 +137,5 @@ public class ExporterRegistry
             b++;
         }
         return registry1;
-    }
-
-    private List<Version> getVersions(IConfigurationElement configurationElement)
-    {
-        List<Version> versions = Lists.newArrayList();
-        byte b;
-        int i;
-        IConfigurationElement[] arrayOfIConfigurationElement = configurationElement.getChildren(ATT_RUNTIME);
-        for (i = arrayOfIConfigurationElement.length, b = 0; b < i;)
-        {
-            IConfigurationElement runtimeElement = arrayOfIConfigurationElement[b];
-            try
-            {
-                versions.addAll(RuntimeCompatibility.computeVersions(runtimeElement));
-            }
-            catch (CoreException e)
-            {
-                YamlPlugin.log(e.getStatus());
-            }
-            b++;
-        }
-        return versions;
-    }
-
-    private Map<Version, List<IExporter>> getExporters()
-    {
-        if (!this.initialized || this.registry.isEmpty())
-        {
-            synchronized (this.lock)
-            {
-                if (!this.initialized || this.registry.isEmpty())
-                {
-                    Map<Version, List<IExporter>> exporters = loadExporters();
-                    this.registry = exporters;
-                    this.initialized = true;
-                    return exporters;
-                }
-            }
-        }
-        return this.registry;
-    }
-
-    private ExportException createExportNotRegistredException(Version version, EObject eObject)
-    {
-        return new ExportException(String
-            .valueOf(MessageFormat.format(Messages.ExporterRegistry_exporter_not_registered__0__version__1,
-                new Object[] { eObject.eClass().getName(), version.toString() }))
-            + " all exporters by version: "
-            + (getExporters().getOrDefault(version, Collections.emptyList())).stream()
-                .map(item -> item.getClass().getName())
-                .collect(Collectors.joining(", "))); //$NON-NLS-1$
     }
 }

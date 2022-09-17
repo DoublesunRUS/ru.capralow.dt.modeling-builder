@@ -29,18 +29,6 @@ public abstract class BasicExporter
     private IExporterQualifier exporterQuialifier;
 
     @Override
-    public boolean isAppropriate(Version version, EObject eObject)
-    {
-        return this.exporterQuialifier.qualify(this, version, eObject);
-    }
-
-    @Override
-    public Path getOutputPath(EObject eObject, EStructuralFeature feature, Version version) throws ExportException
-    {
-        return getOutputPath(eObject, feature, null, version);
-    }
-
-    @Override
     public Path getOutputPath(EObject eObject, EStructuralFeature feature, String fileExtension, Version version)
         throws ExportException
     {
@@ -67,13 +55,25 @@ public abstract class BasicExporter
         }
     }
 
-    public Path getOutputPath(EObject eObject, Version version) throws ExportException
+    @Override
+    public Path getOutputPath(EObject eObject, EStructuralFeature feature, Version version) throws ExportException
     {
-        return getOutputPath(eObject, null, null, version);
+        return getOutputPath(eObject, feature, null, version);
     }
 
     public Path getOutputPath(EObject eObject, String fileExtension, Version version) throws ExportException
     {
         return getOutputPath(eObject, null, fileExtension, version);
+    }
+
+    public Path getOutputPath(EObject eObject, Version version) throws ExportException
+    {
+        return getOutputPath(eObject, null, null, version);
+    }
+
+    @Override
+    public boolean isAppropriate(Version version, EObject eObject)
+    {
+        return this.exporterQuialifier.qualify(this, version, eObject);
     }
 }

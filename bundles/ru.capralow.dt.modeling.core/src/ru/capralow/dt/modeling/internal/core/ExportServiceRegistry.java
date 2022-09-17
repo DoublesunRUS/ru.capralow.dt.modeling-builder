@@ -34,6 +34,18 @@ public class ExportServiceRegistry
     private volatile boolean isInitialized;
 
     @Override
+    public IExportFileSupport getExportFileSupport(final Version version) throws ExportException
+    {
+        final IExportFileSupport support = this.getExportFileSupportRegistry().get(version);
+        if (support != null)
+        {
+            return support;
+        }
+        throw new ExportException(
+            Messages.bind(Messages.ExportServiceRegistry_exportServiceVersion0NotRegistered, version.toString()));
+    }
+
+    @Override
     public IExportService getExportService(final Version version) throws ExportException
     {
         final IConfigurationElement element = this.getExportServiceRegistry().get(version);
@@ -52,16 +64,14 @@ public class ExportServiceRegistry
             Messages.bind(Messages.ExportServiceRegistry_exportServiceVersion0NotRegistered, version.toString()));
     }
 
-    @Override
-    public IExportFileSupport getExportFileSupport(final Version version) throws ExportException
+    private synchronized Map<Version, IExportFileSupport> getExportFileSupportRegistry()
     {
-        final IExportFileSupport support = this.getExportFileSupportRegistry().get(version);
-        if (support != null)
+        if (!this.isInitialized)
         {
-            return support;
+            this.initialize();
+            this.isInitialized = true;
         }
-        throw new ExportException(
-            Messages.bind(Messages.ExportServiceRegistry_exportServiceVersion0NotRegistered, version.toString()));
+        return this.exportFileSupportRegistry;
     }
 
     private synchronized Map<Version, IConfigurationElement> getExportServiceRegistry()
@@ -74,14 +84,23 @@ public class ExportServiceRegistry
         return this.exportServiceRegistry;
     }
 
-    private synchronized Map<Version, IExportFileSupport> getExportFileSupportRegistry()
+    private List<Version> getVersions(final IConfigurationElement configurationElement)
     {
-        if (!this.isInitialized)
+        final List<Version> versions = Lists.newArrayList();
+        IConfigurationElement[] children = configurationElement.getChildren(ATT_RUNTIME);
+        for (int length = children.length, i = 0; i < length; ++i)
         {
-            this.initialize();
-            this.isInitialized = true;
+            final IConfigurationElement runtimeElement = children[i];
+            try
+            {
+                versions.addAll(RuntimeCompatibility.computeVersions(runtimeElement));
+            }
+            catch (CoreException e)
+            {
+                CorePlugin.log(e.getStatus());
+            }
         }
-        return this.exportFileSupportRegistry;
+        return versions;
     }
 
     private void initialize()
@@ -115,24 +134,5 @@ public class ExportServiceRegistry
         }
         this.exportServiceRegistry = exportServiceBuilder.build();
         this.exportFileSupportRegistry = exportFileSupportBuilder.build();
-    }
-
-    private List<Version> getVersions(final IConfigurationElement configurationElement)
-    {
-        final List<Version> versions = Lists.newArrayList();
-        IConfigurationElement[] children = configurationElement.getChildren(ATT_RUNTIME);
-        for (int length = children.length, i = 0; i < length; ++i)
-        {
-            final IConfigurationElement runtimeElement = children[i];
-            try
-            {
-                versions.addAll(RuntimeCompatibility.computeVersions(runtimeElement));
-            }
-            catch (CoreException e)
-            {
-                CorePlugin.log(e.getStatus());
-            }
-        }
-        return versions;
     }
 }

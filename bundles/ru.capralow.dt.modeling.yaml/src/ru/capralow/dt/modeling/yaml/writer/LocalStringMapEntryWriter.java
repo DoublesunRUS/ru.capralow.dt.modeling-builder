@@ -20,18 +20,18 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.yaml.IqNameProvider;
+import ru.capralow.dt.modeling.yaml.IQnameProvider;
 
 @Singleton
 public class LocalStringMapEntryWriter
     implements ISpecifiedElementWriter
 {
     @Inject
-    private IqNameProvider nameProvider;
+    private IQnameProvider nameProvider;
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws ExportException
+        Version version, Map<String, Object> group) throws ExportException
     {
         Preconditions.checkArgument(
             feature != null && feature.isMany() && feature.getEType() == McorePackage.Literals.LOCAL_STRING_MAP_ENTRY,
@@ -42,12 +42,12 @@ public class LocalStringMapEntryWriter
         @SuppressWarnings("unchecked")
         EMap<String, String> localStringMap = (EMap<String, String>)eObject.eGet(feature);
 
-        writeLocalString(writer, eObject, feature, localStringMap, name, writeEmpty, version);
+        writeLocalString(writer, eObject, feature, localStringMap, name, writeEmpty, version, group);
     }
 
     public void writeLocalString(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature,
-        EMap<String, String> localString, QName elementQName, boolean writeEmpty, Version version)
-        throws ExportException
+        EMap<String, String> localString, QName elementQName, boolean writeEmpty, Version version,
+        Map<String, Object> group) throws ExportException
     {
         boolean isFormattedTitle = isFormattedTitle(eObject, feature);
         if (localString != null && !localString.isEmpty())
@@ -80,7 +80,7 @@ public class LocalStringMapEntryWriter
                 if (value != null && !value.isEmpty())
                 {
 //                    writer.writeElement("V8.CONTENT", value, entryGroup);
-                    writer.writeElement(elementQName, value);
+                    writer.writeElement(elementQName, value, group);
                 }
                 else
                 {

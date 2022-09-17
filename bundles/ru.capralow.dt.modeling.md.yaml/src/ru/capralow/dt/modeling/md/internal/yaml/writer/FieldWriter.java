@@ -40,11 +40,12 @@ public class FieldWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws ExportException
+        Version version, Map<String, Object> group) throws ExportException
     {
         if (feature.getEType() != McorePackage.Literals.FIELD)
         {
-            throw new IllegalArgumentException(String.format("Invalid feature type in %s", new Object[] { feature }));
+            throw new IllegalArgumentException(
+                String.format(Messages.ElementWriter_Invalid_feature_type_0, new Object[] { feature }));
         }
         QName elementQName = nameProvider.getElementQName(feature);
         if (eObject == null)
@@ -56,7 +57,7 @@ public class FieldWriter
             return;
         }
         Object value = eObject.eGet(feature);
-        if (value instanceof List && !((List)value).isEmpty())
+        if (value instanceof List && !((List<?>)value).isEmpty())
         {
             List<Object> list = writer.addList(elementQName);
             for (Field field : (List<Field>)value)
@@ -73,11 +74,12 @@ public class FieldWriter
             String fieldValue = linkConverter.convert(eObject, (EReference)feature,
                 symbolicNameService.generateSymbolicName((EObject)value, eObject, (EReference)feature));
 
-            writer.writeElement(elementQName, fieldValue);
+            writer.writeElement(elementQName, fieldValue, group);
         }
         else if (writeEmpty)
         {
 //            writer.writeEmptyElement(elementQName);
         }
     }
+
 }

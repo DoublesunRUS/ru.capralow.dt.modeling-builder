@@ -4,6 +4,7 @@
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -34,7 +35,7 @@ public class StandardAttributeWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws ExportException
+        Version version, Map<String, Object> group) throws ExportException
     {
         if (feature.getEType() != MdClassPackage.Literals.STANDARD_ATTRIBUTE)
         {
@@ -51,10 +52,10 @@ public class StandardAttributeWriter
         for (StandardAttribute attribute : (List<StandardAttribute>)value)
         {
 //                writer.writeStartElement(IMetadataXmlElements.XR.STANDARD_ATTRIBUTE);
-            writer.writeElement("NAME_ATTRIBUTE", attribute.getName());
+            writer.writeElement("NAME_ATTRIBUTE", attribute.getName(), group);
             for (EStructuralFeature structuralFeature : propertyStandardAttributeOrderList)
             {
-                smartFeatureWriter.write(writer, attribute, structuralFeature, true, version);
+                smartFeatureWriter.write(writer, attribute, structuralFeature, true, version, group);
             }
 //                writer.writeEndElement();
         }

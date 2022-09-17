@@ -25,13 +25,51 @@ public class YamlPlugin
 
     private static YamlPlugin instance;
 
-    private InjectorAwareServiceRegistrator registrator;
+    public static IStatus createErrorStatus(String msg, Throwable e)
+    {
+        return new Status(IStatus.ERROR, ID, 0, msg, e);
+    }
 
-    private volatile Injector injector;
+    public static IStatus createWarningStatus(String msg)
+    {
+        return new Status(IStatus.WARNING, ID, 0, msg, null);
+    }
 
     public static YamlPlugin getInstance()
     {
         return instance;
+    }
+
+    public static void log(IStatus status)
+    {
+        instance.getLog().log(status);
+    }
+
+    public static void logError(String message, Throwable throwable)
+    {
+        log(createErrorStatus(message, throwable));
+    }
+
+    private InjectorAwareServiceRegistrator registrator;
+
+    private volatile Injector injector;
+
+    public Injector getInjector()
+    {
+        Injector localInstance = this.injector;
+        if (localInstance == null)
+        {
+            synchronized (YamlPlugin.class)
+            {
+                localInstance = this.injector;
+                if (localInstance == null)
+                {
+                    localInstance = createInjector();
+                    this.injector = localInstance;
+                }
+            }
+        }
+        return localInstance;
     }
 
     @Override
@@ -57,44 +95,6 @@ public class YamlPlugin
         instance = null;
 
         super.stop(context);
-    }
-
-    public static void log(IStatus status)
-    {
-        instance.getLog().log(status);
-    }
-
-    public static IStatus createErrorStatus(String msg, Throwable e)
-    {
-        return new Status(IStatus.ERROR, ID, 0, msg, e);
-    }
-
-    public static void logError(String message, Throwable throwable)
-    {
-        log(createErrorStatus(message, throwable));
-    }
-
-    public static IStatus createWarningStatus(String msg)
-    {
-        return new Status(IStatus.WARNING, ID, 0, msg, null);
-    }
-
-    public Injector getInjector()
-    {
-        Injector localInstance = this.injector;
-        if (localInstance == null)
-        {
-            synchronized (YamlPlugin.class)
-            {
-                localInstance = this.injector;
-                if (localInstance == null)
-                {
-                    localInstance = createInjector();
-                    this.injector = localInstance;
-                }
-            }
-        }
-        return localInstance;
     }
 
     private Injector createInjector()

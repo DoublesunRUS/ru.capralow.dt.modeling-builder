@@ -29,8 +29,6 @@ public class UiPlugin
 
     private static UiPlugin instance;
 
-    private Injector injector;
-
     public static IStatus createErrorStatus(String message)
     {
         return new Status(IStatus.ERROR, ID, 0, message, (Throwable)null);
@@ -51,6 +49,16 @@ public class UiPlugin
         return new Status(IStatus.ERROR, ID, 0, message, throwable);
     }
 
+    public static Image getImage(String symbolicName)
+    {
+        return getInstance().getImageRegistry().get(symbolicName);
+    }
+
+    public static ImageDescriptor getImageDescriptor(String symbolicName)
+    {
+        return getInstance().getImageRegistry().getDescriptor(symbolicName);
+    }
+
     public static UiPlugin getInstance()
     {
         return instance;
@@ -60,6 +68,14 @@ public class UiPlugin
     {
         getInstance().getLog().log(status);
     }
+
+    private static ImageDescriptor imageDescriptorFromSymbolicName(String symbolicName)
+    {
+        String path = "icons" + symbolicName.substring(ID.length()); //$NON-NLS-1$
+        return imageDescriptorFromPlugin(ID, path);
+    }
+
+    private Injector injector;
 
     public synchronized Injector getInjector()
     {
@@ -106,26 +122,10 @@ public class UiPlugin
         }
     }
 
-    public static Image getImage(String symbolicName)
-    {
-        return getInstance().getImageRegistry().get(symbolicName);
-    }
-
-    public static ImageDescriptor getImageDescriptor(String symbolicName)
-    {
-        return getInstance().getImageRegistry().getDescriptor(symbolicName);
-    }
-
     @Override
     protected void initializeImageRegistry(ImageRegistry reg)
     {
         reg.put(IMG_EXPORT_WIZ, imageDescriptorFromSymbolicName(IMG_EXPORT_WIZ));
-    }
-
-    private static ImageDescriptor imageDescriptorFromSymbolicName(String symbolicName)
-    {
-        String path = "icons" + symbolicName.substring(ID.length()); //$NON-NLS-1$
-        return imageDescriptorFromPlugin(ID, path);
     }
 
 }

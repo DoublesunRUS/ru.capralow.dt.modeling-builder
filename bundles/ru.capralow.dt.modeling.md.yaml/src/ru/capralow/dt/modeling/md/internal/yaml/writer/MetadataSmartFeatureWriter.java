@@ -3,6 +3,8 @@
  */
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
 
+import java.util.Map;
+
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EObject;
@@ -20,9 +22,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.yaml.IqNameProvider;
-import ru.capralow.dt.modeling.yaml.writer.ChoiceParameterLinkWriter;
-import ru.capralow.dt.modeling.yaml.writer.ChoiceParameterWriter;
+import ru.capralow.dt.modeling.yaml.IQnameProvider;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
 import ru.capralow.dt.modeling.yaml.writer.LocalStringMapEntryWriter;
 import ru.capralow.dt.modeling.yaml.writer.PictureWriter;
@@ -37,7 +37,7 @@ public class MetadataSmartFeatureWriter
     implements ISpecifiedElementWriter
 {
     @Inject
-    private IqNameProvider nameProvider;
+    private IQnameProvider nameProvider;
 
     @Inject
     private ReferenceWriter referenceWriter;
@@ -53,7 +53,7 @@ public class MetadataSmartFeatureWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws ExportException
+        Version version, Map<String, Object> group) throws ExportException
     {
         if (eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Configuration
             && feature == MdClassPackage.Literals.MD_OBJECT__NAME)
@@ -64,14 +64,14 @@ public class MetadataSmartFeatureWriter
         else if (specifiedFeatureWriters.containsKey(feature))
         {
             ISpecifiedElementWriter specifiedWriter = injector.getInstance(specifiedFeatureWriters.get(feature));
-            specifiedWriter.write(writer, eObject, feature, writeEmpty, version);
+            specifiedWriter.write(writer, eObject, feature, writeEmpty, version, group);
 
         }
         else if (specifiedClassifierWriters.containsKey(feature.getEType()))
         {
             ISpecifiedElementWriter specifiedWriter =
                 injector.getInstance(specifiedClassifierWriters.get(feature.getEType()));
-            specifiedWriter.write(writer, eObject, feature, writeEmpty, version);
+            specifiedWriter.write(writer, eObject, feature, writeEmpty, version, group);
 
         }
         else if (feature instanceof org.eclipse.emf.ecore.EAttribute)
@@ -79,18 +79,66 @@ public class MetadataSmartFeatureWriter
             if (!feature.isMany() && eObject != null)
             {
                 Object value = eObject.eGet(feature);
-                if (value != null || value == null && writeEmpty)
+                if (value == null && writeEmpty)
                 {
-                    writer.writeElement(nameProvider.getElementQName(feature), eObject.eGet(feature));
+                    value = ""; //$NON-NLS-1$
+                }
+                if (value != null)
+                {
+                    writer.writeElement(nameProvider.getElementQName(feature), value, group);
                 }
             }
 
         }
         else if (feature instanceof org.eclipse.emf.ecore.EReference)
         {
-            referenceWriter.write(writer, eObject, feature, writeEmpty, version);
+            referenceWriter.write(writer, eObject, feature, writeEmpty, version, group);
 
         }
+    }
+
+    private void fillProducedTypes(ImmutableMap.Builder<EClassifier, Class<? extends ISpecifiedElementWriter>> builder)
+    {
+        for (EClassifier classifier : MdTypeFactory.eINSTANCE.getEPackage().getEClassifiers())
+        {
+            if (classifier instanceof EClass)
+            {
+                EClass eClass = (EClass)classifier;
+                if (!eClass.isAbstract() && !eClass.isInterface()
+                    && MdTypePackage.Literals.MD_TYPES.isSuperTypeOf(eClass))
+                {
+                    builder.put(eClass, ProducedTypeWriter.class);
+                }
+            }
+        }
+    }
+
+    private ImmutableMap<EClassifier, Class<? extends ISpecifiedElementWriter>> fillSpecialClassifierWriters()
+    {
+        ImmutableMap.Builder<EClassifier, Class<? extends ISpecifiedElementWriter>> builder = ImmutableMap.builder();
+
+//        builder.put(MdClassPackage.Literals.CONTAINED_OBJECT, ContainedObjectsWriter.class);
+        builder.put(MdClassPackage.Literals.OBJECT_BELONGING, ISpecifiedElementWriter.ZeroWriter.class);
+        builder.put(MdClassPackage.Literals.STANDARD_ATTRIBUTE, StandardAttributeWriter.class);
+        builder.put(MdClassPackage.Literals.STANDARD_TABULAR_SECTION_DESCRIPTION,
+            StandardTabularSectionDescriptorWriter.class);
+//        builder.put(MdClassPackage.Literals.CHARACTERISTICS_DESCRIPTION, CharacteristicsDescriptionWriter.class);
+        builder.put(McorePackage.Literals.PICTURE, PictureWriter.class);
+        builder.put(McorePackage.Literals.HELP, ISpecifiedElementWriter.ZeroWriter.class);
+        builder.put(McorePackage.Literals.LOCAL_STRING_MAP_ENTRY, LocalStringMapEntryWriter.class);
+        builder.put(McorePackage.Literals.FIELD, FieldWriter.class);
+        builder.put(McorePackage.Literals.TYPE_DESCRIPTION, TypeDescriptionWriter.class);
+        builder.put(McorePackage.Literals.VALUE, ValueWriter.class);
+//        builder.put(CommonPackage.Literals.APPLICATION_USE_PURPOSE, UsePurposeWriter.class);
+        builder.put(CommonPackage.Literals.TYPE_LINK, TypeLinkWriter.class);
+//        builder.put(CommonPackage.Literals.CHOICE_PARAMETER_LINK, ChoiceParameterLinkWriter.class);
+//        builder.put(CommonPackage.Literals.CHOICE_PARAMETER, ChoiceParameterWriter.class);
+//        builder.put(CommonPackage.Literals.TRANSACTIONS_ISOLATION_LEVEL, TransactionsIsolationLevelWriter.class);
+        builder.put(McorePackage.Literals.QNAME, QNameWriter.class);
+
+        fillProducedTypes(builder);
+
+        return builder.build();
     }
 
     private ImmutableMap<EStructuralFeature, Class<? extends ISpecifiedElementWriter>> fillSpecialFeatureWriters()
@@ -171,15 +219,24 @@ public class MetadataSmartFeatureWriter
         builder.put(MdClassPackage.Literals.CONFIGURATION__VENDOR_INFORMATION_ADDRESS,
             ISpecifiedElementWriter.ZeroWriter.class);
 
+        builder.put(MdClassPackage.Literals.COMMON_MODULE__CLIENT_ORDINARY_APPLICATION,
+            ISpecifiedElementWriter.ZeroWriter.class);
+        builder.put(MdClassPackage.Literals.COMMON_MODULE__EXTERNAL_CONNECTION,
+            ISpecifiedElementWriter.ZeroWriter.class);
+        builder.put(MdClassPackage.Literals.COMMON_MODULE__GLOBAL, ISpecifiedElementWriter.ZeroWriter.class);
+        builder.put(MdClassPackage.Literals.COMMON_MODULE__PRIVILEGED, ISpecifiedElementWriter.ZeroWriter.class);
+        builder.put(MdClassPackage.Literals.COMMON_MODULE__RETURN_VALUES_REUSE,
+            ISpecifiedElementWriter.ZeroWriter.class);
+
+        builder.put(MdClassPackage.Literals.CATALOG__ATTRIBUTES, CatalogAttributeWriter.class);
+        builder.put(MdClassPackage.Literals.CATALOG__COMMANDS, ISpecifiedElementWriter.ZeroWriter.class);
+        builder.put(MdClassPackage.Literals.CATALOG__FORMS, ISpecifiedElementWriter.ZeroWriter.class);
+//      builder.put(MdClassPackage.Literals.CATALOG__OWNERS, MdObjectRefItemsWriter.class);
         builder.put(MdClassPackage.Literals.CATALOG__PREDEFINED, ISpecifiedElementWriter.ZeroWriter.class);
         builder.put(MdClassPackage.Literals.CATALOG_PREDEFINED__ITEMS, ISpecifiedElementWriter.ZeroWriter.class);
         builder.put(MdClassPackage.Literals.CATALOG_PREDEFINED_ITEM__CONTENT, ISpecifiedElementWriter.ZeroWriter.class);
         builder.put(MdClassPackage.Literals.CATALOG_PREDEFINED_ITEM__CODE, ISpecifiedElementWriter.ZeroWriter.class);
-//        builder.put(MdClassPackage.Literals.CATALOG__OWNERS, MdObjectRefItemsWriter.class);
-        builder.put(MdClassPackage.Literals.CATALOG__ATTRIBUTES, MetadataObjectWriter.class);
-        builder.put(MdClassPackage.Literals.CATALOG__TABULAR_SECTIONS, MetadataObjectWriter.class);
-        builder.put(MdClassPackage.Literals.CATALOG__COMMANDS, ISpecifiedElementWriter.ZeroWriter.class);
-//        builder.put(MdClassPackage.Literals.CATALOG__FORMS, ReferenceWriter.class);
+        builder.put(MdClassPackage.Literals.CATALOG__TABULAR_SECTIONS, CatalogTabularSectionDescriptorWriter.class);
         builder.put(MdClassPackage.Literals.CATALOG__TEMPLATES, ISpecifiedElementWriter.ZeroWriter.class);
 
 //        builder.put(MdClassPackage.Literals.ACCOUNTING_REGISTER__RESOURCES, MetadataObjectWriter.class);
@@ -413,49 +470,5 @@ public class MetadataSmartFeatureWriter
 //            CharacteristicsDescriptionValueWriter.class);
 
         return builder.build();
-    }
-
-    private ImmutableMap<EClassifier, Class<? extends ISpecifiedElementWriter>> fillSpecialClassifierWriters()
-    {
-        ImmutableMap.Builder<EClassifier, Class<? extends ISpecifiedElementWriter>> builder = ImmutableMap.builder();
-
-//        builder.put(MdClassPackage.Literals.CONTAINED_OBJECT, ContainedObjectsWriter.class);
-        builder.put(MdClassPackage.Literals.OBJECT_BELONGING, ISpecifiedElementWriter.ZeroWriter.class);
-//        builder.put(MdClassPackage.Literals.STANDARD_ATTRIBUTE, StandardAttributeWriter.class);
-        builder.put(MdClassPackage.Literals.STANDARD_TABULAR_SECTION_DESCRIPTION,
-            StandardTabularSectionDescriptorWriter.class);
-//        builder.put(MdClassPackage.Literals.CHARACTERISTICS_DESCRIPTION, CharacteristicsDescriptionWriter.class);
-        builder.put(McorePackage.Literals.PICTURE, PictureWriter.class);
-        builder.put(McorePackage.Literals.HELP, ISpecifiedElementWriter.ZeroWriter.class);
-        builder.put(McorePackage.Literals.LOCAL_STRING_MAP_ENTRY, LocalStringMapEntryWriter.class);
-        builder.put(McorePackage.Literals.FIELD, FieldWriter.class);
-        builder.put(McorePackage.Literals.TYPE_DESCRIPTION, TypeDescriptionWriter.class);
-        builder.put(McorePackage.Literals.VALUE, ValueWriter.class);
-//        builder.put(CommonPackage.Literals.APPLICATION_USE_PURPOSE, UsePurposeWriter.class);
-        builder.put(CommonPackage.Literals.TYPE_LINK, TypeLinkWriter.class);
-        builder.put(CommonPackage.Literals.CHOICE_PARAMETER_LINK, ChoiceParameterLinkWriter.class);
-        builder.put(CommonPackage.Literals.CHOICE_PARAMETER, ChoiceParameterWriter.class);
-//        builder.put(CommonPackage.Literals.TRANSACTIONS_ISOLATION_LEVEL, TransactionsIsolationLevelWriter.class);
-        builder.put(McorePackage.Literals.QNAME, QNameWriter.class);
-
-        fillProducedTypes(builder);
-
-        return builder.build();
-    }
-
-    private void fillProducedTypes(ImmutableMap.Builder<EClassifier, Class<? extends ISpecifiedElementWriter>> builder)
-    {
-        for (EClassifier classifier : MdTypeFactory.eINSTANCE.getEPackage().getEClassifiers())
-        {
-            if (classifier instanceof EClass)
-            {
-                EClass eClass = (EClass)classifier;
-                if (!eClass.isAbstract() && !eClass.isInterface()
-                    && MdTypePackage.Literals.MD_TYPES.isSuperTypeOf(eClass))
-                {
-                    builder.put(eClass, ProducedTypeWriter.class);
-                }
-            }
-        }
     }
 }

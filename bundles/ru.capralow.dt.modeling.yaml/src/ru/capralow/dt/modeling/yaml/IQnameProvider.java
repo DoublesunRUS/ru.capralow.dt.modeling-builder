@@ -8,9 +8,9 @@ import javax.xml.namespace.QName;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
-public interface IqNameProvider
+public interface IQnameProvider
 {
-    QName getElementQName(EStructuralFeature paramEStructuralFeature);
-
     QName getClassQName(EClass paramEClass);
+
+    QName getElementQName(EStructuralFeature paramEStructuralFeature);
 }

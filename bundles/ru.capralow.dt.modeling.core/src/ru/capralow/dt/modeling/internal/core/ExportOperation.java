@@ -44,6 +44,10 @@ public class ExportOperation
     private static final String[] REQUIRED_DD_PARTS;
     private static final String UNKNOWN_DIRECTORY_NAME = "unknown"; //$NON-NLS-1$
     private static final String CONFIGURATION_PART_FILE_NAME = "configuration.part"; //$NON-NLS-1$
+    static
+    {
+        REQUIRED_DD_PARTS = new String[] { "MD", "FORM", "MD_PRE" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+    }
     private IExportArtifactBuilderFactory artifactBuilderFactory;
     private EObject[] eObjects;
     private Version version;
@@ -52,12 +56,8 @@ public class ExportOperation
     private ISystemIdleService systemIdleService;
     private IDerivedDataManagerProvider derivedDataManagerProvider;
     private IExportStrategy strategy;
-    private ExportDebugTrace debugTrace;
 
-    static
-    {
-        REQUIRED_DD_PARTS = new String[] { "MD", "FORM", "MD_PRE" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-    }
+    private ExportDebugTrace debugTrace;
 
     public ExportOperation(final Version version, final Path targetPath,
         final IExportArtifactBuilderFactory artifactBuilderFactory, final IExportServiceRegistry exportServiceRegistry,
@@ -102,18 +102,14 @@ public class ExportOperation
 
             Throwable t = null;
 
-            try
+            try (IExportArtifactBuilder artifactBuilder = artifactBuilderFactory.createArtifactBuilder();)
             {
-                IExportArtifactBuilder artifactBuilder = artifactBuilderFactory.createArtifactBuilder();
 
-                try
+                for (int i = 0; i < eObjects.length; ++i)
                 {
-                    EObject[] var13 = eObjects;
-                    int var12 = eObjects.length;
-
-                    for (int var11 = 0; var11 < var12; ++var11)
+                    try
                     {
-                        EObject eObject = var13[var11];
+                        EObject eObject = eObjects[i];
                         boolean exportSubordinatesObjects = strategy.exportSubordinatesObjects(eObject);
                         boolean exportExternalProperties = strategy.exportExternalProperties(eObject);
                         debugTrace.trace(IExportOperation.EXPORT_OPERATION_TRACE_OPTION, "Start export service");
@@ -124,24 +120,27 @@ public class ExportOperation
                         debugTrace.traceExit(IExportService.EXPORT_SERVICE_TRACE_OPTION, status);
                         operationStatus.merge(status);
                     }
-
-                    if (project != null && !progressMonitor.isCanceled() && strategy.exportUnknown())
+                    catch (Throwable exception)
                     {
-                        debugTrace.trace(IExportOperation.EXPORT_OPERATION_TRACE_OPTION, "Export Unknown artifacts");
-                        IStatus exportUnknownArtifacts =
-                            exportUnknownArtifacts(project, artifactBuilder, progressMonitor);
-                        debugTrace.traceExit(IExportOperation.EXPORT_OPERATION_TRACE_OPTION, exportUnknownArtifacts);
-                        operationStatus.merge(exportUnknownArtifacts);
+                        if (t == null)
+                        {
+                            t = exception;
+                        }
+                        else if (t != exception)
+                        {
+                            t.addSuppressed(exception);
+                        }
                     }
                 }
-                finally
+
+                if (project != null && !progressMonitor.isCanceled() && strategy.exportUnknown())
                 {
-                    if (artifactBuilder != null)
-                    {
-                        artifactBuilder.close();
-                    }
-
+                    debugTrace.trace(IExportOperation.EXPORT_OPERATION_TRACE_OPTION, "Export Unknown artifacts");
+                    IStatus exportUnknownArtifacts = exportUnknownArtifacts(project, artifactBuilder, progressMonitor);
+                    debugTrace.traceExit(IExportOperation.EXPORT_OPERATION_TRACE_OPTION, exportUnknownArtifacts);
+                    operationStatus.merge(exportUnknownArtifacts);
                 }
+
             }
             catch (Throwable exception)
             {
@@ -217,16 +216,6 @@ public class ExportOperation
         return Status.OK_STATUS;
     }
 
-    private IStatus sortStatuses(final MultiStatus operationStatus)
-    {
-        final List<IStatus> statuses = Stream.of(operationStatus.getChildren())
-            .filter(s -> s.getSeverity() > 0)
-            .sorted((s1, s2) -> s1.getSeverity() - s2.getSeverity())
-            .collect(Collectors.toList());
-        return new MultiStatus(CorePlugin.ID, operationStatus.getCode(), statuses.toArray(new IStatus[0]),
-            getMessage(operationStatus, statuses), (Throwable)null);
-    }
-
     private String getMessage(final IStatus status, final List<IStatus> statuses)
     {
         switch (status.getSeverity())
@@ -249,5 +238,15 @@ public class ExportOperation
                 .format(Messages.ExportOperation_export_operation_has_error__0, statuses.get(0).getMessage());
         }
         }
+    }
+
+    private IStatus sortStatuses(final MultiStatus operationStatus)
+    {
+        final List<IStatus> statuses = Stream.of(operationStatus.getChildren())
+            .filter(s -> s.getSeverity() > 0)
+            .sorted((s1, s2) -> s1.getSeverity() - s2.getSeverity())
+            .collect(Collectors.toList());
+        return new MultiStatus(CorePlugin.ID, operationStatus.getCode(), statuses.toArray(new IStatus[0]),
+            getMessage(operationStatus, statuses), (Throwable)null);
     }
 }

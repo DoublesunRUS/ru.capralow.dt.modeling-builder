@@ -4,6 +4,7 @@
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
 
 import java.text.MessageFormat;
+import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
@@ -36,7 +37,7 @@ public class ProducedTypeWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws ExportException
+        Version version, Map<String, Object> group) throws ExportException
     {
         Preconditions.checkArgument(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.MdObject,
             String.format("Invalid object %s", new Object[] { eObject }));
@@ -75,6 +76,15 @@ public class ProducedTypeWriter
         }
     }
 
+    private TypeItem getType(AbstractMdType abstractMdType)
+    {
+        if (abstractMdType instanceof MdType)
+        {
+            return ((MdType)abstractMdType).getType();
+        }
+        return ((MdTypeSet)abstractMdType).getTypeSet();
+    }
+
     private boolean isTypeSupportedByVersion(EReference reference, Version version)
     {
         if (version.isLessThan(Version.V8_3_13) && reference == MdTypePackage.Literals.CONSTANT_TYPES__VALUE_KEY_TYPE)
@@ -99,15 +109,6 @@ public class ProducedTypeWriter
 //        writer.writeElement(IMetadataYamlElements.CATEGORY_ATTRIBUTE.getLocalPart(), category);
 //        writer.writeElement(IMetadataYamlElements.XR.TYPE_ID, typeId);
 //        writer.writeElement(IMetadataYamlElements.XR.VALUE_ID, valueTypeId);
-    }
-
-    private TypeItem getType(AbstractMdType abstractMdType)
-    {
-        if (abstractMdType instanceof MdType)
-        {
-            return ((MdType)abstractMdType).getType();
-        }
-        return ((MdTypeSet)abstractMdType).getTypeSet();
     }
 
     String getCategoryName(AbstractMdType mdType)

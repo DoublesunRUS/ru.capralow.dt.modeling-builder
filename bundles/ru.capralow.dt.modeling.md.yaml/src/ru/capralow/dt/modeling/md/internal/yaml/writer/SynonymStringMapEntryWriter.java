@@ -3,6 +3,8 @@
  */
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
 
+import java.util.Map;
+
 import javax.xml.namespace.QName;
 
 import org.eclipse.emf.common.util.EMap;
@@ -18,7 +20,7 @@ import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
 import ru.capralow.dt.modeling.md.yaml.IMetadataYamlElements;
-import ru.capralow.dt.modeling.yaml.IqNameProvider;
+import ru.capralow.dt.modeling.yaml.IQnameProvider;
 import ru.capralow.dt.modeling.yaml.writer.LocalStringMapEntryWriter;
 import ru.capralow.dt.modeling.yaml.writer.YamlStreamWriter;
 
@@ -27,11 +29,11 @@ public class SynonymStringMapEntryWriter
     extends LocalStringMapEntryWriter
 {
     @Inject
-    private IqNameProvider nameProvider;
+    private IQnameProvider nameProvider;
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws ExportException
+        Version version, Map<String, Object> group) throws ExportException
     {
         Preconditions.checkArgument(
             feature != null && feature.isMany() && feature.getEType() == McorePackage.Literals.LOCAL_STRING_MAP_ENTRY,
@@ -47,7 +49,7 @@ public class SynonymStringMapEntryWriter
         @SuppressWarnings("unchecked")
         EMap<String, String> localStringMap = (EMap<String, String>)eObject.eGet(feature);
 
-        writeLocalString(writer, eObject, feature, localStringMap, featureName, writeEmpty, version);
+        writeLocalString(writer, eObject, feature, localStringMap, featureName, writeEmpty, version, group);
     }
 
 }

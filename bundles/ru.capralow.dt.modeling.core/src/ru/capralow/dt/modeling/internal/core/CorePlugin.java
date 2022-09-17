@@ -27,8 +27,6 @@ public class CorePlugin
 
     private static CorePlugin instance;
 
-    private Injector injector;
-
     public static IStatus createErrorStatus(String message)
     {
         return new Status(IStatus.ERROR, ID, 0, message, (Throwable)null);
@@ -59,6 +57,17 @@ public class CorePlugin
         getInstance().getLog().log(status);
     }
 
+    private Injector injector;
+
+    public Injector getInjector()
+    {
+        if (injector == null)
+        {
+            injector = createInjector();
+        }
+        return injector;
+    }
+
     @Override
     public void start(BundleContext context) throws Exception
     {
@@ -79,15 +88,6 @@ public class CorePlugin
         instance = null;
 
         super.stop(context);
-    }
-
-    public Injector getInjector()
-    {
-        if (injector == null)
-        {
-            injector = createInjector();
-        }
-        return injector;
     }
 
     private Injector createInjector()

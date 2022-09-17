@@ -27,7 +27,9 @@ public class ExportConfigurationWizard
     implements IExportWizard
 {
     private static final String EXPORT_WIZARD = "V8ExportConfigurationWizard"; //$NON-NLS-1$
+
     private IStructuredSelection selection;
+
     @Inject
     @Named(UiModule.EXPORT_WIZARD_PAGE_QUALIFIER)
     private IExportWizardPage mainPage;

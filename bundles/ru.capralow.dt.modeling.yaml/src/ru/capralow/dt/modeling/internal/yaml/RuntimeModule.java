@@ -16,14 +16,14 @@ import com._1c.g5.wiring.AbstractServiceAwareModule;
 public class RuntimeModule
     extends AbstractServiceAwareModule
 {
-    public RuntimeModule(Plugin bundle)
-    {
-        super(bundle);
-    }
-
     public RuntimeModule(BundleContext context)
     {
         super(context);
+    }
+
+    public RuntimeModule(Plugin bundle)
+    {
+        super(bundle);
     }
 
     @Override

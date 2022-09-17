@@ -23,9 +23,15 @@ public class MdYamlPlugin
 
     private static MdYamlPlugin instance;
 
-    private InjectorAwareServiceRegistrator registrator;
+    public static IStatus createErrorStatus(String msg, Throwable e)
+    {
+        return new Status(IStatus.ERROR, ID, 0, msg, e);
+    }
 
-    private Injector injector;
+    public static IStatus createWarningStatus(String msg)
+    {
+        return new Status(IStatus.WARNING, ID, 0, msg, null);
+    }
 
     public static MdYamlPlugin getInstance()
     {
@@ -40,15 +46,9 @@ public class MdYamlPlugin
         }
     }
 
-    public static IStatus createErrorStatus(String msg, Throwable e)
-    {
-        return new Status(IStatus.ERROR, ID, 0, msg, e);
-    }
+    private InjectorAwareServiceRegistrator registrator;
 
-    public static IStatus createWarningStatus(String msg)
-    {
-        return new Status(IStatus.WARNING, ID, 0, msg, null);
-    }
+    private Injector injector;
 
     public synchronized Injector getInjector()
     {

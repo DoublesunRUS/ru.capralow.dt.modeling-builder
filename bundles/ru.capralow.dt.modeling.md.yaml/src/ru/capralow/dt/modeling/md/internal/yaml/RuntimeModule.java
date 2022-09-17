@@ -20,14 +20,19 @@ import ru.capralow.dt.modeling.md.yaml.impl.YamlExporterExtensionManager;
 import ru.capralow.dt.modeling.md.yaml.writer.IProducedTypesOrderProvider;
 import ru.capralow.dt.modeling.yaml.ExtensionBasedExporterQualifier;
 import ru.capralow.dt.modeling.yaml.IExporterQualifier;
-import ru.capralow.dt.modeling.yaml.IqNameProvider;
+import ru.capralow.dt.modeling.yaml.IQnameProvider;
 import ru.capralow.dt.modeling.yaml.UnionExporterQualifier;
 import ru.capralow.dt.modeling.yaml.writer.ISpecifiedElementWriter;
 
 public class RuntimeModule
     extends MdRuntimeModule
 {
-    public Class<? extends IqNameProvider> bindIqNameProvider()
+    public Class<? extends IProducedTypesOrderProvider> bindIProducedTypesOrderProvider()
+    {
+        return ProducedTypesOrderProvider.class;
+    }
+
+    public Class<? extends IQnameProvider> bindIqNameProvider()
     {
         return MetadataFeatureNameProvider.class;
     }
@@ -37,14 +42,16 @@ public class RuntimeModule
         return ExportMdSymLinkConverter.class;
     }
 
-    public Class<? extends IProducedTypesOrderProvider> bindIProducedTypesOrderProvider()
-    {
-        return ProducedTypesOrderProvider.class;
-    }
-
     public Class<? extends IYamlExporterExtensionManager> bindIXmlExporterExtensionManager()
     {
         return YamlExporterExtensionManager.class;
+    }
+
+    public void configureIExporterQualifier(Binder binder)
+    {
+        binder.bind(IExporterQualifier.class)
+            .toInstance(UnionExporterQualifier.combine(new IExporterQualifier[] { new NativeMdObjectExporterQualifier(),
+                new ExtensionBasedExporterQualifier() }));
     }
 
     public void configureIProjectFileSystemSupport(Binder binder)
@@ -53,12 +60,5 @@ public class RuntimeModule
         binder.bind(ISpecifiedElementWriter.class)
             .annotatedWith(Names.named(ISpecifiedElementWriter.SMART_ELEMENT_WRITER))
             .to(MetadataSmartFeatureWriter.class);
-    }
-
-    public void configureIExporterQualifier(Binder binder)
-    {
-        binder.bind(IExporterQualifier.class)
-            .toInstance(UnionExporterQualifier.combine(new IExporterQualifier[] { new NativeMdObjectExporterQualifier(),
-                new ExtensionBasedExporterQualifier() }));
     }
 }

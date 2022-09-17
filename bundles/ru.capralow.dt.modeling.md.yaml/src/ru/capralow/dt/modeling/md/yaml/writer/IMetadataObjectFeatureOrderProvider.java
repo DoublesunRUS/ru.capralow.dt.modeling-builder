@@ -16,9 +16,9 @@ import ru.capralow.dt.modeling.md.internal.yaml.writer.MetadataObjectFeatureOrde
 @ImplementedBy(MetadataObjectFeatureOrderProvider.class)
 public interface IMetadataObjectFeatureOrderProvider
 {
-    List<EStructuralFeature> getProperties(EClass paramEClass, Version paramVersion);
+    List<EStructuralFeature> getChildren(EClass paramEClass, Version paramVersion);
 
     List<EStructuralFeature> getInnerInfo(EClass paramEClass, Version paramVersion);
 
-    List<EStructuralFeature> getChildren(EClass paramEClass, Version paramVersion);
+    List<EStructuralFeature> getProperties(EClass paramEClass, Version paramVersion);
 }

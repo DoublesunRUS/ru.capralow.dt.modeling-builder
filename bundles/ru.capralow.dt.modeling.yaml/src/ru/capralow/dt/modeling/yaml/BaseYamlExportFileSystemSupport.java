@@ -44,11 +44,51 @@ public abstract class BaseYamlExportFileSystemSupport
 
     private static final String RECALCULATIONS = "Recalculations"; //$NON-NLS-1$
 
+    public static <T extends EObject> boolean containsBmObject(List<? extends T> list, T object)
+    {
+        return list.contains(object);
+    }
+
+    public static Collection<Subsystem> getSubsystemsContainingMdObject(Configuration configuration, MdObject mdObject)
+    {
+        List<Subsystem> result = new ArrayList<>();
+        collectSubsystemsByFilter(configuration.getSubsystems(), new ContainsMdObjectPredicate(mdObject), result);
+        return result;
+    }
+
+    private static void collectSubsystemsByFilter(Collection<Subsystem> subsystems, Predicate<Subsystem> predicate,
+        Collection<Subsystem> result)
+    {
+        for (Subsystem subsystem : subsystems)
+        {
+            collectSubsystemsByFilter(subsystem.getSubsystems(), predicate, result);
+            if (predicate == null || predicate.apply(subsystem))
+            {
+                result.add(subsystem);
+            }
+        }
+    }
+
     @Inject
     private Provider<IExternalPropertyManagerRegistry> externalPropertyManagerRegistryProvider;
 
     @Inject
     private Provider<IBmModelManager> bmModelManagerProvider;
+
+    private IBmModel getBmModel(EObject referenceObject)
+    {
+        if (referenceObject.eIsProxy())
+        {
+            return this.bmModelManagerProvider.get().getModel(EcoreUtil.getURI(referenceObject));
+        }
+        return this.bmModelManagerProvider.get().getModel(referenceObject);
+    }
+
+    protected IExternalPropertyManager getExternalPropertyManager(EObject referenceObject)
+    {
+        IBmModel bmModel = getBmModel(referenceObject);
+        return this.externalPropertyManagerRegistryProvider.get().getExternalPropertyManager(bmModel);
+    }
 
     protected Path getMdObjectTargetDirectory(MdObject mdObject)
     {
@@ -155,46 +195,6 @@ public abstract class BaseYamlExportFileSystemSupport
 //        debugTrace.trace(IExporter.EXPORTER_TRACE_OPTION, message);
 //        debugTrace.traceDumpStack(IExporter.EXPORTER_TRACE_OPTION);
 //        throw new IllegalArgumentException(message);
-    }
-
-    protected IExternalPropertyManager getExternalPropertyManager(EObject referenceObject)
-    {
-        IBmModel bmModel = getBmModel(referenceObject);
-        return this.externalPropertyManagerRegistryProvider.get().getExternalPropertyManager(bmModel);
-    }
-
-    private IBmModel getBmModel(EObject referenceObject)
-    {
-        if (referenceObject.eIsProxy())
-        {
-            return this.bmModelManagerProvider.get().getModel(EcoreUtil.getURI(referenceObject));
-        }
-        return this.bmModelManagerProvider.get().getModel(referenceObject);
-    }
-
-    public static Collection<Subsystem> getSubsystemsContainingMdObject(Configuration configuration, MdObject mdObject)
-    {
-        List<Subsystem> result = new ArrayList<>();
-        collectSubsystemsByFilter(configuration.getSubsystems(), new ContainsMdObjectPredicate(mdObject), result);
-        return result;
-    }
-
-    private static void collectSubsystemsByFilter(Collection<Subsystem> subsystems, Predicate<Subsystem> predicate,
-        Collection<Subsystem> result)
-    {
-        for (Subsystem subsystem : subsystems)
-        {
-            collectSubsystemsByFilter(subsystem.getSubsystems(), predicate, result);
-            if (predicate == null || predicate.apply(subsystem))
-            {
-                result.add(subsystem);
-            }
-        }
-    }
-
-    public static <T extends EObject> boolean containsBmObject(List<? extends T> list, T object)
-    {
-        return list.contains(object);
     }
 
     private static class ContainsMdObjectPredicate

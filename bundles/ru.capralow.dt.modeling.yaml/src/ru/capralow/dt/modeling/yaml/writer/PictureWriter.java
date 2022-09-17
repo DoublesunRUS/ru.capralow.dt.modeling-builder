@@ -4,6 +4,7 @@
 package ru.capralow.dt.modeling.yaml.writer;
 
 import java.text.MessageFormat;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -24,7 +25,7 @@ import com.google.inject.Inject;
 
 import ru.capralow.dt.modeling.core.ExportException;
 import ru.capralow.dt.modeling.internal.yaml.YamlPlugin;
-import ru.capralow.dt.modeling.yaml.IqNameProvider;
+import ru.capralow.dt.modeling.yaml.IQnameProvider;
 
 public class PictureWriter
     implements ISpecifiedElementWriter
@@ -32,14 +33,14 @@ public class PictureWriter
     private static final String PICTURE_EXTENSION_KEY = "picture.extension"; //$NON-NLS-1$
 
     @Inject
-    private IqNameProvider nameProvider;
+    private IQnameProvider nameProvider;
 
     @Inject
     private ISymbolicNameService symbolicNameService;
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws ExportException
+        Version version, Map<String, Object> group) throws ExportException
     {
         Preconditions.checkArgument(feature.getEType() == McorePackage.Literals.PICTURE, "Invalid feature type in %s",
             feature);
@@ -47,34 +48,13 @@ public class PictureWriter
         Picture picture = (Picture)eObject.eGet(feature);
         if (checkPicture(picture))
         {
-            writer.writeElement(featureName.toString(), "");
-            writePicture(writer, picture, eObject, feature);
+            writer.writeElement(featureName.toString(), "", group);
+            writePicture(writer, picture, eObject, feature, group);
 //            writer.writeEndElement();
         }
         else if (writeEmpty)
         {
 //            writer.writeEmptyElement(featureName.toString());
-        }
-    }
-
-    protected final void writePictureRefContent(YamlStreamWriter writer, String reference, boolean loadTransparent)
-        throws ExportException
-
-    {
-        writer.writeElement("XR.REF", reference);
-        writer.writeElement("XR.LOAD_TRANSPARENT", Boolean.valueOf(loadTransparent));
-    }
-
-    protected final void writePictureDefContent(YamlStreamWriter writer, String pictureName, Point transparentPixel)
-        throws ExportException
-    {
-        writer.writeElement("XR.ABS", pictureName);
-        writer.writeElement("XR.LOAD_TRANSPARENT", Boolean.valueOf(transparentPixel != null));
-        if (transparentPixel != null && transparentPixel.getX() != -1 && transparentPixel.getY() != -1)
-        {
-//            writer.writeEmptyElement(IYamlElements.XR.TRANSPARENT_PIXEL);
-            writer.writeElement("x", Integer.toString(transparentPixel.getX()));
-            writer.writeElement("y", Integer.toString(transparentPixel.getY()));
         }
     }
 
@@ -122,21 +102,32 @@ public class PictureWriter
         return false;
     }
 
-    private void writePicture(YamlStreamWriter writer, Picture picture, EObject eObject, EStructuralFeature feature)
-        throws ExportException
+    private void writePicture(YamlStreamWriter writer, Picture picture, EObject eObject, EStructuralFeature feature,
+        Map<String, Object> group) throws ExportException
     {
         if (picture instanceof PictureDef)
         {
-            writePictureDef(writer, (PictureDef)picture, eObject, feature);
+            writePictureDef(writer, (PictureDef)picture, eObject, feature, group);
         }
         if (picture instanceof PictureRef)
         {
-            writePictureRef(writer, (PictureRef)picture, eObject, feature);
+            writePictureRef(writer, (PictureRef)picture, eObject, feature, group);
         }
     }
 
+    private void writePictureDef(YamlStreamWriter writer, PictureDef picture, EObject contextObject,
+        EStructuralFeature feature, Map<String, Object> group) throws ExportException
+    {
+        String pictureExtension = ((IBmObject)picture).bmGetProperty(PICTURE_EXTENSION_KEY);
+        pictureExtension =
+            ("picture".equals(pictureExtension) || pictureExtension == null) ? "" : ("." + pictureExtension);
+        String pictureName = String.valueOf(Strings.toFirstUpper(feature.getName())) + pictureExtension;
+        Point transparentPixel = picture.getTransparentPixel();
+        writePictureDefContent(writer, pictureName, transparentPixel, group);
+    }
+
     private void writePictureRef(YamlStreamWriter writer, PictureRef picture, EObject contextObject,
-        EStructuralFeature feature) throws ExportException
+        EStructuralFeature feature, Map<String, Object> group) throws ExportException
     {
         Picture referencePicture = picture.getPicture();
         String reference = this.symbolicNameService.generateSymbolicName(referencePicture, picture,
@@ -145,17 +136,27 @@ public class PictureWriter
             && (!(referencePicture instanceof com._1c.g5.v8.dt.metadata.mdclass.CommonPicture)
                 || ((PictureDef)referencePicture).getTransparentPixel() == null)
             && (!referencePicture.eIsProxy() || !reference.startsWith("StdPicture.")));
-        writePictureRefContent(writer, reference, loadTransparent);
+        writePictureRefContent(writer, reference, loadTransparent, group);
     }
 
-    private void writePictureDef(YamlStreamWriter writer, PictureDef picture, EObject contextObject,
-        EStructuralFeature feature) throws ExportException
+    protected final void writePictureDefContent(YamlStreamWriter writer, String pictureName, Point transparentPixel,
+        Map<String, Object> group) throws ExportException
     {
-        String pictureExtension = ((IBmObject)picture).bmGetProperty(PICTURE_EXTENSION_KEY);
-        pictureExtension =
-            ("picture".equals(pictureExtension) || pictureExtension == null) ? "" : ("." + pictureExtension);
-        String pictureName = String.valueOf(Strings.toFirstUpper(feature.getName())) + pictureExtension;
-        Point transparentPixel = picture.getTransparentPixel();
-        writePictureDefContent(writer, pictureName, transparentPixel);
+        writer.writeElement("XR.ABS", pictureName, group);
+        writer.writeElement("XR.LOAD_TRANSPARENT", Boolean.valueOf(transparentPixel != null), group);
+        if (transparentPixel != null && transparentPixel.getX() != -1 && transparentPixel.getY() != -1)
+        {
+//            writer.writeEmptyElement(IYamlElements.XR.TRANSPARENT_PIXEL);
+            writer.writeElement("x", Integer.toString(transparentPixel.getX()), group);
+            writer.writeElement("y", Integer.toString(transparentPixel.getY()), group);
+        }
+    }
+
+    protected final void writePictureRefContent(YamlStreamWriter writer, String reference, boolean loadTransparent,
+        Map<String, Object> group) throws ExportException
+
+    {
+        writer.writeElement("XR.REF", reference, group);
+        writer.writeElement("XR.LOAD_TRANSPARENT", Boolean.valueOf(loadTransparent), group);
     }
 }

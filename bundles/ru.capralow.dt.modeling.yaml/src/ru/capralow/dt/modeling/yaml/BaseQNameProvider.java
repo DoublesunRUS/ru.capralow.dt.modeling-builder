@@ -12,7 +12,7 @@ import org.eclipse.xtext.util.Strings;
 import com.google.common.collect.ImmutableMap;
 
 public class BaseQNameProvider
-    implements IqNameProvider
+    implements IQnameProvider
 {
     protected final ImmutableMap<EStructuralFeature, QName> specifiedFeatureNames;
 
@@ -43,6 +43,20 @@ public class BaseQNameProvider
             : capitalizeFirstLetter(feature);
     }
 
+    private QName capitalizeFirstLetter(EStructuralFeature feature)
+    {
+        String name =
+            needToCapitalizeFirstLetterOfFeatureName() ? Strings.toFirstUpper(feature.getName()) : feature.getName();
+        return new QName(name);
+    }
+
+    private QName uncapitalizeFirstLetter(EClass eClass)
+    {
+        String name =
+            needToCapitalizeFirstLetterOfFeatureName() ? eClass.getName() : Strings.toFirstLower(eClass.getName());
+        return new QName(name);
+    }
+
     protected void fillSpecifiedClassNames(ImmutableMap.Builder<EClass, QName> builder)
     {
         // Nothing to do
@@ -56,19 +70,5 @@ public class BaseQNameProvider
     protected boolean needToCapitalizeFirstLetterOfFeatureName()
     {
         return true;
-    }
-
-    private QName capitalizeFirstLetter(EStructuralFeature feature)
-    {
-        String name =
-            needToCapitalizeFirstLetterOfFeatureName() ? Strings.toFirstUpper(feature.getName()) : feature.getName();
-        return new QName(name);
-    }
-
-    private QName uncapitalizeFirstLetter(EClass eClass)
-    {
-        String name =
-            needToCapitalizeFirstLetterOfFeatureName() ? eClass.getName() : Strings.toFirstLower(eClass.getName());
-        return new QName(name);
     }
 }

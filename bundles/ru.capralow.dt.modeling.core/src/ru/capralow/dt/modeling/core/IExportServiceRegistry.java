@@ -11,7 +11,7 @@ import ru.capralow.dt.modeling.internal.core.ExportServiceRegistry;
 @ImplementedBy(ExportServiceRegistry.class)
 public interface IExportServiceRegistry
 {
-    IExportService getExportService(Version p0) throws ExportException;
-
     IExportFileSupport getExportFileSupport(Version p0) throws ExportException;
+
+    IExportService getExportService(Version p0) throws ExportException;
 }

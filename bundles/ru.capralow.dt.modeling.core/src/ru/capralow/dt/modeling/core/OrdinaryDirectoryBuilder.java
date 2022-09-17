@@ -20,14 +20,15 @@ import com._1c.g5.v8.dt.common.FileUtil;
 public final class OrdinaryDirectoryBuilder
     implements IExportArtifactBuilder
 {
-    private final Path directoryPath;
-    private volatile boolean closed;
-
     public static OrdinaryDirectoryBuilder create(final Path directoryPath)
     {
         Assert.isLegal(directoryPath != null, "Argument 'directoryPath' may not be null");
         return new OrdinaryDirectoryBuilder(directoryPath);
     }
+
+    private final Path directoryPath;
+
+    private volatile boolean closed;
 
     private OrdinaryDirectoryBuilder(final Path directoryPath)
     {
@@ -35,14 +36,10 @@ public final class OrdinaryDirectoryBuilder
     }
 
     @Override
-    public OutputStream newOutputStream(final Path path) throws IOException
+    public void close() throws IOException
     {
-        Assert.isLegal(path != null, "Argument 'path' may not be null");
-        Assert.isLegal(!path.isAbsolute(), "Argument 'path' must be relative");
         this.ensureOpen();
-        final Path fullPath = this.directoryPath.resolve(path);
-        Files.createDirectories(fullPath.getParent(), new FileAttribute[0]);
-        return new BufferedOutputStream(Files.newOutputStream(fullPath, new OpenOption[0]));
+        this.closed = true;
     }
 
     @Override
@@ -66,10 +63,14 @@ public final class OrdinaryDirectoryBuilder
     }
 
     @Override
-    public void close() throws IOException
+    public OutputStream newOutputStream(final Path path) throws IOException
     {
+        Assert.isLegal(path != null, "Argument 'path' may not be null");
+        Assert.isLegal(!path.isAbsolute(), "Argument 'path' must be relative");
         this.ensureOpen();
-        this.closed = true;
+        final Path fullPath = this.directoryPath.resolve(path);
+        Files.createDirectories(fullPath.getParent(), new FileAttribute[0]);
+        return new BufferedOutputStream(Files.newOutputStream(fullPath, new OpenOption[0]));
     }
 
     private void ensureOpen()

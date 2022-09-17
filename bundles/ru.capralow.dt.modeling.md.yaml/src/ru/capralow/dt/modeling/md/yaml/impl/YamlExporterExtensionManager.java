@@ -59,6 +59,6 @@ public class YamlExporterExtensionManager
     {
         this.extensions.add(extension);
         MdYamlPlugin
-            .log(MdYamlPlugin.createWarningStatus("The external IXmlExporterExtension is registered: " + extension));
+            .log(MdYamlPlugin.createWarningStatus("The external IYamlExporterExtension is registered: " + extension));
     }
 }

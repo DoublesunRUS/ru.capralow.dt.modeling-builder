@@ -143,7 +143,7 @@ public class MetadataYamlExporter
     protected void write(MdObject mdObject, IExportContext exportContext, YamlStreamWriter writer)
         throws XMLStreamException, ExportException
     {
-        metadataYamlWriter.write(writer, mdObject, null, true, exportContext.getProjectVersion());
+        metadataYamlWriter.write(writer, mdObject, null, true, exportContext.getProjectVersion(), null);
     }
 
 }

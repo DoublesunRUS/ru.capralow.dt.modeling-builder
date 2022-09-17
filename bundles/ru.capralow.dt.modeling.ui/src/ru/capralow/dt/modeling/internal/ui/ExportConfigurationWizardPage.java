@@ -95,6 +95,11 @@ public class ExportConfigurationWizardPage
     private static final String ZIP_TARGET_PATH_HISTORY_SECTION = "zipTargetPaths"; //$NON-NLS-1$
     private static final int TARGET_PATH_HISTORY_LENGTH = 5;
     private static final Point DEFAULT_PAGE_SIZE;
+    static
+    {
+        ARCHIVE_EXTENSIONS = new String[] { "*.zip" }; //$NON-NLS-1$
+        DEFAULT_PAGE_SIZE = new Point(720, 300);
+    }
     private String previouslyBrowsedDirectory;
     private String previouslyBrowsedArchive;
     private Point initialPageSize;
@@ -109,14 +114,9 @@ public class ExportConfigurationWizardPage
     private IExportOperationFactory exportOperationFactory;
     @Inject
     private IV8ProjectManager projectManager;
+
     @Inject
     private IMonitoringEventDispatcher monitoringEventDispatcher;
-
-    static
-    {
-        ARCHIVE_EXTENSIONS = new String[] { "*.zip" }; //$NON-NLS-1$
-        DEFAULT_PAGE_SIZE = new Point(720, 300);
-    }
 
     public ExportConfigurationWizardPage()
     {
@@ -131,6 +131,50 @@ public class ExportConfigurationWizardPage
         setTitle(Messages.ExportConfigurationWizardPage_title);
         setDescription(Messages.ExportConfigurationWizardPage_description);
         setPageComplete(false);
+    }
+
+    @Override
+    public void createControl(final Composite parent)
+    {
+        initializeDialogUnits(parent);
+        final Composite pageArea = new Composite(parent, 0);
+        setControl(pageArea);
+        GridLayoutFactory.fillDefaults().applyTo(pageArea);
+        GridDataFactory.fillDefaults().grab(true, true).applyTo(pageArea);
+        projects = initAvaliableProjectsList();
+        createPageArea(pageArea);
+        createWizardValidationManager();
+        initWizardDialogPageChangingListener();
+        Dialog.applyDialogFont(parent);
+    }
+
+    @Override
+    public void dispose()
+    {
+        if (getWizard().getContainer() instanceof WizardDialog)
+        {
+            ((WizardDialog)getWizard().getContainer()).removePageChangingListener(this);
+        }
+        super.dispose();
+    }
+
+    @Override
+    public boolean finish()
+    {
+        PlatformUI.getWorkbench().saveAllEditors(true);
+        if (!prepareProject() || !prepareTargetPath())
+        {
+            return false;
+        }
+        history.get(getTargetPathHistorySection()).addHistoryEntry(getTargetPathValue().getValue().trim());
+        return executeExport();
+    }
+
+    @Override
+    public void handlePageChanging(final PageChangingEvent event)
+    {
+        getShell()
+            .setSize(equals(event.getTargetPage()) ? ExportConfigurationWizardPage.DEFAULT_PAGE_SIZE : initialPageSize);
     }
 
     @Override
@@ -153,163 +197,6 @@ public class ExportConfigurationWizardPage
                 projectValue.setValue(v8Project);
             }
         }
-    }
-
-    @Override
-    public void createControl(final Composite parent)
-    {
-        initializeDialogUnits(parent);
-        final Composite pageArea = new Composite(parent, 0);
-        setControl(pageArea);
-        GridLayoutFactory.fillDefaults().applyTo(pageArea);
-        GridDataFactory.fillDefaults().grab(true, true).applyTo(pageArea);
-        projects = initAvaliableProjectsList();
-        createPageArea(pageArea);
-        createWizardValidationManager();
-        initWizardDialogPageChangingListener();
-        Dialog.applyDialogFont(parent);
-    }
-
-    @Override
-    public boolean finish()
-    {
-        PlatformUI.getWorkbench().saveAllEditors(true);
-        if (!prepareProject() || !prepareTargetPath())
-        {
-            return false;
-        }
-        history.get(getTargetPathHistorySection()).addHistoryEntry(getTargetPathValue().getValue().trim());
-        return executeExport();
-    }
-
-    @Override
-    public void dispose()
-    {
-        if (getWizard().getContainer() instanceof WizardDialog)
-        {
-            ((WizardDialog)getWizard().getContainer()).removePageChangingListener(this);
-        }
-        super.dispose();
-    }
-
-    @Override
-    public void handlePageChanging(final PageChangingEvent event)
-    {
-        getShell()
-            .setSize(equals(event.getTargetPage()) ? ExportConfigurationWizardPage.DEFAULT_PAGE_SIZE : initialPageSize);
-    }
-
-    private boolean prepareProject()
-    {
-        try
-        {
-            final int severity = projectValue.getValue()
-                .getProject()
-                .findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-            if (severity == IMarker.SEVERITY_ERROR)
-            {
-                return queryYesNoQuestion(Messages.ExportConfigurationWizardPage_projectHasError);
-            }
-            if (severity == IMarker.SEVERITY_WARNING)
-            {
-                return queryYesNoQuestion(Messages.ExportConfigurationWizardPage_projectHasWarning);
-            }
-        }
-        catch (CoreException e)
-        {
-            displayErrorDialog(Messages.ExportConfigurationWizardPage_projectNotValid);
-            return false;
-        }
-        return true;
-    }
-
-    private boolean prepareTargetPath()
-    {
-        Path target = Paths.get(getTargetPathValue().getValue(), new String[0]);
-        Boolean isDirectoryTarget = isDirectoryTargetSelected.getValue();
-        Path targetDirectory = isDirectoryTarget ? target : target.getParent();
-
-        try
-        {
-            if (Files.notExists(targetDirectory, new LinkOption[0]))
-            {
-                if (!queryYesNoQuestion(Messages.ExportConfigurationWizardPage_messageTargetDirNotExist))
-                {
-                    return false;
-                }
-                Files.createDirectories(targetDirectory, new FileAttribute[0]);
-            }
-            if (isDirectoryTarget)
-            {
-                if (Files.list(target).findAny().isPresent())
-                {
-                    if (!queryYesNoQuestion(Messages.ExportConfigurationWizardPage_messageTargetDirNotEmpty))
-                    {
-                        return false;
-                    }
-
-                    Files.walk(targetDirectory)
-                        .sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .filter(item -> !item.getPath().equals(targetDirectory.toAbsolutePath().toString()))
-                        .forEach(File::delete);
-                }
-            }
-            else if (Files.isRegularFile(target, new LinkOption[0]))
-            {
-                if (!this
-                    .queryYesNoQuestion(Messages.ExportConfigurationWizardPage_Message_target_zip_file_exist_replace))
-                {
-                    return false;
-                }
-                Files.delete(target);
-            }
-            return true;
-        }
-        catch (IOException e)
-        {
-            displayErrorDialog(MessageFormat.format(
-                Messages.ExportConfigurationWizardPage_An_IO_exception_occurred_with_specified_target_path__0,
-                targetDirectory));
-            return false;
-        }
-    }
-
-    private boolean executeExport()
-    {
-        final IExportOperation exportOperation = createExportOperation();
-        final IStatus[] exportStatus = { null };
-        try
-        {
-            getContainer().run(true, true, new IRunnableWithProgress()
-            {
-                @Override
-                public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
-                {
-                    exportStatus[0] = exportOperation.run(monitor);
-                }
-            });
-        }
-        catch (InterruptedException ex)
-        {
-            // Nothing to do
-        }
-        catch (InvocationTargetException e)
-        {
-            UiPlugin.log(UiPlugin.createErrorStatus(Messages.ExportConfigurationWizardPage_executionErrorMessage, e));
-            displayErrorDialog(Messages.ExportConfigurationWizardPage_executionErrorMessage);
-            return true;
-        }
-        if (!exportStatus[0].isOK())
-        {
-            StatusDialog.open(getShell(), getTitle(), exportStatus[0]);
-        }
-        else
-        {
-            displayOkStatusDialog(exportStatus[0].getMessage());
-        }
-        dispatchProjectExportedEvent(projectValue.getValue(), exportStatus[0]);
-        return true;
     }
 
     private IExportOperation createExportOperation()
@@ -412,6 +299,270 @@ public class ExportConfigurationWizardPage
         validationStatus.addValueChangeListener(e -> updateValidationStatus(e.getObservableValue().getValue()));
     }
 
+    private void dispatchProjectExportedEvent(final IV8Project project, final IStatus exportStatus)
+    {
+        String projectType = null;
+        try
+        {
+            projectType = project.getProject().hasNature(ICoreConstants.V8_CONFIGURATION_NATURE) ? "configuration" //$NON-NLS-1$
+                : project.getProject().hasNature(ICoreConstants.V8_EXTENSION_NATURE) ? "extension" : null; //$NON-NLS-1$
+        }
+        catch (CoreException e)
+        {
+            UiPlugin.log(e.getStatus());
+        }
+        if (projectType != null)
+        {
+            final String result = exportStatus.isOK() ? "success" : "failure"; //$NON-NLS-1$ //$NON-NLS-2$
+            final String eventName =
+                "ru.capralow.dt.modeling.ui/event/projectExportedToXml." + projectType + "." + result; //$NON-NLS-1$ //$NON-NLS-2$
+            monitoringEventDispatcher.dispatchEvent(new BusinessEvent(eventName));
+        }
+    }
+
+    private void displayErrorDialog(final String message)
+    {
+        MessageDialog.open(1, getContainer().getShell(), Messages.ExportConfigurationWizardPage_exportProblem, message,
+            268435456);
+    }
+
+    private void displayOkStatusDialog(final String message)
+    {
+        MessageDialog.open(2, getContainer().getShell(), Messages.ExportConfigurationWizardPage_title, message,
+            268435456);
+    }
+
+    private boolean executeExport()
+    {
+        final IExportOperation exportOperation = createExportOperation();
+        final IStatus[] exportStatus = { null };
+        try
+        {
+            getContainer().run(true, true, new IRunnableWithProgress()
+            {
+                @Override
+                public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException
+                {
+                    exportStatus[0] = exportOperation.run(monitor);
+                }
+            });
+        }
+        catch (InterruptedException ex)
+        {
+            // Nothing to do
+        }
+        catch (InvocationTargetException e)
+        {
+            UiPlugin.log(UiPlugin.createErrorStatus(Messages.ExportConfigurationWizardPage_executionErrorMessage, e));
+            displayErrorDialog(Messages.ExportConfigurationWizardPage_executionErrorMessage);
+            return true;
+        }
+        if (!exportStatus[0].isOK())
+        {
+            StatusDialog.open(getShell(), getTitle(), exportStatus[0]);
+        }
+        else
+        {
+            displayOkStatusDialog(exportStatus[0].getMessage());
+        }
+        dispatchProjectExportedEvent(projectValue.getValue(), exportStatus[0]);
+        return true;
+    }
+
+    private DialogSettingsBasedHistory getHistory(final String historySection)
+    {
+        return history.computeIfAbsent(historySection, this::loadHistory);
+    }
+
+    private String getProjectLabel(final Object object)
+    {
+        if (object instanceof IV8Project)
+        {
+            final IV8Project project = (IV8Project)object;
+            final Configuration configuration = ((IConfigurationAware)project).getConfiguration();
+            final String rootObjectName = (configuration != null) ? (" - " + configuration.getName()) : ""; //$NON-NLS-1$ //$NON-NLS-2$
+            final Version version = project.getVersion();
+            return String.format("%s%s (v. %s)", project.getProject().getName(), rootObjectName, version); //$NON-NLS-1$
+        }
+        return ""; //$NON-NLS-1$
+    }
+
+    private String getTargetPathHistorySection()
+    {
+        return (isDirectoryTargetSelected.getValue() == Boolean.TRUE) ? DIR_TARGET_PATH_HISTORY_SECTION
+            : ZIP_TARGET_PATH_HISTORY_SECTION;
+    }
+
+    private IObservableValue<String> getTargetPathValue()
+    {
+        return (isDirectoryTargetSelected.getValue() == Boolean.TRUE) ? targetDirPathValue : targetZipPathValue;
+    }
+
+    private List<IV8Project> initAvaliableProjectsList()
+    {
+        return projectManager.getProjects(this::isAvailableProject).stream().collect(Collectors.toList());
+    }
+
+    private void initWizardDialogPageChangingListener()
+    {
+        if (getWizard().getContainer() instanceof WizardDialog)
+        {
+            initialPageSize = getShell().getSize();
+            getShell().setSize(ExportConfigurationWizardPage.DEFAULT_PAGE_SIZE);
+            ((WizardDialog)getWizard().getContainer()).addPageChangingListener(this);
+        }
+    }
+
+    private boolean isAvailableProject(final IV8Project project)
+    {
+        return project instanceof IConfigurationAware
+            && project.getDtProject().getType() == IDtProject.WORKSPACE_PROJECT_TYPE;
+    }
+
+    private DialogSettingsBasedHistory loadHistory(final String historySection)
+    {
+        final DialogSettingsBasedHistory sectionHistory =
+            new DialogSettingsBasedHistory(DialogSettings.getOrCreateSection(getDialogSettings(), historySection));
+        sectionHistory.setHistorySize(TARGET_PATH_HISTORY_LENGTH);
+        return sectionHistory;
+    }
+
+    private void openTargetArchiveSelectionDialog(final IObservableValue<String> pathValue)
+    {
+        final FileDialog dialog = new FileDialog(getShell(), 268443648);
+        String archive = Strings.nullToEmpty(pathValue.getValue()).trim();
+        if (archive.isEmpty())
+        {
+            archive = previouslyBrowsedArchive;
+        }
+        if (archive.isEmpty())
+        {
+            dialog.setFilterPath(ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString());
+        }
+        else if (Files.exists(Paths.get(archive, new String[0]), new LinkOption[0]))
+        {
+            dialog.setFilterPath(archive);
+        }
+        dialog.setFilterExtensions(ExportConfigurationWizardPage.ARCHIVE_EXTENSIONS);
+        final String selectedArchive = dialog.open();
+        if (selectedArchive != null)
+        {
+            previouslyBrowsedArchive = selectedArchive;
+            pathValue.setValue(selectedArchive);
+        }
+    }
+
+    private void openTargetDirectorySelectionDialog(final IObservableValue<String> pathValue)
+    {
+        final DirectoryDialog dialog = new DirectoryDialog(getShell(), 268435456);
+        dialog.setMessage(Messages.ExportConfigurationWizardPage_browseDialogMessage);
+        String directory = Strings.nullToEmpty(pathValue.getValue()).trim();
+        if (directory.isEmpty())
+        {
+            directory = previouslyBrowsedDirectory;
+        }
+        if (directory.isEmpty())
+        {
+            dialog.setFilterPath(ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString());
+        }
+        else
+        {
+            final Path path = Path.of(directory, new String[0]);
+            if (Files.exists(path, new LinkOption[0]))
+            {
+                dialog.setFilterPath(directory);
+            }
+        }
+        final String selectedDirectory = dialog.open();
+        if (selectedDirectory != null)
+        {
+            previouslyBrowsedDirectory = selectedDirectory;
+            pathValue.setValue(selectedDirectory);
+        }
+    }
+
+    private boolean prepareProject()
+    {
+        try
+        {
+            final int severity = projectValue.getValue()
+                .getProject()
+                .findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+            if (severity == IMarker.SEVERITY_ERROR)
+            {
+                return queryYesNoQuestion(Messages.ExportConfigurationWizardPage_projectHasError);
+            }
+            if (severity == IMarker.SEVERITY_WARNING)
+            {
+                return queryYesNoQuestion(Messages.ExportConfigurationWizardPage_projectHasWarning);
+            }
+        }
+        catch (CoreException e)
+        {
+            displayErrorDialog(Messages.ExportConfigurationWizardPage_projectNotValid);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean prepareTargetPath()
+    {
+        Path target = Paths.get(getTargetPathValue().getValue(), new String[0]);
+        Boolean isDirectoryTarget = isDirectoryTargetSelected.getValue();
+        Path targetDirectory = isDirectoryTarget ? target : target.getParent();
+
+        try
+        {
+            if (Files.notExists(targetDirectory, new LinkOption[0]))
+            {
+                if (!queryYesNoQuestion(Messages.ExportConfigurationWizardPage_messageTargetDirNotExist))
+                {
+                    return false;
+                }
+                Files.createDirectories(targetDirectory, new FileAttribute[0]);
+            }
+            if (isDirectoryTarget)
+            {
+                if (Files.list(target).findAny().isPresent())
+                {
+                    if (!queryYesNoQuestion(Messages.ExportConfigurationWizardPage_messageTargetDirNotEmpty))
+                    {
+                        return false;
+                    }
+
+                    Files.walk(targetDirectory)
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .filter(item -> !item.getPath().equals(targetDirectory.toAbsolutePath().toString()))
+                        .forEach(File::delete);
+                }
+            }
+            else if (Files.isRegularFile(target, new LinkOption[0]))
+            {
+                if (!this
+                    .queryYesNoQuestion(Messages.ExportConfigurationWizardPage_Message_target_zip_file_exist_replace))
+                {
+                    return false;
+                }
+                Files.delete(target);
+            }
+            return true;
+        }
+        catch (IOException e)
+        {
+            displayErrorDialog(MessageFormat.format(
+                Messages.ExportConfigurationWizardPage_An_IO_exception_occurred_with_specified_target_path__0,
+                targetDirectory));
+            return false;
+        }
+    }
+
+    private boolean queryYesNoQuestion(final String message)
+    {
+        return MessageDialog.openQuestion(getContainer().getShell(), Messages.ExportConfigurationWizardPage_question,
+            message);
+    }
+
     private void updateValidationStatus(final IStatus status)
     {
         switch (status.getSeverity())
@@ -447,155 +598,23 @@ public class ExportConfigurationWizardPage
         }
     }
 
-    private void openTargetDirectorySelectionDialog(final IObservableValue<String> pathValue)
+    private class ProjectValidation
+        implements IValidator<Object>
     {
-        final DirectoryDialog dialog = new DirectoryDialog(getShell(), 268435456);
-        dialog.setMessage(Messages.ExportConfigurationWizardPage_browseDialogMessage);
-        String directory = Strings.nullToEmpty(pathValue.getValue()).trim();
-        if (directory.isEmpty())
+        @Override
+        public IStatus validate(final Object value)
         {
-            directory = previouslyBrowsedDirectory;
-        }
-        if (directory.isEmpty())
-        {
-            dialog.setFilterPath(ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString());
-        }
-        else
-        {
-            final Path path = Path.of(directory, new String[0]);
-            if (Files.exists(path, new LinkOption[0]))
+            if (!(value instanceof IConfigurationAware))
             {
-                dialog.setFilterPath(directory);
+                return UiPlugin.createErrorStatus(Messages.ExportConfigurationWizardPage_info, (Throwable)null);
             }
+            if (((IConfigurationAware)value).getConfiguration() != null)
+            {
+                return Status.OK_STATUS;
+            }
+            return UiPlugin.createErrorStatus(Messages.ExportConfigurationWizardPage_noConfigurationInProject,
+                (Throwable)null);
         }
-        final String selectedDirectory = dialog.open();
-        if (selectedDirectory != null)
-        {
-            previouslyBrowsedDirectory = selectedDirectory;
-            pathValue.setValue(selectedDirectory);
-        }
-    }
-
-    private void openTargetArchiveSelectionDialog(final IObservableValue<String> pathValue)
-    {
-        final FileDialog dialog = new FileDialog(getShell(), 268443648);
-        String archive = Strings.nullToEmpty(pathValue.getValue()).trim();
-        if (archive.isEmpty())
-        {
-            archive = previouslyBrowsedArchive;
-        }
-        if (archive.isEmpty())
-        {
-            dialog.setFilterPath(ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString());
-        }
-        else if (Files.exists(Paths.get(archive, new String[0]), new LinkOption[0]))
-        {
-            dialog.setFilterPath(archive);
-        }
-        dialog.setFilterExtensions(ExportConfigurationWizardPage.ARCHIVE_EXTENSIONS);
-        final String selectedArchive = dialog.open();
-        if (selectedArchive != null)
-        {
-            previouslyBrowsedArchive = selectedArchive;
-            pathValue.setValue(selectedArchive);
-        }
-    }
-
-    private void displayErrorDialog(final String message)
-    {
-        MessageDialog.open(1, getContainer().getShell(), Messages.ExportConfigurationWizardPage_exportProblem, message,
-            268435456);
-    }
-
-    private void displayOkStatusDialog(final String message)
-    {
-        MessageDialog.open(2, getContainer().getShell(), Messages.ExportConfigurationWizardPage_title, message,
-            268435456);
-    }
-
-    private boolean queryYesNoQuestion(final String message)
-    {
-        return MessageDialog.openQuestion(getContainer().getShell(), Messages.ExportConfigurationWizardPage_question,
-            message);
-    }
-
-    private void initWizardDialogPageChangingListener()
-    {
-        if (getWizard().getContainer() instanceof WizardDialog)
-        {
-            initialPageSize = getShell().getSize();
-            getShell().setSize(ExportConfigurationWizardPage.DEFAULT_PAGE_SIZE);
-            ((WizardDialog)getWizard().getContainer()).addPageChangingListener(this);
-        }
-    }
-
-    private void dispatchProjectExportedEvent(final IV8Project project, final IStatus exportStatus)
-    {
-        String projectType = null;
-        try
-        {
-            projectType = project.getProject().hasNature(ICoreConstants.V8_CONFIGURATION_NATURE) ? "configuration" //$NON-NLS-1$
-                : project.getProject().hasNature(ICoreConstants.V8_EXTENSION_NATURE) ? "extension" : null; //$NON-NLS-1$
-        }
-        catch (CoreException e)
-        {
-            UiPlugin.log(e.getStatus());
-        }
-        if (projectType != null)
-        {
-            final String result = exportStatus.isOK() ? "success" : "failure"; //$NON-NLS-1$ //$NON-NLS-2$
-            final String eventName =
-                "ru.capralow.dt.modeling.ui/event/projectExportedToXml." + projectType + "." + result; //$NON-NLS-1$ //$NON-NLS-2$
-            monitoringEventDispatcher.dispatchEvent(new BusinessEvent(eventName));
-        }
-    }
-
-    private List<IV8Project> initAvaliableProjectsList()
-    {
-        return projectManager.getProjects(this::isAvailableProject).stream().collect(Collectors.toList());
-    }
-
-    private boolean isAvailableProject(final IV8Project project)
-    {
-        return project instanceof IConfigurationAware
-            && project.getDtProject().getType() == IDtProject.WORKSPACE_PROJECT_TYPE;
-    }
-
-    private String getProjectLabel(final Object object)
-    {
-        if (object instanceof IV8Project)
-        {
-            final IV8Project project = (IV8Project)object;
-            final Configuration configuration = ((IConfigurationAware)project).getConfiguration();
-            final String rootObjectName = (configuration != null) ? (" - " + configuration.getName()) : ""; //$NON-NLS-1$ //$NON-NLS-2$
-            final Version version = project.getVersion();
-            return String.format("%s%s (v. %s)", project.getProject().getName(), rootObjectName, version); //$NON-NLS-1$
-        }
-        return ""; //$NON-NLS-1$
-    }
-
-    private IObservableValue<String> getTargetPathValue()
-    {
-        return (isDirectoryTargetSelected.getValue() == Boolean.TRUE) ? targetDirPathValue : targetZipPathValue;
-    }
-
-    private String getTargetPathHistorySection()
-    {
-        return (isDirectoryTargetSelected.getValue() == Boolean.TRUE) ? DIR_TARGET_PATH_HISTORY_SECTION
-            : ZIP_TARGET_PATH_HISTORY_SECTION;
-    }
-
-    private DialogSettingsBasedHistory getHistory(final String historySection)
-    {
-        return history.computeIfAbsent(historySection, this::loadHistory);
-    }
-
-    private DialogSettingsBasedHistory loadHistory(final String historySection)
-    {
-        final DialogSettingsBasedHistory sectionHistory =
-            new DialogSettingsBasedHistory(DialogSettings.getOrCreateSection(getDialogSettings(), historySection));
-        sectionHistory.setHistorySize(TARGET_PATH_HISTORY_LENGTH);
-        return sectionHistory;
     }
 
     private class TargetPathValidator
@@ -617,6 +636,16 @@ public class ExportConfigurationWizardPage
                 : validateTargetArchive(trimmedTargetText);
         }
 
+        private IStatus validateTargetArchive(final String targetText)
+        {
+            if (isDirectoryTargetSelected.getValue() == Boolean.FALSE && targetText.isBlank())
+            {
+                return UiPlugin.createErrorStatus(Messages.ExportConfigurationWizardPage_Select_target_archive_message,
+                    (Throwable)null);
+            }
+            return Status.OK_STATUS;
+        }
+
         private IStatus validateTargetDirectory(final String targetText)
         {
             if (isDirectoryTargetSelected.getValue() == Boolean.TRUE)
@@ -634,35 +663,6 @@ public class ExportConfigurationWizardPage
                 }
             }
             return Status.OK_STATUS;
-        }
-
-        private IStatus validateTargetArchive(final String targetText)
-        {
-            if (isDirectoryTargetSelected.getValue() == Boolean.FALSE && targetText.isBlank())
-            {
-                return UiPlugin.createErrorStatus(Messages.ExportConfigurationWizardPage_Select_target_archive_message,
-                    (Throwable)null);
-            }
-            return Status.OK_STATUS;
-        }
-    }
-
-    private class ProjectValidation
-        implements IValidator<Object>
-    {
-        @Override
-        public IStatus validate(final Object value)
-        {
-            if (!(value instanceof IConfigurationAware))
-            {
-                return UiPlugin.createErrorStatus(Messages.ExportConfigurationWizardPage_info, (Throwable)null);
-            }
-            if (((IConfigurationAware)value).getConfiguration() != null)
-            {
-                return Status.OK_STATUS;
-            }
-            return UiPlugin.createErrorStatus(Messages.ExportConfigurationWizardPage_noConfigurationInProject,
-                (Throwable)null);
         }
     }
 }

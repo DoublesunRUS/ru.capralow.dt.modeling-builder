@@ -29,16 +29,16 @@ import org.eclipse.core.runtime.Assert;
 public final class ZipArchiveBuilder
     implements IExportArtifactBuilder
 {
-    private final ZipOutputStream zipOutputStream;
-    private final long maxQueuedDataSize;
-    private final boolean closeStream;
-    private final ReentrantLock writeZipLock;
-    private final Object writeRequestQueueLock;
-    private Queue<WriteRequest> writeRequestQueue;
-    private Set<String> writtenPaths;
-    private long queuedDataSize;
-    private volatile boolean broken;
-    private volatile boolean closed;
+    public static ZipArchiveBuilder create(final OutputStream outputStream, final int level,
+        final long maxQueuedDataSize) throws IOException
+    {
+        Assert.isLegal(outputStream != null, "Argument 'outputStream' may not be null");
+        Assert.isLegal(level >= 0 && level <= 9, "Argument 'level' must be between 0 and 9");
+        Assert.isLegal(maxQueuedDataSize > 0L, "Argument 'maxQueuedDataSize' must be greater than 0");
+        final ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
+        zipOutputStream.setLevel(level);
+        return new ZipArchiveBuilder(zipOutputStream, maxQueuedDataSize, false);
+    }
 
     public static ZipArchiveBuilder create(final Path path, final int level, final long maxQueuedDataSize)
         throws IOException
@@ -53,16 +53,38 @@ public final class ZipArchiveBuilder
         return new ZipArchiveBuilder(zipOutputStream, maxQueuedDataSize, true);
     }
 
-    public static ZipArchiveBuilder create(final OutputStream outputStream, final int level,
-        final long maxQueuedDataSize) throws IOException
+    private static String toString(final Path path)
     {
-        Assert.isLegal(outputStream != null, "Argument 'outputStream' may not be null");
-        Assert.isLegal(level >= 0 && level <= 9, "Argument 'level' must be between 0 and 9");
-        Assert.isLegal(maxQueuedDataSize > 0L, "Argument 'maxQueuedDataSize' must be greater than 0");
-        final ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
-        zipOutputStream.setLevel(level);
-        return new ZipArchiveBuilder(zipOutputStream, maxQueuedDataSize, false);
+        if (path.getNameCount() == 1)
+        {
+            return path.toString();
+        }
+        final StringBuilder result = new StringBuilder();
+        final Iterator<Path> iterator = path.iterator();
+        while (iterator.hasNext())
+        {
+            result.append(iterator.next().toString());
+            if (iterator.hasNext())
+            {
+                result.append('/');
+            }
+        }
+        return result.toString();
     }
+
+    private final ZipOutputStream zipOutputStream;
+    private final long maxQueuedDataSize;
+    private final boolean closeStream;
+    private final ReentrantLock writeZipLock;
+    private final Object writeRequestQueueLock;
+    private Queue<WriteRequest> writeRequestQueue;
+    private Set<String> writtenPaths;
+
+    private long queuedDataSize;
+
+    private volatile boolean broken;
+
+    private volatile boolean closed;
 
     private ZipArchiveBuilder(final ZipOutputStream zipOutputStream, final long maxQueuedDataSize,
         final boolean closeStream)
@@ -75,51 +97,6 @@ public final class ZipArchiveBuilder
         this.writtenPaths = new HashSet<>();
         this.writeZipLock = new ReentrantLock();
         this.writeRequestQueueLock = new Object();
-    }
-
-    @Override
-    public OutputStream newOutputStream(final Path path) throws IOException
-    {
-        Assert.isLegal(path != null, "Argument 'path' may not be null");
-        Assert.isLegal(!path.isAbsolute(), "Argument 'path' must be relative");
-        this.ensureOpen();
-        this.ensureNotBroken();
-        return new ByteArrayOutputStream()
-        {
-            @Override
-            public void close() throws IOException
-            {
-                ZipArchiveBuilder.this.ensureOpen();
-                ZipArchiveBuilder.this.ensureNotBroken();
-                ZipArchiveBuilder.this.addWriteRequest(path, this.toByteArray());
-            }
-        };
-    }
-
-    @Override
-    public void copy(final Path sourcePath, final Path targetPath) throws IOException
-    {
-        Assert.isLegal(sourcePath != null, "Argument 'sourcePath' may not be null");
-        Assert.isLegal(targetPath != null, "Argument 'targetPath' may not be null");
-        Assert.isLegal(!targetPath.isAbsolute(), "Argument 'targetPath' must be relative");
-        this.ensureOpen();
-        this.ensureNotBroken();
-        if (Files.isDirectory(sourcePath, new LinkOption[0]))
-        {
-            Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>()
-            {
-                @Override
-                public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException
-                {
-                    ZipArchiveBuilder.this.addCopyRequest(targetPath.resolve(sourcePath.relativize(file)), file);
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        }
-        else
-        {
-            this.addCopyRequest(targetPath, sourcePath);
-        }
     }
 
     @Override
@@ -164,44 +141,49 @@ public final class ZipArchiveBuilder
         this.writeZipLock.unlock();
     }
 
-    boolean isWriteInProgress()
+    @Override
+    public void copy(final Path sourcePath, final Path targetPath) throws IOException
     {
-        return this.writeZipLock.isLocked();
-    }
-
-    private static String toString(final Path path)
-    {
-        if (path.getNameCount() == 1)
+        Assert.isLegal(sourcePath != null, "Argument 'sourcePath' may not be null");
+        Assert.isLegal(targetPath != null, "Argument 'targetPath' may not be null");
+        Assert.isLegal(!targetPath.isAbsolute(), "Argument 'targetPath' must be relative");
+        this.ensureOpen();
+        this.ensureNotBroken();
+        if (Files.isDirectory(sourcePath, new LinkOption[0]))
         {
-            return path.toString();
-        }
-        final StringBuilder result = new StringBuilder();
-        final Iterator<Path> iterator = path.iterator();
-        while (iterator.hasNext())
-        {
-            result.append(iterator.next().toString());
-            if (iterator.hasNext())
+            Files.walkFileTree(sourcePath, new SimpleFileVisitor<Path>()
             {
-                result.append('/');
+                @Override
+                public FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) throws IOException
+                {
+                    ZipArchiveBuilder.this.addCopyRequest(targetPath.resolve(sourcePath.relativize(file)), file);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        }
+        else
+        {
+            this.addCopyRequest(targetPath, sourcePath);
+        }
+    }
+
+    @Override
+    public OutputStream newOutputStream(final Path path) throws IOException
+    {
+        Assert.isLegal(path != null, "Argument 'path' may not be null");
+        Assert.isLegal(!path.isAbsolute(), "Argument 'path' must be relative");
+        this.ensureOpen();
+        this.ensureNotBroken();
+        return new ByteArrayOutputStream()
+        {
+            @Override
+            public void close() throws IOException
+            {
+                ZipArchiveBuilder.this.ensureOpen();
+                ZipArchiveBuilder.this.ensureNotBroken();
+                ZipArchiveBuilder.this.addWriteRequest(path, this.toByteArray());
             }
-        }
-        return result.toString();
-    }
-
-    private void ensureOpen()
-    {
-        if (this.closed)
-        {
-            throw new IllegalStateException("Builder is closed");
-        }
-    }
-
-    private void ensureNotBroken()
-    {
-        if (this.broken)
-        {
-            throw new IllegalStateException("Builder is broken");
-        }
+        };
     }
 
     private void addCopyRequest(final Path targetPath, final Path sourcePath) throws IOException
@@ -246,6 +228,50 @@ public final class ZipArchiveBuilder
         }
         // monitorexit(this.writeRequestQueueLock)
         return true;
+    }
+
+    private void ensureNotBroken()
+    {
+        if (this.broken)
+        {
+            throw new IllegalStateException("Builder is broken");
+        }
+    }
+
+    private void ensureOpen()
+    {
+        if (this.closed)
+        {
+            throw new IllegalStateException("Builder is closed");
+        }
+    }
+
+    private void finishWriteZip() throws IOException
+    {
+        while (true)
+        {
+            final WriteRequest writeRequest;
+            synchronized (this.writeRequestQueueLock)
+            {
+                writeRequest = this.writeRequestQueue.poll();
+                if (writeRequest == null)
+                {
+                    // monitorexit(this.writeRequestQueueLock)
+                    break;
+                }
+            }
+            // monitorexit(this.writeRequestQueueLock)
+            this.processSingleWriteRequest(writeRequest);
+        }
+    }
+
+    private void processSingleWriteRequest(final WriteRequest writeRequest) throws IOException
+    {
+        this.zipOutputStream.putNextEntry(new ZipEntry(writeRequest.path));
+        this.zipOutputStream.write(writeRequest.bytes, 0, writeRequest.bytes.length);
+        this.zipOutputStream.closeEntry();
+        writeRequest.path = null;
+        writeRequest.bytes = null;
     }
 
     private void writeZip() throws IOException
@@ -307,32 +333,9 @@ public final class ZipArchiveBuilder
         }
     }
 
-    private void finishWriteZip() throws IOException
+    boolean isWriteInProgress()
     {
-        while (true)
-        {
-            final WriteRequest writeRequest;
-            synchronized (this.writeRequestQueueLock)
-            {
-                writeRequest = this.writeRequestQueue.poll();
-                if (writeRequest == null)
-                {
-                    // monitorexit(this.writeRequestQueueLock)
-                    break;
-                }
-            }
-            // monitorexit(this.writeRequestQueueLock)
-            this.processSingleWriteRequest(writeRequest);
-        }
-    }
-
-    private void processSingleWriteRequest(final WriteRequest writeRequest) throws IOException
-    {
-        this.zipOutputStream.putNextEntry(new ZipEntry(writeRequest.path));
-        this.zipOutputStream.write(writeRequest.bytes, 0, writeRequest.bytes.length);
-        this.zipOutputStream.closeEntry();
-        writeRequest.path = null;
-        writeRequest.bytes = null;
+        return this.writeZipLock.isLocked();
     }
 
     private static class WriteRequest

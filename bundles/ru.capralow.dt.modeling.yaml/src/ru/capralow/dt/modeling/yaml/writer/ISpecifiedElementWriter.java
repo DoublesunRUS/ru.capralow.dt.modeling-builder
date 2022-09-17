@@ -3,6 +3,8 @@
  */
 package ru.capralow.dt.modeling.yaml.writer;
 
+import java.util.Map;
+
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
@@ -15,16 +17,16 @@ public interface ISpecifiedElementWriter
     String SMART_ELEMENT_WRITER = "SmartSpecifiedElementWriter"; //$NON-NLS-1$
 
     void write(YamlStreamWriter exportXmlStreamWriter, EObject eObject, EStructuralFeature eStructuralFeature,
-        boolean writeEmpty, Version version) throws ExportException;
+        boolean writeEmpty, Version version, Map<String, Object> group) throws ExportException;
 
     class ZeroWriter
         implements ISpecifiedElementWriter
     {
         @Override
         public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-            Version version) throws ExportException
+            Version version, Map<String, Object> group) throws ExportException
         {
-            // Nothing to do
+            // Skip object
         }
     }
 }

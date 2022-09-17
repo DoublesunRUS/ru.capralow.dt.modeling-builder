@@ -16,11 +16,11 @@ import ru.capralow.dt.modeling.yaml.IExporter;
 
 public interface IYamlExporterExtensionManager
 {
-    boolean overridesTemplateCopying(EObject paramEObject, IExportContext paramIExportContext);
-
     void copyTemplateWithLineFeedConversion(IExporter paramIExporter, EObject paramEObject,
         IExportContext paramIExportContext, IExportArtifactBuilder paramIExportArtifactBuilder, Path paramPath1,
         Path paramPath2, LineFeedConverter.ConvertOption... paramVarArgs) throws ExportException;
+
+    boolean overridesTemplateCopying(EObject paramEObject, IExportContext paramIExportContext);
 
     void registerExtension(IYamlExporterExtension paramIXmlExporterExtension);
 }

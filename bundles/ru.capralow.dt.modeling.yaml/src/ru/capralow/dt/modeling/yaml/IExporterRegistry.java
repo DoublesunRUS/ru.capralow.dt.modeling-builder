@@ -14,7 +14,7 @@ import ru.capralow.dt.modeling.internal.yaml.ExporterRegistry;
 @ImplementedBy(ExporterRegistry.class)
 public interface IExporterRegistry
 {
-    IExporter getExporter(Version paramVersion, EObject paramEObject) throws ExportException;
-
     boolean exporterExists(Version paramVersion, EObject paramEObject);
+
+    IExporter getExporter(Version paramVersion, EObject paramEObject) throws ExportException;
 }

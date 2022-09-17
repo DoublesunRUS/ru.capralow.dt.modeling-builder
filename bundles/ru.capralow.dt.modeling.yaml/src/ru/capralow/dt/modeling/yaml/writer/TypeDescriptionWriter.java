@@ -5,6 +5,7 @@ package ru.capralow.dt.modeling.yaml.writer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
@@ -31,7 +32,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.yaml.IqNameProvider;
+import ru.capralow.dt.modeling.yaml.IQnameProvider;
 
 @Singleton
 public class TypeDescriptionWriter
@@ -48,12 +49,30 @@ public class TypeDescriptionWriter
         FormPackage.Literals.FORM__ATTRIBUTES, MdClassPackage.Literals.EXTERNAL_DATA_PROCESSOR__ATTRIBUTES,
         MdClassPackage.Literals.EXTERNAL_REPORT__ATTRIBUTES);
 
+    private static String getLocalPartName(TypeItem typeItem, QName typeName, TypeDescription typeDescription)
+    {
+        return typeName.getLocalPart();
+    }
+
     @Inject
-    private IqNameProvider nameProvider;
+    private IQnameProvider nameProvider;
+
+    public boolean isEmptyTypeDescription(TypeDescription value)
+    {
+        if (value != null)
+        {
+            EList<TypeItem> types = value.getTypes();
+            boolean isNoTypes =
+                !(!types.isEmpty() && (types.size() != 1 || !"Arbitrary".equals(McoreUtil.getTypeName(types.get(0)))));
+            return isNoTypes && value.getStringQualifiers() == null && value.getNumberQualifiers() == null
+                && value.getDateQualifiers() == null && value.getBinaryQualifiers() == null;
+        }
+        return true;
+    }
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws ExportException
+        Version version, Map<String, Object> group) throws ExportException
     {
         if (feature.isMany() || feature.getEType() != McorePackage.Literals.TYPE_DESCRIPTION)
         {
@@ -137,17 +156,17 @@ public class TypeDescriptionWriter
         }
     }
 
-    public boolean isEmptyTypeDescription(TypeDescription value)
+    private void writeTypeItem(YamlStreamWriter writer, TypeItem typeItem, TypeDescription typeDescription,
+        QName elementName) throws ExportException
     {
-        if (value != null)
+        if (!"Arbitrary".equals(McoreUtil.getTypeName(typeItem)))
         {
-            EList<TypeItem> types = value.getTypes();
-            boolean isNoTypes =
-                !(!types.isEmpty() && (types.size() != 1 || !"Arbitrary".equals(McoreUtil.getTypeName(types.get(0)))));
-            return isNoTypes && value.getStringQualifiers() == null && value.getNumberQualifiers() == null
-                && value.getDateQualifiers() == null && value.getBinaryQualifiers() == null;
+//            writer.writeStartElement(elementName);
+            QName typeName = XdtoTypeMap.INSTANCE.typeToXmlName(typeItem);
+            String localPartName = getLocalPartName(typeItem, typeName, typeDescription);
+//            writer.writeCharacters(':' + localPartName);
+//            writer.writeInlineEndElement();
         }
-        return true;
     }
 
     private void writeTypes(YamlStreamWriter writer, TypeDescription typeDescription) throws ExportException
@@ -166,23 +185,5 @@ public class TypeDescriptionWriter
         {
             writeTypeItem(writer, typeSet, typeDescription, new QName("V8.TYPE_SET"));
         }
-    }
-
-    private void writeTypeItem(YamlStreamWriter writer, TypeItem typeItem, TypeDescription typeDescription,
-        QName elementName) throws ExportException
-    {
-        if (!"Arbitrary".equals(McoreUtil.getTypeName(typeItem)))
-        {
-//            writer.writeStartElement(elementName);
-            QName typeName = XdtoTypeMap.INSTANCE.typeToXmlName(typeItem);
-            String localPartName = getLocalPartName(typeItem, typeName, typeDescription);
-//            writer.writeCharacters(':' + localPartName);
-//            writer.writeInlineEndElement();
-        }
-    }
-
-    private static String getLocalPartName(TypeItem typeItem, QName typeName, TypeDescription typeDescription)
-    {
-        return typeName.getLocalPart();
     }
 }

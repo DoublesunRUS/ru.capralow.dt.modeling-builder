@@ -56,70 +56,24 @@ public class MetadataFeatureNameProvider
         builder.put(MdClassPackage.Literals.CONFIGURATION__VERSION, IMetadataYamlElements.Application.VERSION);
         builder.put(MdClassPackage.Literals.CONFIGURATION__VENDOR, IMetadataYamlElements.Application.VENDOR);
 
-        //        builder.put(MdClassPackage.Literals.CONFIGURATION__LANGUAGES, IMetadataYamlElements.LANGUAGE);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__SUBSYSTEMS, IMetadataYamlElements.SUBSYSTEM);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__STYLE_ITEMS, IMetadataYamlElements.STYLE_ITEM);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__STYLES, IMetadataYamlElements.STYLE);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__COMMON_PICTURES, IMetadataYamlElements.COMMON_PICTURE);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__INTERFACES, IMetadataYamlElements.INTERFACE);
-//        builder.put(
-//        MdClassPackage.Literals.CONFIGURATION__SESSION_PARAMETERS, IMetadataYamlElements.SESSION_PARAMETER);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__ROLES, IMetadataYamlElements.ROLE);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__COMMON_TEMPLATES, IMetadataYamlElements.COMMON_TEMPLATE);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__FILTER_CRITERIA, IMetadataYamlElements.FILTER_CRITERION);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__COMMON_MODULES, IMetadataYamlElements.COMMON_MODULE);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__COMMON_ATTRIBUTES, IMetadataYamlElements.COMMON_ATTRIBUTE);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__EXCHANGE_PLANS, IMetadataYamlElements.EXCHANGE_PLAN);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__XDTO_PACKAGES, IMetadataYamlElements.XDTO_PACKAGE);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__WEB_SERVICES, IMetadataYamlElements.WEB_SERVICE);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__HTTP_SERVICES, IMetadataYamlElements.HTTP_SERVICE);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__WS_REFERENCES, IMetadataYamlElements.WS_REFERENCE);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__EVENT_SUBSCRIPTIONS,
-//            IMetadataYamlElements.EVENT_SUBSCRIPTION);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__SCHEDULED_JOBS, IMetadataYamlElements.SCHEDULED_JOB);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__SETTINGS_STORAGES, IMetadataYamlElements.SETTINGS_STORAGE);
-//        builder.put(
-//        MdClassPackage.Literals.CONFIGURATION__FUNCTIONAL_OPTIONS, IMetadataYamlElements.FUNCTIONAL_OPTION);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__FUNCTIONAL_OPTIONS_PARAMETERS,
-//            IMetadataYamlElements.FUNCTIONAL_OPTIONS_PARAMETER);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__DEFINED_TYPES, IMetadataYamlElements.DEFINED_TYPE);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__COMMON_COMMANDS, IMetadataYamlElements.COMMON_COMMAND);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__COMMAND_GROUPS, IMetadataYamlElements.COMMAND_GROUP);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__CONSTANTS, IMetadataYamlElements.CONSTANT);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__COMMON_FORMS, IMetadataYamlElements.COMMON_FORM);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__CATALOGS, IMetadataYamlElements.CATALOG);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__DOCUMENTS, IMetadataYamlElements.DOCUMENT);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__DOCUMENT_NUMERATORS,
-//            IMetadataYamlElements.DOCUMENT_NUMERATOR);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__SEQUENCES, IMetadataYamlElements.SEQUENCE);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__DOCUMENT_JOURNALS, IMetadataYamlElements.DOCUMENT_JOURNAL);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__ENUMS, IMetadataYamlElements.ENUM);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__REPORTS, IMetadataYamlElements.REPORT);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__DATA_PROCESSORS, IMetadataYamlElements.DATA_PROCESSOR);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__INFORMATION_REGISTERS,
-//            IMetadataYamlElements.INFORMATION_REGISTER);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__ACCUMULATION_REGISTERS,
-//            IMetadataYamlElements.ACCUMULATION_REGISTER);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__CHARTS_OF_CHARACTERISTIC_TYPES,
-//            IMetadataYamlElements.CHART_OF_CHARACTERISTIC_TYPES);
-//        builder.put(
-//        MdClassPackage.Literals.CONFIGURATION__CHARTS_OF_ACCOUNTS, IMetadataYamlElements.CHART_OF_ACCOUNTS);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__ACCOUNTING_REGISTERS,
-//            IMetadataYamlElements.ACCOUNTING_REGISTER);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__CHARTS_OF_CALCULATION_TYPES,
-//            IMetadataYamlElements.CHART_OF_CALCULATION_TYPES);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__CALCULATION_REGISTERS,
-//            IMetadataYamlElements.CALCULATION_REGISTER);
-//        builder.put(
-//        MdClassPackage.Literals.CONFIGURATION__BUSINESS_PROCESSES, IMetadataYamlElements.BUSINESS_PROCESS);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__TASKS, IMetadataYamlElements.TASK);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__EXTERNAL_DATA_SOURCES,
-//            IMetadataYamlElements.EXTERNAL_DATA_SOURCE);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__INTEGRATION_SERVICES,
-//            IMetadataYamlElements.INTEGRATION_SERVICE);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__BOTS, IMetadataYamlElements.BOT);
-//        builder.put(MdClassPackage.Literals.CONFIGURATION__MOBILE_APPLICATION_URLS,
-//            IMetadataYamlElements.MOBILE_APPLICATION_URLS);
+        builder.put(MdClassPackage.Literals.CATALOG__ATTRIBUTES, IMetadataYamlElements.ATTRIBUTES);
+
+        //      builder.put(MdClassPackage.Literals.CATALOG__TABULAR_SECTIONS, IMetadataYamlElements.TABULAR_SECTION);
+//      builder.put(MdClassPackage.Literals.CATALOG__FORMS, IMetadataYamlElements.FORM);
+//      builder.put(MdClassPackage.Literals.CATALOG__TEMPLATES, IMetadataYamlElements.TEMPLATE);
+//      builder.put(MdClassPackage.Literals.CATALOG__COMMANDS, IMetadataYamlElements.COMMAND);
+//
+        builder.put(MdClassPackage.Literals.ENUM__ENUM_VALUES, IMetadataYamlElements.VALUES);
+//      builder.put(MdClassPackage.Literals.ENUM__FORMS, IMetadataYamlElements.FORM);
+//      builder.put(MdClassPackage.Literals.ENUM__TEMPLATES, IMetadataYamlElements.TEMPLATE);
+//      builder.put(MdClassPackage.Literals.ENUM__COMMANDS, IMetadataYamlElements.COMMAND);
+//
+        builder.put(MdClassPackage.Literals.INFORMATION_REGISTER__ATTRIBUTES, IMetadataYamlElements.ATTRIBUTES);
+        builder.put(MdClassPackage.Literals.INFORMATION_REGISTER__DIMENSIONS, IMetadataYamlElements.DIMENSIONS);
+        builder.put(MdClassPackage.Literals.INFORMATION_REGISTER__RESOURCES, IMetadataYamlElements.RESOURCES);
+//    builder.put(MdClassPackage.Literals.INFORMATION_REGISTER__FORMS, IMetadataYamlElements.FORM);
+//    builder.put(MdClassPackage.Literals.INFORMATION_REGISTER__TEMPLATES, IMetadataYamlElements.TEMPLATE);
+//    builder.put(MdClassPackage.Literals.INFORMATION_REGISTER__COMMANDS, IMetadataYamlElements.COMMAND);
 //
 //        builder.put(MdClassPackage.Literals.DB_OBJECT_TABULAR_SECTION__ATTRIBUTES, IMetadataYamlElements.ATTRIBUTE);
 //
@@ -135,12 +89,6 @@ public class MetadataFeatureNameProvider
 //        builder.put(MdClassPackage.Literals.COMMON_ATTRIBUTE_CONTENT_ITEM__USE, IMetadataYamlElements.XR.USE);
 //        builder.put(MdClassPackage.Literals.COMMON_ATTRIBUTE_CONTENT_ITEM__CONDITIONAL_SEPARATION,
 //            IMetadataYamlElements.XR.CONDITIONAL_SEPARATION);
-//
-//        builder.put(MdClassPackage.Literals.CATALOG__ATTRIBUTES, IMetadataYamlElements.ATTRIBUTE);
-//        builder.put(MdClassPackage.Literals.CATALOG__TABULAR_SECTIONS, IMetadataYamlElements.TABULAR_SECTION);
-//        builder.put(MdClassPackage.Literals.CATALOG__FORMS, IMetadataYamlElements.FORM);
-//        builder.put(MdClassPackage.Literals.CATALOG__TEMPLATES, IMetadataYamlElements.TEMPLATE);
-//        builder.put(MdClassPackage.Literals.CATALOG__COMMANDS, IMetadataYamlElements.COMMAND);
 //
 //        builder.put(MdClassPackage.Literals.CHART_OF_ACCOUNTS__ATTRIBUTES, IMetadataYamlElements.ATTRIBUTE);
 //        builder.put(
@@ -159,11 +107,6 @@ public class MetadataFeatureNameProvider
 //        builder.put(MdClassPackage.Literals.DOCUMENT__TEMPLATES, IMetadataYamlElements.TEMPLATE);
 //        builder.put(MdClassPackage.Literals.DOCUMENT__COMMANDS, IMetadataYamlElements.COMMAND);
 //
-//        builder.put(MdClassPackage.Literals.ENUM__ENUM_VALUES, IMetadataYamlElements.ENUM_VALUE);
-//        builder.put(MdClassPackage.Literals.ENUM__FORMS, IMetadataYamlElements.FORM);
-//        builder.put(MdClassPackage.Literals.ENUM__TEMPLATES, IMetadataYamlElements.TEMPLATE);
-//        builder.put(MdClassPackage.Literals.ENUM__COMMANDS, IMetadataYamlElements.COMMAND);
-//
 //        builder.put(MdClassPackage.Literals.CHART_OF_CALCULATION_TYPES__ATTRIBUTES, IMetadataYamlElements.ATTRIBUTE);
 //        builder.put(MdClassPackage.Literals.CHART_OF_CALCULATION_TYPES__TABULAR_SECTIONS,
 //            IMetadataYamlElements.TABULAR_SECTION);
@@ -178,13 +121,6 @@ public class MetadataFeatureNameProvider
 //        builder.put(MdClassPackage.Literals.CHART_OF_CHARACTERISTIC_TYPES__FORMS, IMetadataYamlElements.FORM);
 //        builder.put(MdClassPackage.Literals.CHART_OF_CHARACTERISTIC_TYPES__TEMPLATES, IMetadataYamlElements.TEMPLATE);
 //        builder.put(MdClassPackage.Literals.CHART_OF_CHARACTERISTIC_TYPES__COMMANDS, IMetadataYamlElements.COMMAND);
-//
-//        builder.put(MdClassPackage.Literals.INFORMATION_REGISTER__RESOURCES, IMetadataYamlElements.RESOURCE);
-//        builder.put(MdClassPackage.Literals.INFORMATION_REGISTER__ATTRIBUTES, IMetadataYamlElements.ATTRIBUTE);
-//        builder.put(MdClassPackage.Literals.INFORMATION_REGISTER__DIMENSIONS, IMetadataYamlElements.DIMENSION);
-//        builder.put(MdClassPackage.Literals.INFORMATION_REGISTER__FORMS, IMetadataYamlElements.FORM);
-//        builder.put(MdClassPackage.Literals.INFORMATION_REGISTER__TEMPLATES, IMetadataYamlElements.TEMPLATE);
-//        builder.put(MdClassPackage.Literals.INFORMATION_REGISTER__COMMANDS, IMetadataYamlElements.COMMAND);
 //
 //        builder.put(MdClassPackage.Literals.EXCHANGE_PLAN__ATTRIBUTES, IMetadataYamlElements.ATTRIBUTE);
 //        builder.put(MdClassPackage.Literals.EXCHANGE_PLAN__TABULAR_SECTIONS, IMetadataYamlElements.TABULAR_SECTION);

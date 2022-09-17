@@ -10,6 +10,12 @@ public interface IExportStrategy
     IExportStrategy DEFAULT = new IExportStrategy()
     {
         @Override
+        public boolean exportExternalProperties(final EObject eObject)
+        {
+            return true;
+        }
+
+        @Override
         public boolean exportSubordinatesObjects(final EObject eObject)
         {
             return true;
@@ -20,17 +26,11 @@ public interface IExportStrategy
         {
             return true;
         }
-
-        @Override
-        public boolean exportExternalProperties(final EObject eObject)
-        {
-            return true;
-        }
     };
 
-    boolean exportSubordinatesObjects(EObject p0);
-
     boolean exportExternalProperties(EObject p0);
+
+    boolean exportSubordinatesObjects(EObject p0);
 
     boolean exportUnknown();
 }

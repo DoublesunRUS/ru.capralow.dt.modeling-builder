@@ -44,7 +44,7 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 
 import ru.capralow.dt.modeling.core.ExportException;
-import ru.capralow.dt.modeling.yaml.IqNameProvider;
+import ru.capralow.dt.modeling.yaml.IQnameProvider;
 
 public class ValueWriter
     implements ISpecifiedElementWriter
@@ -68,7 +68,7 @@ public class ValueWriter
     protected ReferenceWriter referenceWriter;
 
     @Inject
-    private IqNameProvider nameManager;
+    private IQnameProvider nameManager;
 
     @Inject
     @Named(ISpecifiedElementWriter.SMART_ELEMENT_WRITER)
@@ -82,7 +82,7 @@ public class ValueWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws ExportException
+        Version version, Map<String, Object> group) throws ExportException
     {
         if (feature == MdClassPackage.Literals.WEB_SERVICE__XDTO_PACKAGES)
         {
@@ -97,7 +97,7 @@ public class ValueWriter
                 throw new IllegalArgumentException(
                     String.format("Invalid value object %s", new Object[] { valueObject }));
             }
-            writeValue(writer, valueObject, elementName, writeEmpty, feature, version);
+            writeValue(writer, valueObject, elementName, writeEmpty, feature, version, group);
         }
         else if (writeEmpty)
         {
@@ -106,7 +106,7 @@ public class ValueWriter
     }
 
     public void writeValue(YamlStreamWriter writer, Object valueObject, QName elementName, boolean writeEmpty,
-        EStructuralFeature feature, Version version) throws ExportException
+        EStructuralFeature feature, Version version, Map<String, Object> group) throws ExportException
     {
         if (valueObject == null)
         {
@@ -116,21 +116,21 @@ public class ValueWriter
             || valueObject instanceof com._1c.g5.v8.dt.mcore.NullValue)
         {
 //            writer.writeEmptyElement(elementName);
-            writer.writeElement("XSI.NIL", "true");
+            writer.writeElement("XSI.NIL", "true", group);
         }
         else if (valueObject instanceof BooleanValue)
         {
             Map<String, Object> valueGroup = writer.addGroup(elementName);
 
 //            writer.writeStartElement(elementName);
-            writer.writeElement("XSI.TYPE", "XS.BOOLEAN");
+            writer.writeElement("XSI.TYPE", "XS.BOOLEAN", group);
 //            writer.writeCharacters(Boolean.toString(((BooleanValue)valueObject).isValue()));
 //            writer.writeInlineEndElement();
         }
         else if (valueObject instanceof NumberValue)
         {
 //            writer.writeStartElement(elementName);
-            writer.writeElement("XSI.TYPE", "XS.DECIMAL");
+            writer.writeElement("XSI.TYPE", "XS.DECIMAL", group);
 //            writer.writeCharacters(((NumberValue)valueObject).getValue().toString());
 //            writer.writeInlineEndElement();
         }
@@ -140,12 +140,12 @@ public class ValueWriter
             if (Strings.isNullOrEmpty(value))
             {
 //                writer.writeEmptyElement(elementName);
-                writer.writeElement("XSI.TYPE", "XS.STRING");
+                writer.writeElement("XSI.TYPE", "XS.STRING", group);
             }
             else
             {
 //                writer.writeStartElement(elementName);
-                writer.writeElement("XSI.TYPE", "XS.STRING");
+                writer.writeElement("XSI.TYPE", "XS.STRING", group);
 //                writer.writeCharacters(value);
 //                writer.writeInlineEndElement();
             }
@@ -153,14 +153,14 @@ public class ValueWriter
         else if (valueObject instanceof DateValue)
         {
 //            writer.writeStartElement(elementName);
-            writer.writeElement("XSI.TYPE", "XS.DATETIME");
+            writer.writeElement("XSI.TYPE", "XS.DATETIME", group);
 //            writer.writeCharacters(((DateValue)valueObject).getValue().toString());
 //            writer.writeInlineEndElement();
         }
         else if (valueObject instanceof BinaryValue)
         {
 //            writer.writeStartElement(elementName);
-            writer.writeElement("XSI.TYPE", "XS.BINARY_DATA");
+            writer.writeElement("XSI.TYPE", "XS.BINARY_DATA", group);
 //            writer.writeCharacters(((BinaryValue)valueObject).getValue());
 //            writer.writeInlineEndElement();
         }
@@ -173,7 +173,7 @@ public class ValueWriter
                 if (writeEmpty)
                 {
 //                    writer.writeEmptyElement(elementName);
-                    writer.writeElement("XSI.TYPE", typeName);
+                    writer.writeElement("XSI.TYPE", typeName, group);
                 }
             }
             else
@@ -183,14 +183,14 @@ public class ValueWriter
                 if (!Strings.isNullOrEmpty(ref))
                 {
 //                    writer.writeStartElement(elementName);
-                    writer.writeElement("XSI.TYPE", typeName);
+                    writer.writeElement("XSI.TYPE", typeName, group);
 //                    writer.writeCharacters(ref);
 //                    writer.writeInlineEndElement();
                 }
                 else if (writeEmpty)
                 {
 //                    writer.writeEmptyElement(elementName);
-                    writer.writeElement("XSI.TYPE", typeName);
+                    writer.writeElement("XSI.TYPE", typeName, group);
                 }
             }
         }
@@ -198,7 +198,7 @@ public class ValueWriter
         {
             IrresolvableReferenceValue referenceValue = (IrresolvableReferenceValue)valueObject;
 //            writer.writeStartElement(elementName);
-            writer.writeElement("XSI.TYPE", "XR.DESIGN_TIME_REF");
+            writer.writeElement("XSI.TYPE", "XR.DESIGN_TIME_REF", group);
 //            writer.writeCharacters(String.format("%s.%s",
 //                new Object[] {
 //            referenceValue.getRefTypeId().toString(), referenceValue.getInstanceId().toString() }));
@@ -210,28 +210,28 @@ public class ValueWriter
             if (!valueList.getValues().isEmpty())
             {
 //                writer.writeStartElement(elementName);
-                writer.writeElement("XSI.TYPE", "XR.VALUE_LIST");
+                writer.writeElement("XSI.TYPE", "XR.VALUE_LIST", group);
                 for (Value value : valueList.getValues())
                 {
                     writeValue(writer, value, nameManager.getElementQName(McorePackage.Literals.VALUE_LIST__VALUES),
-                        writeEmpty, feature, version);
+                        writeEmpty, feature, version, group);
                 }
 //                writer.writeEndElement();
             }
             else
             {
 //                writer.writeEmptyElement(elementName);
-                writer.writeElement("XSI.TYPE", "XR.VALUE_LIST");
+                writer.writeElement("XSI.TYPE", "XR.VALUE_LIST", group);
             }
         }
         else if (valueObject instanceof FixedArrayValue)
         {
 //            writer.writeStartElement(elementName);
-            writer.writeElement("XSI.TYPE", "V8.FIXED_ARRAY");
+            writer.writeElement("XSI.TYPE", "V8.FIXED_ARRAY", group);
             for (Value value : ((FixedArrayValue)valueObject).getValues())
             {
                 writeValue(writer, value, nameManager.getElementQName(McorePackage.Literals.FIXED_ARRAY_VALUE__VALUES),
-                    writeEmpty, feature, version);
+                    writeEmpty, feature, version, group);
             }
 //            writer.writeEndElement();
         }
@@ -242,33 +242,34 @@ public class ValueWriter
             if (!typeDescriptionWriter.isEmptyTypeDescription(value))
             {
 //                writer.writeStartElement(elementName);
-                writer.writeElement("XSI.TYPE", "V8.TYPE_DESCRIPTION");
+                writer.writeElement("XSI.TYPE", "V8.TYPE_DESCRIPTION", group);
                 typeDescriptionWriter.writeTypeDescription(writer, value);
 //                writer.writeEndElement();
             }
             else if (writeEmpty)
             {
 //                writer.writeEmptyElement(elementName);
-                writer.writeElement("XSI.TYPE", "V8.TYPE_DESCRIPTION");
+                writer.writeElement("XSI.TYPE", "V8.TYPE_DESCRIPTION", group);
             }
         }
         else if (valueObject instanceof StandardPeriodValue)
         {
 //            writer.writeStartElement(elementName);
-            writer.writeElement("XSI.TYPE", "V8.STANDARD_PERIOD");
+            writer.writeElement("XSI.TYPE", "V8.STANDARD_PERIOD", group);
             standardPeriodWriterProvider.get()
-                .writeStandardPeriod(writer, ((StandardPeriodValue)valueObject).getValue());
+                .writeStandardPeriod(writer, ((StandardPeriodValue)valueObject).getValue(), group);
 //            writer.writeEndElement();
         }
         else if (valueObject instanceof com._1c.g5.v8.dt.form.model.FormChoiceListDesTimeValue)
         {
 //            writer.writeStartElement(elementName);
-            writer.writeElement("XSI.TYPE", "FormChoiceListDesTimeValue");
+            writer.writeElement("XSI.TYPE", "FormChoiceListDesTimeValue", group);
             featureWriter.write(writer, (EObject)valueObject,
                 (EStructuralFeature)FormPackage.Literals.FORM_CHOICE_LIST_DES_TIME_VALUE__PRESENTATION, writeEmpty,
-                version);
+                version, group);
             featureWriter.write(writer, (EObject)valueObject,
-                (EStructuralFeature)FormPackage.Literals.FORM_CHOICE_LIST_DES_TIME_VALUE__VALUE, writeEmpty, version);
+                (EStructuralFeature)FormPackage.Literals.FORM_CHOICE_LIST_DES_TIME_VALUE__VALUE, writeEmpty, version,
+                group);
 //            writer.writeEndElement();
         }
         else if (valueObject instanceof BorderValue)
@@ -287,7 +288,7 @@ public class ValueWriter
         else if (valueObject instanceof AccountTypeValue)
         {
 //            writer.writeStartElement(elementName);
-            writer.writeElement("XSI.TYPE", "ENT.ACCOUNT_TYPE");
+            writer.writeElement("XSI.TYPE", "ENT.ACCOUNT_TYPE", group);
 //            writer.writeCharacters(((AccountTypeValue)valueObject).getValue().toString());
 //            writer.writeInlineEndElement();
         }
@@ -295,7 +296,7 @@ public class ValueWriter
         {
             ChartLineTypeValue value = (ChartLineTypeValue)valueObject;
 //            writer.writeStartElement(elementName);
-            writer.writeElement("XSI.TYPE", "V8UI.CHART_LINE_TYPE");
+            writer.writeElement("XSI.TYPE", "V8UI.CHART_LINE_TYPE", group);
 //            writer.writeCharacters(value.getValue().toString());
 //            writer.writeInlineEndElement();
         }
@@ -305,7 +306,7 @@ public class ValueWriter
             if (value.getValue() != null)
             {
                 writeSimpleValue(writer, elementName, value.getValue().getClass().getSimpleName(),
-                    value.getValue().getLiteral());
+                    value.getValue().getLiteral(), group);
             }
         }
         else if (valueObject instanceof SysEnumValue)
@@ -314,7 +315,7 @@ public class ValueWriter
             if (value.getValue() != null && value.getValue().indexOf('.') != -1)
             {
                 String[] segments = value.getValue().split("\\."); //$NON-NLS-1$
-                writeSimpleValue(writer, elementName, segments[0], segments[1]);
+                writeSimpleValue(writer, elementName, segments[0], segments[1], group);
             }
         }
         else
@@ -324,19 +325,19 @@ public class ValueWriter
         }
     }
 
+    private void writeSimpleValue(YamlStreamWriter writer, QName elementName, String typeName, String value,
+        Map<String, Object> group) throws ExportException
+    {
+//        writer.writeStartElement(elementName);
+        QName typeQName = XdtoTypeMap.INSTANCE.typeNameToXmlName(typeName);
+        writer.writeElement("XSI.TYPE", ':' + typeQName.getLocalPart(), group);
+//        writer.writeCharacters(value);
+//        writer.writeInlineEndElement();
+    }
+
     protected QName getTypeName(ReferenceValue refValueObject)
     {
         return AS_DESIGN_TIME_REF.contains(refValueObject.eContainingFeature()) ? new QName("XR.DESIGN_TIME_REF")
             : new QName("XR.MD_OBJECT_REF");
-    }
-
-    private void writeSimpleValue(YamlStreamWriter writer, QName elementName, String typeName, String value)
-        throws ExportException
-    {
-//        writer.writeStartElement(elementName);
-        QName typeQName = XdtoTypeMap.INSTANCE.typeNameToXmlName(typeName);
-        writer.writeElement("XSI.TYPE", ':' + typeQName.getLocalPart());
-//        writer.writeCharacters(value);
-//        writer.writeInlineEndElement();
     }
 }

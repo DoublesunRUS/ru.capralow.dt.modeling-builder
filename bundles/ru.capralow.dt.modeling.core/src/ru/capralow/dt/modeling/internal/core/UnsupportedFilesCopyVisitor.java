@@ -41,84 +41,92 @@ public final class UnsupportedFilesCopyVisitor
     @Override
     public FileVisitResult visitFile(final Path sourcePath, final BasicFileAttributes attrs) throws IOException
     {
-        if (this.exclusion == null || !this.exclusion.test(sourcePath))
+        if (this.exclusion != null && this.exclusion.test(sourcePath))
         {
-            final Path targetPath = this.sourceRoot.relativize(sourcePath);
-            final Optional<LineFeedConverter.ConvertOption[]> modificator = this.modificators.entrySet()
-                .parallelStream()
-                .filter(e -> e.getKey().test(sourcePath))
-                .findAny()
-                .map(Map.Entry::getValue);
-            if (modificator.isPresent())
+            return super.visitFile(sourcePath, attrs);
+        }
+
+        final Path targetPath = this.sourceRoot.relativize(sourcePath);
+        final Optional<LineFeedConverter.ConvertOption[]> modificator = this.modificators.entrySet()
+            .parallelStream()
+            .filter(e -> e.getKey().test(sourcePath))
+            .findAny()
+            .map(Map.Entry::getValue);
+
+        if (modificator.isPresent())
+        {
+            IOException t = null;
+            try
             {
-                IOException t = null;
+                final InputStream inputStream =
+                    new BufferedInputStream(Files.newInputStream(sourcePath, new OpenOption[0]));
                 try
                 {
-                    final InputStream inputStream =
-                        new BufferedInputStream(Files.newInputStream(sourcePath, new OpenOption[0]));
+                    final OutputStream outputStream = this.artifactBuilder.newOutputStream(targetPath);
+
                     try
                     {
-                        final OutputStream outputStream = this.artifactBuilder.newOutputStream(targetPath);
-                        try
+                        LineFeedConverter.convert(inputStream, outputStream, modificator.get());
+                    }
+
+                    finally
+                    {
+                        if (outputStream != null)
                         {
-                            LineFeedConverter.convert(inputStream, outputStream, modificator.get());
+                            outputStream.close();
                         }
-                        finally
-                        {
-                            if (outputStream != null)
-                            {
-                                outputStream.close();
-                            }
-                        }
-                        if (inputStream != null)
-                        {
-                            inputStream.close();
-                            return super.visitFile(sourcePath, attrs);
-                        }
+                    }
+
+                    if (inputStream != null)
+                    {
+                        inputStream.close();
                         return super.visitFile(sourcePath, attrs);
                     }
-                    catch (IOException exception)
-                    {
-                        if (t == null)
-                        {
-                            t = exception;
-                        }
-                        else
-                        {
-                            if (t != exception)
-                            {
-                                t.addSuppressed(exception);
-                            }
-                        }
-                        if (inputStream != null)
-                        {
-                            inputStream.close();
-                        }
-                    }
+
+                    return super.visitFile(sourcePath, attrs);
                 }
-                catch (IOException exception2)
+                catch (IOException exception)
                 {
                     if (t == null)
                     {
-                        t = exception2;
+                        t = exception;
                     }
                     else
                     {
-                        if (t != exception2)
+                        if (t != exception)
                         {
-                            t.addSuppressed(exception2);
+                            t.addSuppressed(exception);
                         }
                     }
+                    if (inputStream != null)
+                    {
+                        inputStream.close();
+                    }
                 }
-
-                if (t != null)
+            }
+            catch (IOException exception2)
+            {
+                if (t == null)
                 {
-                    throw t;
+                    t = exception2;
+                }
+                else
+                {
+                    if (t != exception2)
+                    {
+                        t.addSuppressed(exception2);
+                    }
                 }
             }
 
-            this.artifactBuilder.copy(sourcePath, targetPath);
+            if (t != null)
+            {
+                throw t;
+            }
         }
+
+        this.artifactBuilder.copy(sourcePath, targetPath);
+
         return super.visitFile(sourcePath, attrs);
     }
 
@@ -142,16 +150,16 @@ public final class UnsupportedFilesCopyVisitor
             return this;
         }
 
+        public UnsupportedFilesCopyVisitor build()
+        {
+            return new UnsupportedFilesCopyVisitor(this);
+        }
+
         public Builder putModifier(final Predicate<Path> pathPredicate,
             final LineFeedConverter.ConvertOption... convertOptions)
         {
             this.modificators.put(pathPredicate, convertOptions);
             return this;
-        }
-
-        public UnsupportedFilesCopyVisitor build()
-        {
-            return new UnsupportedFilesCopyVisitor(this);
         }
     }
 

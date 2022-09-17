@@ -94,7 +94,7 @@ public class ExportService
                 public Thread newThread(Runnable r)
                 {
                     Thread t = new Thread(r);
-                    t.setName("Exporter-" + this.index.incrementAndGet());
+                    t.setName("Exporter-" + this.index.incrementAndGet()); //$NON-NLS-1$
                     return t;
                 }
             });
@@ -157,66 +157,6 @@ public class ExportService
         }
     }
 
-    private void checkActive()
-    {
-        if (!this.active)
-        {
-            throw new IllegalStateException("The service is not active");
-        }
-    }
-
-    private String getMessage(List<IStatus> statusList)
-    {
-        Integer severity = Integer.valueOf(statusList.stream().mapToInt(IStatus::getSeverity).max().orElse(0));
-        switch (severity.intValue())
-        {
-        case IStatus.OK:
-        case IStatus.INFO:
-            return Messages.ExportService_export_operation_success;
-        case IStatus.CANCEL:
-            return Messages.ExportService_export_operation_canceled_by_user;
-        case IStatus.WARNING:
-            return Messages.ExportService_export_operation_completed_with_warning;
-        default:
-            return (statusList.size() > 1) ? Messages.ExportService_export_operation_has_several_errors
-                : Messages.ExportService_export_operation_has_error;
-        }
-    }
-
-    private List<IStatus> export(EObject paramEObject, boolean exportSubordinateObject,
-        boolean exportExternalProperties, IExportArtifactBuilder artifactBuilder, IExportContext exportContext,
-        SubMonitor progress) throws OperationCanceledException
-    {
-        CompletionService<IStatus> completionService = new ExecutorCompletionService<>(this.threadPoolExecutor);
-        TaskMonitor taskMonitor = new TaskMonitor();
-        AtomicInteger activeTaskCount = new AtomicInteger();
-        completionService.submit(new ExportObjectTask(() -> paramEObject, exportSubordinateObject,
-            exportExternalProperties, artifactBuilder, exportContext, this.exporterRegistry, this.subObjectsManager,
-            completionService, activeTaskCount, taskMonitor));
-        activeTaskCount.incrementAndGet();
-        List<IStatus> status = new ArrayList<>();
-        while (!awaitCompletion(completionService, activeTaskCount, status, progress))
-        {
-            if (Thread.interrupted())
-            {
-                Thread.currentThread().interrupt();
-                taskMonitor.setCanceled(true);
-                throw new OperationCanceledException();
-            }
-            if (progress.isCanceled())
-            {
-                taskMonitor.setCanceled(true);
-                throw new OperationCanceledException();
-            }
-            String taskName = taskMonitor.getTaskName();
-            if (taskName != null)
-            {
-                progress.setTaskName(taskName);
-            }
-        }
-        return status;
-    }
-
     private boolean awaitCompletion(CompletionService<IStatus> completionService, AtomicInteger activeTaskCount,
         List<IStatus> status, SubMonitor monitor)
     {
@@ -254,6 +194,66 @@ public class ExportService
         }
         monitor.worked(1);
         return activeTaskCount.decrementAndGet() == 0;
+    }
+
+    private void checkActive()
+    {
+        if (!this.active)
+        {
+            throw new IllegalStateException("The service is not active");
+        }
+    }
+
+    private List<IStatus> export(EObject paramEObject, boolean exportSubordinateObject,
+        boolean exportExternalProperties, IExportArtifactBuilder artifactBuilder, IExportContext exportContext,
+        SubMonitor progress) throws OperationCanceledException
+    {
+        CompletionService<IStatus> completionService = new ExecutorCompletionService<>(this.threadPoolExecutor);
+        TaskMonitor taskMonitor = new TaskMonitor();
+        AtomicInteger activeTaskCount = new AtomicInteger();
+        completionService.submit(new ExportObjectTask(() -> paramEObject, exportSubordinateObject,
+            exportExternalProperties, artifactBuilder, exportContext, this.exporterRegistry, this.subObjectsManager,
+            completionService, activeTaskCount, taskMonitor));
+        activeTaskCount.incrementAndGet();
+        List<IStatus> status = new ArrayList<>();
+        while (!awaitCompletion(completionService, activeTaskCount, status, progress))
+        {
+            if (Thread.interrupted())
+            {
+                Thread.currentThread().interrupt();
+                taskMonitor.setCanceled(true);
+                throw new OperationCanceledException();
+            }
+            if (progress.isCanceled())
+            {
+                taskMonitor.setCanceled(true);
+                throw new OperationCanceledException();
+            }
+            String taskName = taskMonitor.getTaskName();
+            if (taskName != null)
+            {
+                progress.setTaskName(taskName);
+            }
+        }
+        return status;
+    }
+
+    private String getMessage(List<IStatus> statusList)
+    {
+        Integer severity = Integer.valueOf(statusList.stream().mapToInt(IStatus::getSeverity).max().orElse(0));
+        switch (severity.intValue())
+        {
+        case IStatus.OK:
+        case IStatus.INFO:
+            return Messages.ExportService_export_operation_success;
+        case IStatus.CANCEL:
+            return Messages.ExportService_export_operation_canceled_by_user;
+        case IStatus.WARNING:
+            return Messages.ExportService_export_operation_completed_with_warning;
+        default:
+            return (statusList.size() > 1) ? Messages.ExportService_export_operation_has_several_errors
+                : Messages.ExportService_export_operation_has_error;
+        }
     }
 
     private static class ExportObjectTask
@@ -343,23 +343,6 @@ public class ExportService
         }
     }
 
-    private static class TaskMonitor
-        extends NullProgressMonitor
-    {
-        private volatile String taskName;
-
-        @Override
-        public void setTaskName(String name)
-        {
-            this.taskName = name;
-        }
-
-        public String getTaskName()
-        {
-            return this.taskName;
-        }
-    }
-
     private static class ResourcePlan
         implements IResourcePlan
     {
@@ -391,6 +374,23 @@ public class ExportService
             };
             definitions.put(EXPORT_YAML_ACTIVITY, activityDemandsDefaultAdapter);
             return definitions;
+        }
+    }
+
+    private static class TaskMonitor
+        extends NullProgressMonitor
+    {
+        private volatile String taskName;
+
+        public String getTaskName()
+        {
+            return this.taskName;
+        }
+
+        @Override
+        public void setTaskName(String name)
+        {
+            this.taskName = name;
         }
     }
 }

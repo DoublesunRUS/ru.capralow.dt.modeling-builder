@@ -50,96 +50,6 @@ public class YamlStreamWriter
         data = new HashMap<>();
     }
 
-    @Override
-    public void close() throws IOException
-    {
-        if (!(data.isEmpty()))
-        {
-            yaml.dump(data, writer);
-        }
-        writer.close();
-        yaml = null;
-    }
-
-    public void writeElement(String localName, String value) throws ExportException
-    {
-        if (localName == null || value == null)
-        {
-            throw new ExportException(MessageFormat.format(
-                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
-                new Object[] { localName, value }));
-        }
-
-        data.put(localName, value);
-    }
-
-    public void writeElement(String localName, String value, Map<String, Object> group) throws ExportException
-    {
-        if (localName == null || value == null)
-        {
-            throw new ExportException(MessageFormat.format(
-                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
-                new Object[] { localName, value }));
-        }
-
-        group.put(localName, value);
-    }
-
-    public void writeElement(String localName, Object value) throws ExportException
-    {
-        if (localName == null || value == null)
-        {
-            throw new ExportException(MessageFormat.format(
-                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
-                new Object[] { localName, value }));
-        }
-
-        writeElement(localName, String.valueOf(value));
-    }
-
-    public void writeElement(QName qName, Object value) throws ExportException
-    {
-        if (qName == null || value == null)
-        {
-            throw new ExportException(MessageFormat.format(
-                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
-                new Object[] { qName, value }));
-        }
-
-        writeElement(qName, String.valueOf(value));
-    }
-
-    public void writeElement(QName qName, String value) throws ExportException
-    {
-        if (qName == null || value == null)
-        {
-            throw new ExportException(MessageFormat.format(
-                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
-                new Object[] { qName, value }));
-        }
-
-        writeElement(qName.getLocalPart(), String.valueOf(value));
-    }
-
-    public void writeElement(QName qName, QName qValue) throws ExportException
-    {
-        if (qName == null || qValue == null)
-        {
-            throw new ExportException(MessageFormat.format(
-                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
-                new Object[] { qName, qValue }));
-        }
-
-        StringBuilder value = new StringBuilder();
-        if (!qValue.getPrefix().isEmpty())
-        {
-            value.append(qValue.getPrefix()).append(':');
-        }
-
-        value.append(qValue.getLocalPart());
-        writeElement(qName, value.toString());
-    }
-
     public Map<String, Object> addGroup(List<Object> list) throws ExportException
     {
         if (list == null)
@@ -155,11 +65,6 @@ public class YamlStreamWriter
         return groupData;
     }
 
-    public Map<String, Object> addGroup(String localName) throws ExportException
-    {
-        return addGroup(localName, data);
-    }
-
     public Map<String, Object> addGroup(QName qName) throws ExportException
     {
         if (qName == null)
@@ -172,6 +77,11 @@ public class YamlStreamWriter
         return addGroup(qName.getLocalPart(), data);
     }
 
+    public Map<String, Object> addGroup(String localName) throws ExportException
+    {
+        return addGroup(localName, data);
+    }
+
     public Map<String, Object> addGroup(String localName, Map<String, Object> group) throws ExportException
     {
         if (localName == null)
@@ -182,14 +92,16 @@ public class YamlStreamWriter
         }
 
         Map<String, Object> groupData = new HashMap<>();
-        group.put(localName, groupData);
+        if (group != null)
+        {
+            group.put(localName, groupData);
+        }
+        else
+        {
+            data.put(localName, groupData);
+        }
 
         return groupData;
-    }
-
-    public List<Object> addList(String localName) throws ExportException
-    {
-        return addList(localName, data);
     }
 
     public List<Object> addList(QName qName) throws ExportException
@@ -204,6 +116,23 @@ public class YamlStreamWriter
         return addList(qName.getLocalPart(), data);
     }
 
+    public List<Object> addList(QName qName, Map<String, Object> group) throws ExportException
+    {
+        if (qName == null)
+        {
+            throw new ExportException(MessageFormat.format(
+                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
+                new Object[] { qName }));
+        }
+
+        return addList(qName.getLocalPart(), group);
+    }
+
+    public List<Object> addList(String localName) throws ExportException
+    {
+        return addList(localName, data);
+    }
+
     public List<Object> addList(String localName, Map<String, Object> group) throws ExportException
     {
         if (localName == null)
@@ -214,9 +143,123 @@ public class YamlStreamWriter
         }
 
         List<Object> groupData = new ArrayList<>();
-        group.put(localName, groupData);
+        if (group != null)
+        {
+            group.put(localName, groupData);
+        }
+        else
+        {
+            data.put(localName, groupData);
+        }
 
         return groupData;
+    }
+
+    @Override
+    public void close() throws IOException
+    {
+        if (!(data.isEmpty()))
+        {
+            yaml.dump(data, writer);
+        }
+        writer.close();
+        yaml = null;
+    }
+
+    public void removeEmptyGroup(String groupName, Map<String, Object> parentGroup)
+    {
+        if (parentGroup != null)
+        {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> group = (Map<String, Object>)parentGroup.get(groupName);
+            if (group.isEmpty())
+            {
+                parentGroup.remove(groupName);
+            }
+        }
+        else
+        {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> group = (Map<String, Object>)data.get(groupName);
+            if (group.isEmpty())
+            {
+                data.remove(groupName);
+            }
+        }
+    }
+
+    public void writeElement(QName qName, Object value, Map<String, Object> group) throws ExportException
+    {
+        if (qName == null || value == null)
+        {
+            throw new ExportException(MessageFormat.format(
+                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
+                new Object[] { qName, value }));
+        }
+
+        writeElement(qName.getLocalPart(), String.valueOf(value), group);
+    }
+
+    public void writeElement(QName qName, QName qValue, Map<String, Object> group) throws ExportException
+    {
+        if (qName == null || qValue == null)
+        {
+            throw new ExportException(MessageFormat.format(
+                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
+                new Object[] { qName, qValue }));
+        }
+
+        StringBuilder value = new StringBuilder();
+        if (!qValue.getPrefix().isEmpty())
+        {
+            value.append(qValue.getPrefix()).append(':');
+        }
+
+        value.append(qValue.getLocalPart());
+        writeElement(qName.getLocalPart(), value.toString(), group);
+    }
+
+    public void writeElement(QName qName, String value, Map<String, Object> group) throws ExportException
+    {
+        if (qName == null || value == null)
+        {
+            throw new ExportException(MessageFormat.format(
+                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
+                new Object[] { qName, value }));
+        }
+
+        writeElement(qName.getLocalPart(), String.valueOf(value), group);
+    }
+
+    public void writeElement(String localName, Object value, Map<String, Object> group) throws ExportException
+    {
+        if (localName == null || value == null)
+        {
+            throw new ExportException(MessageFormat.format(
+                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
+                new Object[] { localName, value }));
+        }
+
+        writeElement(localName, String.valueOf(value), group);
+    }
+
+    public void writeElement(String localName, String value, Map<String, Object> group) throws ExportException
+    {
+        if (localName == null || value == null)
+        {
+            throw new ExportException(MessageFormat.format(
+                Messages.ExportXmlStreamWriter_Error_of_writing_XML_attribute_with_localname__0__and_value__1,
+                new Object[] { localName, value }));
+        }
+
+        if (group != null)
+        {
+            group.put(localName, value);
+        }
+        else
+        {
+            data.put(localName, value);
+        }
     }
 
 }

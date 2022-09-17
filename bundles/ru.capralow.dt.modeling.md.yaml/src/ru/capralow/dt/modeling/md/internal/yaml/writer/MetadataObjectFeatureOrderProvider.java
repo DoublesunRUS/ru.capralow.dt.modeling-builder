@@ -77,6 +77,15 @@ public class MetadataObjectFeatureOrderProvider
     }
 
     @Override
+    public List<EStructuralFeature> getChildren(EClass eClass, Version version)
+    {
+        return eClass.getEAllStructuralFeatures()
+            .stream()
+            .filter(f -> f.getEAnnotation("http://www.1c.ru/v8/dt/metadata/MdClass") != null)
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public List<EStructuralFeature> getInnerInfo(EClass eClass, Version version)
     {
         if (eClass == MdClassPackage.Literals.CONFIGURATION)
@@ -111,18 +120,9 @@ public class MetadataObjectFeatureOrderProvider
             .apply(version);
     }
 
-    @Override
-    public List<EStructuralFeature> getChildren(EClass eClass, Version version)
+    private boolean defaultPropertyFilter(EStructuralFeature feature)
     {
-        return eClass.getEAllStructuralFeatures()
-            .stream()
-            .filter(f -> f.getEAnnotation("http://www.1c.ru/v8/dt/metadata/MdClass") != null)
-            .collect(Collectors.toList());
-    }
-
-    Map<EClass, Function<Version, List<EStructuralFeature>>> getPropertiesOrderMap()
-    {
-        return this.propertiesOrderMap;
+        return isPropertyFeature(feature) && isNotTransientDerivedFeature(feature);
     }
 
     private List<EStructuralFeature> getAccountingFlag(Version version)
@@ -133,6 +133,14 @@ public class MetadataObjectFeatureOrderProvider
             .next(MdClassPackage.Literals.ACCOUNTING_FLAG__FILL_VALUE)
             .cursor(MdClassPackage.Literals.BASIC_FEATURE__LINK_BY_TYPE)
             .next(MdClassPackage.Literals.ACCOUNTING_FLAG__CHOICE_HISTORY_ON_INPUT)
+            .build();
+    }
+
+    private List<EStructuralFeature> getAccountingRegisterAttribute(Version version)
+    {
+        return (new ListBuilder(MdClassPackage.Literals.ACCOUNTING_REGISTER_ATTRIBUTE, this::defaultPropertyFilter))
+            .cursor(MdClassPackage.Literals.BASIC_FEATURE__LINK_BY_TYPE)
+            .next(MdClassPackage.Literals.ACCOUNTING_REGISTER_ATTRIBUTE__CHOICE_HISTORY_ON_INPUT)
             .build();
     }
 
@@ -151,14 +159,6 @@ public class MetadataObjectFeatureOrderProvider
         return (new ListBuilder(MdClassPackage.Literals.ACCOUNTING_REGISTER_RESOURCE, this::defaultPropertyFilter))
             .cursor(MdClassPackage.Literals.ACCOUNTING_REGISTER_RESOURCE__EXT_DIMENSION_ACCOUNTING_FLAG)
             .next(MdClassPackage.Literals.REGISTER_RESOURCE__FULL_TEXT_SEARCH)
-            .build();
-    }
-
-    private List<EStructuralFeature> getAccountingRegisterAttribute(Version version)
-    {
-        return (new ListBuilder(MdClassPackage.Literals.ACCOUNTING_REGISTER_ATTRIBUTE, this::defaultPropertyFilter))
-            .cursor(MdClassPackage.Literals.BASIC_FEATURE__LINK_BY_TYPE)
-            .next(MdClassPackage.Literals.ACCOUNTING_REGISTER_ATTRIBUTE__CHOICE_HISTORY_ON_INPUT)
             .build();
     }
 
@@ -703,19 +703,19 @@ public class MetadataObjectFeatureOrderProvider
             .build();
     }
 
-    private boolean isPropertyFeature(EStructuralFeature feature)
-    {
-        return feature.getEAnnotation("http://www.1c.ru/v8/dt/metadata/MdProperty") != null;
-    }
-
     private boolean isNotTransientDerivedFeature(EStructuralFeature feature)
     {
         return !feature.isDerived() && !feature.isTransient();
     }
 
-    private boolean defaultPropertyFilter(EStructuralFeature feature)
+    private boolean isPropertyFeature(EStructuralFeature feature)
     {
-        return isPropertyFeature(feature) && isNotTransientDerivedFeature(feature);
+        return feature.getEAnnotation("http://www.1c.ru/v8/dt/metadata/MdProperty") != null;
+    }
+
+    Map<EClass, Function<Version, List<EStructuralFeature>>> getPropertiesOrderMap()
+    {
+        return this.propertiesOrderMap;
     }
 
     private static class ListBuilder
@@ -728,6 +728,11 @@ public class MetadataObjectFeatureOrderProvider
         {
             this.orderedFeaturesList =
                 eClass.getEAllStructuralFeatures().stream().filter(filter).collect(Collectors.toList());
+        }
+
+        public List<EStructuralFeature> build()
+        {
+            return this.orderedFeaturesList;
         }
 
         public ListBuilder cursor(EStructuralFeature feature)
@@ -758,11 +763,6 @@ public class MetadataObjectFeatureOrderProvider
                 this.orderedFeaturesList.add(this.cursor, feature);
             }
             return this;
-        }
-
-        public List<EStructuralFeature> build()
-        {
-            return this.orderedFeaturesList;
         }
     }
 }

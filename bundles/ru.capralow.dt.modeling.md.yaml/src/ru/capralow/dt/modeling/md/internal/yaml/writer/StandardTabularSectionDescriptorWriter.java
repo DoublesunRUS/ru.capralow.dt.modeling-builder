@@ -4,6 +4,7 @@
 package ru.capralow.dt.modeling.md.internal.yaml.writer;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -30,7 +31,7 @@ public class StandardTabularSectionDescriptorWriter
 
     @Override
     public void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature feature, boolean writeEmpty,
-        Version version) throws ExportException
+        Version version, Map<String, Object> group) throws ExportException
     {
         if (feature.getEType() != MdClassPackage.Literals.STANDARD_TABULAR_SECTION_DESCRIPTION)
         {
@@ -38,7 +39,7 @@ public class StandardTabularSectionDescriptorWriter
         }
 
         Object value = eObject.eGet(feature);
-        if (!(value instanceof List && !((List)value).isEmpty()))
+        if (!(value instanceof List && !((List<?>)value).isEmpty()))
         {
             return;
         }
@@ -46,10 +47,10 @@ public class StandardTabularSectionDescriptorWriter
         for (StandardTabularSectionDescription standardTabularSection : (List<StandardTabularSectionDescription>)value)
         {
 //                writer.writeStartElement("XR.STANDARD_TABULAR_SECTION");
-            writer.writeElement("NAME_ATTRIBUTE", standardTabularSection.getName());
-            for (EStructuralFeature structuralFeature : this.propertyOrderList)
+            writer.writeElement("NAME_ATTRIBUTE", standardTabularSection.getName(), group);
+            for (EStructuralFeature structuralFeature : propertyOrderList)
             {
-                this.smartFeatureWriter.write(writer, standardTabularSection, structuralFeature, true, version);
+                smartFeatureWriter.write(writer, standardTabularSection, structuralFeature, true, version, group);
             }
 //                writer.writeEndElement();
         }

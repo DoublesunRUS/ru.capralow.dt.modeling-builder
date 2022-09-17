@@ -31,29 +31,23 @@ public class ExportConfigurationWizardPageData
         this.projects = this.initProjectsData(projectManager);
     }
 
+    public String getLabel(final IProject project)
+    {
+        final ProjectData projectData = this.projects.get(project);
+        final MdObject rootObject = projectData.getRootObject();
+        final Version version = projectData.getVersion();
+        return String.format("%s - %s (v. %s)", project.getName(), (rootObject != null) ? rootObject.getName() : "", //$NON-NLS-1$ //$NON-NLS-2$
+            version);
+    }
+
     public IProject getProject()
     {
         return this.project;
     }
 
-    public void setProject(final IProject project)
-    {
-        this.project = this.projects.containsKey(project) ? project : null;
-    }
-
     public Collection<IProject> getProjects()
     {
         return this.projects.keySet();
-    }
-
-    public void setTargetPath(final String path)
-    {
-        this.targetPath = (path != null) ? path.trim() : null;
-    }
-
-    public String getTargetPath()
-    {
-        return this.targetPath;
     }
 
     public EObject getRootObject()
@@ -65,18 +59,24 @@ public class ExportConfigurationWizardPageData
         return null;
     }
 
+    public String getTargetPath()
+    {
+        return this.targetPath;
+    }
+
     public Version getVersion()
     {
         return this.projects.get(this.project).getVersion();
     }
 
-    public String getLabel(final IProject project)
+    public void setProject(final IProject project)
     {
-        final ProjectData projectData = this.projects.get(project);
-        final MdObject rootObject = projectData.getRootObject();
-        final Version version = projectData.getVersion();
-        return String.format("%s - %s (v. %s)", project.getName(), (rootObject != null) ? rootObject.getName() : "", //$NON-NLS-1$ //$NON-NLS-2$
-            version);
+        this.project = this.projects.containsKey(project) ? project : null;
+    }
+
+    public void setTargetPath(final String path)
+    {
+        this.targetPath = (path != null) ? path.trim() : null;
     }
 
     private Map<IProject, ProjectData> initProjectsData(final IV8ProjectManager projectManager)
@@ -105,14 +105,14 @@ public class ExportConfigurationWizardPageData
             this.rootObject = rootObject;
         }
 
-        public Version getVersion()
-        {
-            return this.version;
-        }
-
         public MdObject getRootObject()
         {
             return this.rootObject;
+        }
+
+        public Version getVersion()
+        {
+            return this.version;
         }
     }
 }
