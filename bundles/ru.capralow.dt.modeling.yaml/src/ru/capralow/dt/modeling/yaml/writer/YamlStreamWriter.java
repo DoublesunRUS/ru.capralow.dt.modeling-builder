@@ -32,7 +32,7 @@ public class YamlStreamWriter
     public YamlStreamWriter(OutputStream outputStream) throws ExportException
     {
         DumperOptions options = new DumperOptions();
-//        options.setPrettyFlow(true);
+        options.setPrettyFlow(true);
         options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         options.setIndentWithIndicator(true);
         options.setIndent(4);

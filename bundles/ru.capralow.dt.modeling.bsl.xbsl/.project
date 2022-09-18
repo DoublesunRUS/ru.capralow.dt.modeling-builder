@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>ru.capralow.dt.modeling.core.tests</name>
+	<name>ru.capralow.dt.modeling.bsl.xbsl</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -25,15 +25,21 @@
 			<arguments>
 			</arguments>
 		</buildCommand>
+		<buildCommand>
+			<name>net.sf.eclipsecs.core.CheckstyleBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
 	</buildSpec>
 	<natures>
 		<nature>org.eclipse.m2e.core.maven2Nature</nature>
 		<nature>org.eclipse.pde.PluginNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>net.sf.eclipsecs.core.CheckstyleNature</nature>
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>1662637455348</id>
+			<id>1662637455356</id>
 			<name></name>
 			<type>30</type>
 			<matcher>

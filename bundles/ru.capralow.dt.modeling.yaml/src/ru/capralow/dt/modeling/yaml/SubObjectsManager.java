@@ -99,35 +99,37 @@ public class SubObjectsManager
         {
             for (EReference reference : references)
             {
-                if (refereceProvider.test(version, reference))
+                if (!(refereceProvider.test(version, reference)))
                 {
-                    Object value = eObject.eGet(reference, resolve);
-                    if (reference.isMany())
-                    {
-                        list.addAll((Collection<? extends EObject>)value);
-                        continue;
-                    }
-                    if (value != null)
-                    {
-                        list.add((EObject)value);
-                    }
+                    continue;
+                }
+
+                Object value = eObject.eGet(reference, resolve);
+
+                if (reference.isMany())
+                {
+                    list.addAll((Collection<? extends EObject>)value);
+                }
+                else if (value != null)
+                {
+                    list.add((EObject)value);
                 }
             }
         }
         return list;
     }
 
-    private Supplier<EObject> wrap(EObject paramEObject, EObject paramIV8Project)
+    private Supplier<EObject> wrap(EObject eObject, EObject v8Project)
     {
-        if (paramEObject instanceof com._1c.g5.v8.dt.form.model.Form && paramEObject.eIsProxy())
+        if (eObject instanceof com._1c.g5.v8.dt.form.model.Form && eObject.eIsProxy())
         {
-            IV8Project project = this.v8ProjectManager.getProject(paramIV8Project);
+            IV8Project project = this.v8ProjectManager.getProject(v8Project);
             if (project instanceof IConfigurationAware && ((IConfigurationAware)project).getConfiguration() != null)
             {
-                return () -> EcoreUtil.resolve(paramEObject, ((IConfigurationAware)paramIV8Project).getConfiguration());
+                return () -> EcoreUtil.resolve(eObject, ((IConfigurationAware)v8Project).getConfiguration());
             }
         }
-        return () -> paramEObject;
+        return () -> eObject;
     }
 
     private interface IVersionAwareReferecePredicate
