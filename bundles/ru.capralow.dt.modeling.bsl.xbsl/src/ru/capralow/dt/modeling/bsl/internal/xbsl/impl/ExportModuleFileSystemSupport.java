@@ -75,7 +75,7 @@ public class ExportModuleFileSystemSupport
         }
         case OBJECT_MODULE:
         {
-            return "Объект";
+            return ".Объект";
         }
         case MANAGER_MODULE:
         {
@@ -83,31 +83,31 @@ public class ExportModuleFileSystemSupport
         }
         case RECORDSET_MODULE:
         {
-            return "НаборЗаписей";
+            return ".НаборЗаписей";
         }
         case COMMAND_MODULE:
         {
-            return "Команда";
+            return ".Команда";
         }
         case MANAGED_APP_MODULE:
         {
-            return "ManagedApplicationModule";
+            return ".ManagedApplicationModule";
         }
         case ORDINARY_APP_MODULE:
         {
-            return "OrdinaryApplicationModule";
+            return ".OrdinaryApplicationModule";
         }
         case EXTERNAL_CONN_MODULE:
         {
-            return "ExternalConnectionModule";
+            return ".ExternalConnectionModule";
         }
         case SESSION_MODULE:
         {
-            return "SessionModule";
+            return ".SessionModule";
         }
         case VALUE_MANAGER_MODULE:
         {
-            return "ValueManagerModule";
+            return ".ValueManagerModule";
         }
         default:
         {
@@ -179,14 +179,26 @@ public class ExportModuleFileSystemSupport
                 }
             }
 
-            return getMdObjectTargetDirectory(basicForm)
-                .resolve(Paths.get(basicForm.getName() + FORM + moduleFileName));
+            Path targetPath = getMdObjectTargetDirectory(basicForm);
+            Path prefix = targetPath.getFileName();
+            if (String.valueOf(prefix.getFileName()).equals("-")) //$NON-NLS-1$
+            {
+                prefix = prefix.resolveSibling(""); //$NON-NLS-1$
+            }
+            return targetPath
+                .resolveSibling(prefix + String.valueOf(Paths.get(basicForm.getName() + FORM + moduleFileName)));
         }
 
         if (owner instanceof MdObject)
         {
             final MdObject mdObject = (MdObject)owner;
-            return getMdObjectTargetDirectory(mdObject).resolve(Paths.get(mdObject.getName() + moduleFileName));
+            Path targetPath = getMdObjectTargetDirectory(mdObject);
+            Path prefix = targetPath.getFileName();
+            if (String.valueOf(prefix.getFileName()).equals("-")) //$NON-NLS-1$
+            {
+                prefix = prefix.resolveSibling(""); //$NON-NLS-1$
+            }
+            return targetPath.resolveSibling(prefix + String.valueOf(Paths.get(mdObject.getName() + moduleFileName)));
         }
 
         return null;

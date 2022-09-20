@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -229,6 +230,8 @@ public class ModuleExporter
                                 methodText += "метод " + method.getName(); //$NON-NLS-1$
                                 methodText += "("; //$NON-NLS-1$
 
+                                List<String> usedVariables = new ArrayList<>();
+
                                 boolean firstParam = true;
                                 EList<FormalParam> formalParams = method.getFormalParams();
                                 for (FormalParam formalParam : formalParams)
@@ -240,6 +243,7 @@ public class ModuleExporter
                                         methodText += ", "; //$NON-NLS-1$
                                     }
                                     methodText += formalParam.getName() + ":"; //$NON-NLS-1$
+                                    usedVariables.add(formalParam.getName());
                                     firstParam = false;
 
                                     boolean firstType = true;
@@ -265,7 +269,8 @@ public class ModuleExporter
                                 EList<Statement> statements = method.allStatements();
                                 for (Statement statement : statements)
                                 {
-                                    String statementText = ReturnStringFromStatement(statement, configuration);
+                                    String statementText =
+                                        ReturnStringFromStatement(statement, usedVariables, configuration);
 
                                     methodText += "\t" + statementText + Strings.newLine(); //$NON-NLS-1$
                                 }
@@ -479,7 +484,8 @@ public class ModuleExporter
         return result;
     }
 
-    protected String ReturnStringFromStatement(Statement statement, Configuration configuration)
+    protected String ReturnStringFromStatement(Statement statement, List<String> usedVariables,
+        Configuration configuration)
     {
         String result = ""; //$NON-NLS-1$
 
@@ -489,6 +495,16 @@ public class ModuleExporter
             Expression rightExpression = ((SimpleStatement)statement).getRight();
 
             result = ReturnStringFromExpression(leftExpression, configuration);
+
+            if (leftExpression instanceof StaticFeatureAccess)
+            {
+                String variableName = ((StaticFeatureAccess)leftExpression).getName();
+                if (!usedVariables.contains(variableName))
+                {
+                    result = "пер " + result;
+                    usedVariables.add(variableName);
+                }
+            }
 
             if (rightExpression != null)
             {

@@ -9,21 +9,27 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.xtext.EcoreUtil2;
 
 import com._1c.g5.v8.bm.integration.IBmModel;
 import com._1c.g5.v8.dt.core.platform.IBmModelManager;
 import com._1c.g5.v8.dt.md.IExternalPropertyManagerRegistry;
 import com._1c.g5.v8.dt.metadata.IExternalPropertyManager;
 import com._1c.g5.v8.dt.metadata.mdclass.Configuration;
+import com._1c.g5.v8.dt.metadata.mdclass.MdClassPackage;
 import com._1c.g5.v8.dt.metadata.mdclass.MdObject;
 import com._1c.g5.v8.dt.metadata.mdclass.Subsystem;
 import com._1c.g5.v8.dt.metadata.mdclass.util.MdClassUtil;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Provider;
 
 import ru.capralow.dt.modeling.core.ExportDebugTrace;
@@ -36,13 +42,27 @@ public abstract class BaseYamlExportFileSystemSupport
 
     private static final String ROOT = ""; //$NON-NLS-1$
 
-    private static final String FORMS = "Forms"; //$NON-NLS-1$
+    public static final Map<EClass, String> TOP_OBJECT_FOLDER_NAMES;
 
-    private static final String TEMPLATES = "Templates"; //$NON-NLS-1$
-
-    private static final String COMMANDS = "Commands"; //$NON-NLS-1$
-
-    private static final String RECALCULATIONS = "Recalculations"; //$NON-NLS-1$
+    static
+    {
+        ImmutableMap.Builder<EClass, String> foldersBuilder = ImmutableMap.builder();
+        foldersBuilder.put(MdClassPackage.Literals.COMMON_MODULE, "-"); //$NON-NLS-1$
+        foldersBuilder.put(MdClassPackage.Literals.HTTP_SERVICE, "HTTPСервис"); //$NON-NLS-1$
+        foldersBuilder.put(MdClassPackage.Literals.CATALOG, "Справочник"); //$NON-NLS-1$
+        foldersBuilder.put(MdClassPackage.Literals.DOCUMENT, "Документ"); //$NON-NLS-1$
+        foldersBuilder.put(MdClassPackage.Literals.ENUM, "Перечисление"); //$NON-NLS-1$
+        foldersBuilder.put(MdClassPackage.Literals.REPORT, "Отчет"); //$NON-NLS-1$
+        foldersBuilder.put(MdClassPackage.Literals.DATA_PROCESSOR, "Обработка"); //$NON-NLS-1$
+        foldersBuilder.put(MdClassPackage.Literals.INFORMATION_REGISTER, "РегистрСведений"); //$NON-NLS-1$
+        foldersBuilder.put(MdClassPackage.Literals.ACCUMULATION_REGISTER, "РегистрНакопления"); //$NON-NLS-1$
+        foldersBuilder.put(MdClassPackage.Literals.CHART_OF_CHARACTERISTIC_TYPES, "ПланВидовХарактеристик"); //$NON-NLS-1$
+        foldersBuilder.put(MdClassPackage.Literals.CHART_OF_ACCOUNTS, "ПланСчетов"); //$NON-NLS-1$
+        foldersBuilder.put(MdClassPackage.Literals.ACCOUNTING_REGISTER, "РегистрБухгалтерии"); //$NON-NLS-1$
+        foldersBuilder.put(MdClassPackage.Literals.CHART_OF_CALCULATION_TYPES, "ПланВидовРасчета"); //$NON-NLS-1$
+        foldersBuilder.put(MdClassPackage.Literals.CALCULATION_REGISTER, "РегистрРасчета"); //$NON-NLS-1$
+        TOP_OBJECT_FOLDER_NAMES = foldersBuilder.build();
+    }
 
     public static <T extends EObject> boolean containsBmObject(List<? extends T> list, T object)
     {
@@ -109,72 +129,40 @@ public abstract class BaseYamlExportFileSystemSupport
         Collection<Subsystem> mdObjectsubsystems =
             getSubsystemsContainingMdObject(MdClassUtil.getConfiguration(mdObject), mdObject);
 
+        Path path;
         if (!mdObjectsubsystems.isEmpty())
         {
             Subsystem subsystem = mdObjectsubsystems.stream().findFirst().get();
 
-            Path path = Paths.get(subsystem.getName(), new String[0]);
+            path = Paths.get(subsystem.getName(), new String[0]);
             while (subsystem.getParentSubsystem() != null)
             {
                 subsystem = subsystem.getParentSubsystem();
                 path = Paths.get(subsystem.getName(), new String[] { subsystem.getName() }).resolve(path);
             }
 
-            return path;
-
         }
         else
         {
-            return Paths.get("Основной", new String[0]); //$NON-NLS-1$
+            path = Paths.get("Основной", new String[0]); //$NON-NLS-1$
         }
 
-//        if (subsystem != null)
-//        {
-//            if (mdObject instanceof Subsystem)
-//            {
-//                Path path = Paths.get(subsystem.getName(), new String[0]);
-//                while (subsystem.getParentSubsystem() != null)
-//                {
-//                    subsystem = subsystem.getParentSubsystem();
-//                    path = Paths.get(subsystem.getName(), new String[] { subsystem.getName() }).resolve(path);
-//                }
-//                return path;
-//            }
+        String target = TOP_OBJECT_FOLDER_NAMES.get(mdObject.eClass());
+        if (target != null)
+        {
+            path = path.resolve(target);
+            return path;
+        }
 
-//            if (mdObject instanceof Table)
-//            {
-//                Table table = (Table)mdObject;
-//                String parentFolder = TOP_OBJECT_FOLDER_NAMES.get(MdClassPackage.Literals.EXTERNAL_DATA_SOURCE);
-//                return Paths.get(parentFolder, new String[] { table.getParentDataSource().getName(), target });
-//            }
-//
-//            if (mdObject instanceof Cube)
-//            {
-//                Cube cube = (Cube)mdObject;
-//                String parentFolder = TOP_OBJECT_FOLDER_NAMES.get(MdClassPackage.Literals.EXTERNAL_DATA_SOURCE);
-//                return Paths.get(parentFolder, new String[] { cube.getParentDataSource().getName(), target });
-//            }
-//
-//            if (mdObject instanceof DimensionTable)
-//            {
-//                DimensionTable dimensionTable = (DimensionTable)mdObject;
-//                String parentFolder = TOP_OBJECT_FOLDER_NAMES.get(MdClassPackage.Literals.EXTERNAL_DATA_SOURCE);
-//                String parentName = dimensionTable.getParentCube().getParentDataSource().getName();
-//                String cubeFolder = TOP_OBJECT_FOLDER_NAMES.get(MdClassPackage.Literals.CUBE);
-//                String cubeName = dimensionTable.getParentCube().getName();
-//                return Paths.get(parentFolder, new String[] { parentName, cubeFolder, cubeName, target });
-//            }
+        MdObject container = EcoreUtil2.getContainerOfType(mdObject.eContainer(), MdObject.class);
+        Preconditions.checkState(container != null && !container.eIsProxy());
 
-//            return Paths.get(subsystem.getName(), new String[0]);
-//        }
-
-//        MdObject container = EcoreUtil2.getContainerOfType(mdObject.eContainer(), MdObject.class);
-//        Preconditions.checkState(container != null && !container.eIsProxy());
-//        Path containerPath = getMdObjectTargetDirectory(container).resolve(container.getName());
-//        if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicForm)
-//        {
-//            return containerPath.resolve(FORMS);
-//        }
+        Path targetPath = getMdObjectTargetDirectory(container);
+        Path containerPath = targetPath.resolveSibling(targetPath.getFileName() + container.getName());
+        if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicForm)
+        {
+            return containerPath;
+        }
 //        if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicTemplate)
 //        {
 //            return containerPath.resolve(TEMPLATES);
@@ -188,13 +176,12 @@ public abstract class BaseYamlExportFileSystemSupport
 //            return containerPath.resolve("Recalculations");
 //        }
 
-//        ExportDebugTrace debugTrace = ExportDebugTrace.getInstance();
-//        String message = MessageFormat.format
-//        ("Trying gets target directory for unknown metadata object with uri: {0}",
-//            new Object[] { EcoreUtil.getURI(mdObject) });
-//        debugTrace.trace(IExporter.EXPORTER_TRACE_OPTION, message);
-//        debugTrace.traceDumpStack(IExporter.EXPORTER_TRACE_OPTION);
-//        throw new IllegalArgumentException(message);
+        ExportDebugTrace debugTrace = ExportDebugTrace.getInstance();
+        String message = MessageFormat.format("Trying gets target directory for unknown metadata object with uri: {0}",
+            new Object[] { EcoreUtil.getURI(mdObject) });
+        debugTrace.trace(IExporter.EXPORTER_TRACE_OPTION, message);
+        debugTrace.traceDumpStack(IExporter.EXPORTER_TRACE_OPTION);
+        throw new IllegalArgumentException(message);
     }
 
     private static class ContainsMdObjectPredicate

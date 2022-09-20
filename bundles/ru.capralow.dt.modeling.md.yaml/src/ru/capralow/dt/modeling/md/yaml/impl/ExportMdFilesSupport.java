@@ -83,8 +83,14 @@ public class ExportMdFilesSupport
             }
             if (eObject instanceof MdObject)
             {
-                return getMdObjectTargetDirectory((MdObject)eObject)
-                    .resolve(String.valueOf(((MdObject)eObject).getName()) + "." + YAML_EXT); //$NON-NLS-1$
+                Path targetPath = getMdObjectTargetDirectory((MdObject)eObject);
+                Path prefix = targetPath.getFileName();
+                if (String.valueOf(prefix.getFileName()).equals("-")) //$NON-NLS-1$
+                {
+                    prefix = prefix.resolveSibling(""); //$NON-NLS-1$
+                }
+                String fileName = String.valueOf(((MdObject)eObject).getName()) + "." + YAML_EXT; //$NON-NLS-1$
+                return targetPath.resolveSibling(prefix + fileName);
             }
 //            if (eObject instanceof Help)
 //            {
