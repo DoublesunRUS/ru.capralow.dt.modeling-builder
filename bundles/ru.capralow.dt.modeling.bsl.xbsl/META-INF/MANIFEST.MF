@@ -19,8 +19,11 @@ Bundle-ClassPath: .
 Bundle-Activator: ru.capralow.dt.modeling.bsl.internal.xbsl.BslXBslPlugin
 Export-Package: ru.capralow.dt.modeling.bsl.internal.xbsl;x-internal:=true,
  ru.capralow.dt.modeling.bsl.internal.xbsl.impl;x-internal:=true
-Import-Package: com._1c.g5.v8.dt.bsl.model;version="[5.0.0,6.0.0)",
+Import-Package: com._1c.g5.v8.bm.core;version="[7.7.0,8.0.0)",
+ com._1c.g5.v8.bm.integration;version="[10.0.0,11.0.0)",
+ com._1c.g5.v8.dt.bsl.model;version="[5.0.0,6.0.0)",
  com._1c.g5.v8.dt.bsl.model.resource.owner;version="[2.0.0,3.0.0)",
+ com._1c.g5.v8.dt.bsl.naming;version="[2.0.0,3.0.0)",
  com._1c.g5.v8.dt.bsl.resource;version="[14.0.0,15.0.0)",
  com._1c.g5.v8.dt.bsl.resource.extension;version="[1.0.0,2.0.0)",
  com._1c.g5.v8.dt.bsl.typesystem.util;version="[9.0.0,10.0.0)",
