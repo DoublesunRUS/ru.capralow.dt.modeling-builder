@@ -26,7 +26,7 @@ public class ExportFileSupport
     {
         try
         {
-            IExporter exporter = this.exporterRegistry.getExporter(version, eObject);
+            IExporter exporter = exporterRegistry.getExporter(version, eObject);
             return exporter.getOutputPath(eObject, null, version);
         }
         catch (ExportException e)
@@ -39,6 +39,6 @@ public class ExportFileSupport
     @Override
     public boolean isExportable(EObject eObject, Version version)
     {
-        return this.exporterRegistry.exporterExists(version, eObject);
+        return exporterRegistry.exporterExists(version, eObject);
     }
 }

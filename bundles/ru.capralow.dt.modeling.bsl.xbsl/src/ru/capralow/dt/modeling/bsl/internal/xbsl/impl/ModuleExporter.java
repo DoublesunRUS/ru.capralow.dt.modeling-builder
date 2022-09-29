@@ -25,11 +25,14 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.URIConverter;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.xtext.resource.DerivedStateAwareResource;
 import org.eclipse.xtext.util.Strings;
 
 import com._1c.g5.v8.dt.bsl.model.BinaryExpression;
 import com._1c.g5.v8.dt.bsl.model.BooleanLiteral;
+import com._1c.g5.v8.dt.bsl.model.BreakStatement;
 import com._1c.g5.v8.dt.bsl.model.Conditional;
+import com._1c.g5.v8.dt.bsl.model.ContinueStatement;
 import com._1c.g5.v8.dt.bsl.model.DynamicFeatureAccess;
 import com._1c.g5.v8.dt.bsl.model.EmptyStatement;
 import com._1c.g5.v8.dt.bsl.model.ExecuteStatement;
@@ -38,6 +41,7 @@ import com._1c.g5.v8.dt.bsl.model.FeatureAccess;
 import com._1c.g5.v8.dt.bsl.model.ForEachStatement;
 import com._1c.g5.v8.dt.bsl.model.ForToStatement;
 import com._1c.g5.v8.dt.bsl.model.FormalParam;
+import com._1c.g5.v8.dt.bsl.model.Function;
 import com._1c.g5.v8.dt.bsl.model.IfStatement;
 import com._1c.g5.v8.dt.bsl.model.IndexAccess;
 import com._1c.g5.v8.dt.bsl.model.Invocation;
@@ -55,6 +59,7 @@ import com._1c.g5.v8.dt.bsl.model.TryExceptStatement;
 import com._1c.g5.v8.dt.bsl.model.UnaryExpression;
 import com._1c.g5.v8.dt.bsl.model.UndefinedLiteral;
 import com._1c.g5.v8.dt.bsl.model.WhileStatement;
+import com._1c.g5.v8.dt.bsl.resource.BslResource;
 import com._1c.g5.v8.dt.bsl.resource.TypesComputer;
 import com._1c.g5.v8.dt.bsl.resource.extension.IBslResourceExtension;
 import com._1c.g5.v8.dt.bsl.resource.extension.IBslResourceExtensionManager;
@@ -216,6 +221,12 @@ public class ModuleExporter
                             Configuration configuration =
                                 ((IConfigurationAware)v8ProjectManager.getProject(eObject)).getConfiguration();
                             Module module = (Module)EcoreUtil.resolve(eObject, configuration);
+                            if (module.eResource() instanceof DerivedStateAwareResource)
+                            {
+                                ((DerivedStateAwareResource)module.eResource()).installDerivedState(false);
+                            }
+                            ((BslResource)module.eResource()).setDeepAnalysis(true);
+                            EcoreUtil.resolveAll(module);
 
                             EList<Method> methods = module.allMethods();
                             for (Method method : methods)
@@ -236,8 +247,6 @@ public class ModuleExporter
                                 EList<FormalParam> formalParams = method.getFormalParams();
                                 for (FormalParam formalParam : formalParams)
                                 {
-                                    formalParam = (FormalParam)EcoreUtil.resolve(formalParam, configuration);
-
                                     if (!firstParam)
                                     {
                                         methodText += ", "; //$NON-NLS-1$
@@ -264,15 +273,19 @@ public class ModuleExporter
                                     }
                                 }
 
-                                methodText += ")" + Strings.newLine(); //$NON-NLS-1$
+                                methodText += ")"; //$NON-NLS-1$
+
+                                if (method instanceof Function)
+                                {
+                                    methodText += ":любой"; //$NON-NLS-1$
+                                }
+
+                                methodText += Strings.newLine();
 
                                 EList<Statement> statements = method.allStatements();
                                 for (Statement statement : statements)
                                 {
-                                    String statementText =
-                                        ReturnStringFromStatement(statement, usedVariables, configuration);
-
-                                    methodText += "\t" + statementText + Strings.newLine(); //$NON-NLS-1$
+                                    methodText += ReturnStringFromStatement(statement, usedVariables, configuration, 1);
                                 }
 
                                 methodText += ";" + Strings.newLine() + Strings.newLine(); //$NON-NLS-1$
@@ -317,6 +330,7 @@ public class ModuleExporter
     }
 
     protected String ReturnStringFromBinaryExpression(BinaryExpression expression, Configuration configuration)
+        throws ExportException
     {
         String operation = ""; //$NON-NLS-1$
 
@@ -328,11 +342,26 @@ public class ModuleExporter
         case "EQ": //$NON-NLS-1$
             operation = " == "; //$NON-NLS-1$
             break;
+        case "GE": //$NON-NLS-1$
+            operation = " >= "; //$NON-NLS-1$
+            break;
         case "GT": //$NON-NLS-1$
             operation = " > "; //$NON-NLS-1$
             break;
+        case "DIVIDE": //$NON-NLS-1$
+            operation = " / "; //$NON-NLS-1$
+            break;
+        case "LE": //$NON-NLS-1$
+            operation = " <= "; //$NON-NLS-1$
+            break;
+        case "LT": //$NON-NLS-1$
+            operation = " < "; //$NON-NLS-1$
+            break;
         case "MINUS": //$NON-NLS-1$
             operation = " - "; //$NON-NLS-1$
+            break;
+        case "MODULO": //$NON-NLS-1$
+            operation = " % "; //$NON-NLS-1$
             break;
         case "MULTIPLY": //$NON-NLS-1$
             operation = " * "; //$NON-NLS-1$
@@ -346,11 +375,9 @@ public class ModuleExporter
         case "PLUS": //$NON-NLS-1$
             operation = " + "; //$NON-NLS-1$
             break;
-        case "LT": //$NON-NLS-1$
-            operation = " < "; //$NON-NLS-1$
-            break;
         default:
-            operation = " "; //$NON-NLS-1$
+            throw new ExportException("Unknown operation literal: " + expression.getOperation().getLiteral());
+
         }
 
         String result = ReturnStringFromExpression(expression.getLeft(), configuration) + operation
@@ -360,6 +387,13 @@ public class ModuleExporter
     }
 
     protected String ReturnStringFromExpression(Expression expression, Configuration configuration)
+        throws ExportException
+    {
+        return ReturnStringFromExpression(expression, configuration, 0);
+    }
+
+    protected String ReturnStringFromExpression(Expression expression, Configuration configuration, int offset)
+        throws ExportException
     {
         if (expression instanceof StaticFeatureAccess)
         {
@@ -370,20 +404,95 @@ public class ModuleExporter
             Invocation invocation = (Invocation)EcoreUtil.resolve(expression, configuration);
             FeatureAccess methodAccess = invocation.getMethodAccess();
 
-            String result = ReturnStringFromFeatureAccess(methodAccess, configuration);
+            String methodName = ReturnStringFromFeatureAccess(methodAccess, configuration);
 
-            result += "("; //$NON-NLS-1$
+            String result = ""; //$NON-NLS-1$
+
             boolean firstParam = true;
-            for (Expression param : invocation.getParams())
+            EList<Expression> params = invocation.getParams();
+
+            switch (methodName.toLowerCase())
             {
-                if (!firstParam)
+            case "?": //$NON-NLS-1$
+                result += ReturnStringFromExpression(params.get(0), configuration);
+                result += " ? "; //$NON-NLS-1$
+                result += ReturnStringFromExpression(params.get(1), configuration);
+                result += " : "; //$NON-NLS-1$
+                result += ReturnStringFromExpression(params.get(2), configuration);
+                break;
+
+            case "значениезаполнено": //$NON-NLS-1$
+                result += ReturnStringFromExpression(params.get(0), configuration);
+                result += ".Пусто()"; //$NON-NLS-1$
+                break;
+
+            case "пустаястрока": //$NON-NLS-1$
+                result += ReturnStringFromExpression(params.get(0), configuration);
+                result += ".Пусто()"; //$NON-NLS-1$
+                break;
+
+            case "стрзаменить": //$NON-NLS-1$
+                result += ReturnStringFromExpression(params.get(0), configuration);
+                result += ".Заменить("; //$NON-NLS-1$
+                for (int i = 1; i < params.size(); i++)
                 {
-                    result += ", "; //$NON-NLS-1$
+                    if (!firstParam)
+                    {
+                        result += ", "; //$NON-NLS-1$
+                    }
+                    result += ReturnStringFromExpression(params.get(i), configuration);
+                    firstParam = false;
                 }
-                result += ReturnStringFromExpression(param, configuration);
-                firstParam = false;
+                result += ")"; //$NON-NLS-1$
+
+                break;
+
+            case "строка": //$NON-NLS-1$
+                result += ReturnStringFromExpression(params.get(0), configuration);
+                result += ".ВСтроку()"; //$NON-NLS-1$
+                break;
+
+            case "стрразделить": //$NON-NLS-1$
+                result += ReturnStringFromExpression(params.get(0), configuration);
+                result += ".Заменить("; //$NON-NLS-1$
+                for (int i = 1; i < params.size(); i++)
+                {
+                    if (!firstParam)
+                    {
+                        result += ", "; //$NON-NLS-1$
+                    }
+                    result += ReturnStringFromExpression(params.get(i), configuration);
+                    firstParam = false;
+                }
+                result += ")"; //$NON-NLS-1$
+
+                break;
+
+            case "тип": //$NON-NLS-1$
+                result += "Тип<"; //$NON-NLS-1$
+                result += ReturnStringFromExpression(params.get(0), configuration).replace("\"", ""); //$NON-NLS-1$ //$NON-NLS-2$
+                result += ">"; //$NON-NLS-1$
+                break;
+
+            case "типзнч": //$NON-NLS-1$
+                result += ReturnStringFromExpression(params.get(0), configuration);
+                result += ".ПолучитьТип()"; //$NON-NLS-1$
+                break;
+
+            default:
+
+                result += methodName + "("; //$NON-NLS-1$
+                for (Expression param : params)
+                {
+                    if (!firstParam)
+                    {
+                        result += ", "; //$NON-NLS-1$
+                    }
+                    result += ReturnStringFromExpression(param, configuration);
+                    firstParam = false;
+                }
+                result += ")"; //$NON-NLS-1$
             }
-            result += ")"; //$NON-NLS-1$
 
             return result;
         }
@@ -400,14 +509,9 @@ public class ModuleExporter
 
             switch (rightType.getNameRu())
             {
-            case "Структура": //$NON-NLS-1$
+            case "Запрос": //$NON-NLS-1$
             {
-                result += "Соответствие<Строка,?>()"; //$NON-NLS-1$
-                break;
-            }
-            case "Соответствие": //$NON-NLS-1$
-            {
-                result += "Соответствие<?,?>()"; //$NON-NLS-1$
+                result += "Запрос()"; //$NON-NLS-1$
                 break;
             }
             case "Массив": //$NON-NLS-1$
@@ -415,9 +519,19 @@ public class ModuleExporter
                 result += "Массив<?>()"; //$NON-NLS-1$
                 break;
             }
-            case "Запрос": //$NON-NLS-1$
+            case "Соответствие": //$NON-NLS-1$
             {
-                result += "Запрос()"; //$NON-NLS-1$
+                result += "Соответствие<?,?>()"; //$NON-NLS-1$
+                break;
+            }
+            case "Структура": //$NON-NLS-1$
+            {
+                result += "Соответствие<Строка,?>()"; //$NON-NLS-1$
+                break;
+            }
+            case "УникальныйИдентификатор": //$NON-NLS-1$
+            {
+                result += "Ууид()"; //$NON-NLS-1$
                 break;
             }
             default:
@@ -447,7 +561,42 @@ public class ModuleExporter
         else if (expression instanceof StringLiteral)
         {
             EList<String> lines = ((StringLiteral)expression).getLines();
-            return String.join(Strings.newLine(), lines);
+            if (lines.size() == 0)
+            {
+                return ""; //$NON-NLS-1$
+            }
+            else if (lines.size() == 1)
+            {
+                String line = lines.get(0);
+                line = line.substring(1, line.length() - 1);
+
+                return "\"" + line.replace("\"\"", "\\\"") + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+            }
+            else
+            {
+                String result = ""; //$NON-NLS-1$
+
+                String offsetChars = ""; //$NON-NLS-1$
+                for (int i = 1; i <= offset; i++)
+                {
+                    offsetChars = "\t" + offsetChars; //$NON-NLS-1$
+                }
+
+                result += Strings.newLine() + offsetChars;
+                for (String line : lines)
+                {
+                    if (line.startsWith("|")) //$NON-NLS-1$
+                    {
+                        line = Strings.newLine() + offsetChars + line.substring(1);
+                    }
+
+                    result += line;
+                }
+
+                result = result.substring(1, result.length() - 1);
+
+                return "\"" + result.replace("\"\"", "\\\"") + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+            }
         }
         else if (expression instanceof NumberLiteral)
         {
@@ -467,6 +616,7 @@ public class ModuleExporter
     }
 
     protected String ReturnStringFromFeatureAccess(FeatureAccess featureAccess, Configuration configuration)
+        throws ExportException
     {
         String result = ""; //$NON-NLS-1$
 
@@ -474,7 +624,25 @@ public class ModuleExporter
         {
             Expression source = ((DynamicFeatureAccess)featureAccess).getSource();
 
-            result = ReturnStringFromExpression(source, configuration) + "." + featureAccess.getName(); //$NON-NLS-1$
+            String sourceString = ReturnStringFromExpression(source, configuration);
+
+            switch (sourceString.toLowerCase())
+            {
+            case "перечисления": //$NON-NLS-1$
+                result = "Перечисление" + featureAccess.getName(); //$NON-NLS-1$
+                break;
+
+            case "справочники": //$NON-NLS-1$
+                result = "Справочник" + featureAccess.getName(); //$NON-NLS-1$
+                break;
+
+            case "регистрысведений": //$NON-NLS-1$
+                result = "РегистрСведений" + featureAccess.getName(); //$NON-NLS-1$
+                break;
+
+            default:
+                result = sourceString + "." + featureAccess.getName(); //$NON-NLS-1$
+            }
         }
         else
         {
@@ -485,14 +653,20 @@ public class ModuleExporter
     }
 
     protected String ReturnStringFromStatement(Statement statement, List<String> usedVariables,
-        Configuration configuration)
+        Configuration configuration, int offset) throws ExportException
     {
-        String result = ""; //$NON-NLS-1$
+        String offsetChars = ""; //$NON-NLS-1$
+        for (int i = 1; i <= offset; i++)
+        {
+            offsetChars = "\t" + offsetChars; //$NON-NLS-1$
+        }
 
         if (statement instanceof SimpleStatement)
         {
             Expression leftExpression = ((SimpleStatement)statement).getLeft();
             Expression rightExpression = ((SimpleStatement)statement).getRight();
+
+            String result = ""; //$NON-NLS-1$
 
             result = ReturnStringFromExpression(leftExpression, configuration);
 
@@ -501,7 +675,7 @@ public class ModuleExporter
                 String variableName = ((StaticFeatureAccess)leftExpression).getName();
                 if (!usedVariables.contains(variableName))
                 {
-                    result = "пер " + result;
+                    result = "пер " + result; //$NON-NLS-1$
                     usedVariables.add(variableName);
                 }
             }
@@ -518,86 +692,206 @@ public class ModuleExporter
                     result += " = "; //$NON-NLS-1$
                 }
 
-                result += ReturnStringFromExpression(rightExpression, configuration);
+                result += ReturnStringFromExpression(rightExpression, configuration, offset);
             }
+
+            return offsetChars + result + Strings.newLine();
 
         }
         else if (statement instanceof ReturnStatement)
         {
+            String result = ""; //$NON-NLS-1$
+
             Expression returnExpression = ((ReturnStatement)statement).getExpression();
 
-            result = "возврат"; //$NON-NLS-1$
+            result += "возврат"; //$NON-NLS-1$
             result += " " + ReturnStringFromExpression(returnExpression, configuration); //$NON-NLS-1$
 
+            return offsetChars + result + Strings.newLine();
+        }
+        else if (statement instanceof BreakStatement)
+        {
+            String result = ""; //$NON-NLS-1$
+
+            result += "прервать"; //$NON-NLS-1$
+
+            return offsetChars + result + Strings.newLine();
+        }
+        else if (statement instanceof ContinueStatement)
+        {
+            String result = ""; //$NON-NLS-1$
+
+            result += "продолжить"; //$NON-NLS-1$
+
+            return offsetChars + result + Strings.newLine();
         }
         else if (statement instanceof IfStatement)
         {
-            Conditional ifPart = ((IfStatement)statement).getIfPart();
-            Expression ifPredicate = ifPart.getPredicate();
+            String result = ""; //$NON-NLS-1$
 
-            result = "если "; //$NON-NLS-1$
-            result += ReturnStringFromExpression(ifPredicate, configuration) + Strings.newLine();
-            result += "\t;" + Strings.newLine(); //$NON-NLS-1$
+            IfStatement ifStatement = (IfStatement)statement;
+            Conditional ifPart = ifStatement.getIfPart();
+
+            result += offsetChars + "если "; //$NON-NLS-1$
+            result += ReturnStringFromExpression(ifPart.getPredicate(), configuration);
+            result += Strings.newLine();
+
+            for (Statement subStatement : ifPart.getStatements())
+            {
+                result += ReturnStringFromStatement(subStatement, usedVariables, configuration, offset + 1);
+            }
+
+            for (Conditional subPart : ifStatement.getElsIfParts())
+            {
+                result += offsetChars + "иначе если "; //$NON-NLS-1$
+                result += ReturnStringFromExpression(subPart.getPredicate(), configuration);
+                result += Strings.newLine();
+
+                for (Statement subStatement : subPart.getStatements())
+                {
+                    result += ReturnStringFromStatement(subStatement, usedVariables, configuration, offset + 1);
+                }
+            }
+
+            EList<Statement> elseStatements = ifStatement.getElseStatements();
+            if (!elseStatements.isEmpty())
+            {
+                result += offsetChars + "иначе"; //$NON-NLS-1$
+                result += Strings.newLine();
+
+                for (Statement subStatement : elseStatements)
+                {
+                    result += ReturnStringFromStatement(subStatement, usedVariables, configuration, offset + 1);
+                }
+            }
+
+            result += offsetChars + ";" + Strings.newLine(); //$NON-NLS-1$
+
+            return result;
         }
         else if (statement instanceof WhileStatement)
         {
-            Expression predicate = ((WhileStatement)statement).getPredicate();
+            String result = ""; //$NON-NLS-1$
 
-            result = "пока "; //$NON-NLS-1$
+            WhileStatement whileStatement = (WhileStatement)statement;
+            Expression predicate = whileStatement.getPredicate();
+
+            result += offsetChars + "пока "; //$NON-NLS-1$
             result += ReturnStringFromExpression(predicate, configuration);
             result += Strings.newLine();
-            result += "\t;" + Strings.newLine(); //$NON-NLS-1$
+
+            for (Statement subStatement : whileStatement.getStatements())
+            {
+                result += ReturnStringFromStatement(subStatement, usedVariables, configuration, offset + 1);
+            }
+
+            result += offsetChars + ";" + Strings.newLine(); //$NON-NLS-1$
+
+            return result;
         }
         else if (statement instanceof ForToStatement)
         {
-            StaticFeatureAccess variableAccess = ((ForToStatement)statement).getVariableAccess();
-            Expression initializer = ((ForToStatement)statement).getInitializer();
-            Expression bound = ((ForToStatement)statement).getBound();
+            String result = ""; //$NON-NLS-1$
 
-            result = "для "; //$NON-NLS-1$
+            ForToStatement forToStatement = (ForToStatement)statement;
+            StaticFeatureAccess variableAccess = forToStatement.getVariableAccess();
+            Expression initializer = forToStatement.getInitializer();
+            Expression bound = forToStatement.getBound();
+
+            result += offsetChars + "для "; //$NON-NLS-1$
             result += ReturnStringFromExpression(variableAccess, configuration);
             result += " = "; //$NON-NLS-1$
             result += ReturnStringFromExpression(initializer, configuration);
             result += " по "; //$NON-NLS-1$
             result += ReturnStringFromExpression(bound, configuration);
             result += Strings.newLine();
-            result += "\t;" + Strings.newLine(); //$NON-NLS-1$
+
+            for (Statement subStatement : forToStatement.getStatements())
+            {
+                result += ReturnStringFromStatement(subStatement, usedVariables, configuration, offset + 1);
+            }
+
+            result += offsetChars + ";" + Strings.newLine(); //$NON-NLS-1$
+
+            return result;
         }
         else if (statement instanceof ForEachStatement)
         {
-            StaticFeatureAccess variableAccess = ((ForEachStatement)statement).getVariableAccess();
-            Expression collection = ((ForEachStatement)statement).getCollection();
+            String result = ""; //$NON-NLS-1$
 
-            result = "для "; //$NON-NLS-1$
+            ForEachStatement forEachStatement = (ForEachStatement)statement;
+            StaticFeatureAccess variableAccess = forEachStatement.getVariableAccess();
+            Expression collection = forEachStatement.getCollection();
+
+            result += offsetChars + "для "; //$NON-NLS-1$
             result += ReturnStringFromExpression(variableAccess, configuration);
             result += " из "; //$NON-NLS-1$
             result += ReturnStringFromExpression(collection, configuration);
             result += Strings.newLine();
-            result += "\t;" + Strings.newLine(); //$NON-NLS-1$
+
+            for (Statement subStatement : forEachStatement.getStatements())
+            {
+                result += ReturnStringFromStatement(subStatement, usedVariables, configuration, offset + 1);
+            }
+
+            result += offsetChars + ";" + Strings.newLine(); //$NON-NLS-1$
+
+            return result;
         }
         else if (statement instanceof TryExceptStatement)
         {
-            result = "попытка" + Strings.newLine(); //$NON-NLS-1$
-            result += "\tпоймать искл: любой" + Strings.newLine(); //$NON-NLS-1$
-            result += "\t;" + Strings.newLine(); //$NON-NLS-1$
+            String result = ""; //$NON-NLS-1$
+
+            TryExceptStatement tryExceptStatement = (TryExceptStatement)statement;
+
+            result += offsetChars + "попытка" + Strings.newLine(); //$NON-NLS-1$
+
+            for (Statement subStatement : tryExceptStatement.getTryStatements())
+            {
+                result += ReturnStringFromStatement(subStatement, usedVariables, configuration, offset + 1);
+            }
+
+            result += offsetChars + "поймать искл: любой" + Strings.newLine(); //$NON-NLS-1$
+
+            for (Statement subStatement : tryExceptStatement.getExceptStatements())
+            {
+                result += ReturnStringFromStatement(subStatement, usedVariables, configuration, offset + 1);
+            }
+
+            result += offsetChars + ";" + Strings.newLine(); //$NON-NLS-1$
+
+            return result;
         }
         else if (statement instanceof ExecuteStatement)
         {
-            result = "выполнить()" + Strings.newLine(); //$NON-NLS-1$
+            String result = ""; //$NON-NLS-1$
+
+            result += offsetChars + "выполнить()" + Strings.newLine(); //$NON-NLS-1$
+
+            return result;
         }
         else if (statement instanceof RaiseStatement)
         {
-            result = "выбросить новый Исключение()" + Strings.newLine(); //$NON-NLS-1$
+            String result = ""; //$NON-NLS-1$
+
+            result += offsetChars + "выбросить новый ИсключениеВыполнения("; //$NON-NLS-1$
+            for (Expression subExpression : ((RaiseStatement)statement).getExpressions())
+            {
+                result += ReturnStringFromExpression(subExpression, configuration, offset + 1);
+            }
+            result += ")" + Strings.newLine(); //$NON-NLS-1$
+
+            return result;
         }
         else if (statement instanceof EmptyStatement)
         {
-            result = Strings.newLine() + Strings.newLine();
+            return Strings.newLine();
         }
         else if (statement != null)
         {
-            result = ""; //$NON-NLS-1$
+            throw new ExportException("Unknown statement: " + statement.getClass());
         }
 
-        return result;
+        return ""; //$NON-NLS-1$
     }
 }

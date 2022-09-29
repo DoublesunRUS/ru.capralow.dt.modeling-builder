@@ -34,10 +34,10 @@ public abstract class BasicExporter
     {
         try
         {
-            Path outputFile = this.fileProvider.getFileName(eObject, feature, fileExtension, version);
+            Path outputFile = fileProvider.getFileName(eObject, feature, fileExtension, version);
             if (outputFile == null)
             {
-                this.debugTrace.trace(IExporter.EXPORTER_TRACE_OPTION,
+                debugTrace.trace(IExporter.EXPORTER_TRACE_OPTION,
                     MessageFormat.format("No output file for object with uri: {0} in {1}",
                         new Object[] { EcoreUtil.getURI(eObject), getClass().getSimpleName() }));
             }
@@ -47,7 +47,7 @@ public abstract class BasicExporter
 
         catch (Exception e)
         {
-            this.debugTrace.trace(IExporter.EXPORTER_TRACE_OPTION,
+            debugTrace.trace(IExporter.EXPORTER_TRACE_OPTION,
                 MessageFormat.format("BasicExporter gets output path error for object {0}, feature {1}",
                     new Object[] { EcoreUtil.getURI(eObject), feature }),
                 e);
@@ -74,6 +74,6 @@ public abstract class BasicExporter
     @Override
     public boolean isAppropriate(Version version, EObject eObject)
     {
-        return this.exporterQuialifier.qualify(this, version, eObject);
+        return exporterQuialifier.qualify(this, version, eObject);
     }
 }
