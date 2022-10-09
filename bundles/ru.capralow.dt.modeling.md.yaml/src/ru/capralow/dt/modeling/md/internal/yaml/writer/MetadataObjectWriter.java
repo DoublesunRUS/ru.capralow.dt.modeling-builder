@@ -21,6 +21,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
 import com._1c.g5.v8.dt.core.platform.IResourceLookup;
+import com._1c.g5.v8.dt.metadata.mdclass.CommonModule;
 import com._1c.g5.v8.dt.metadata.mdclass.MdClassPackage.Literals;
 import com._1c.g5.v8.dt.metadata.mdclass.MdObject;
 import com._1c.g5.v8.dt.platform.version.Version;
@@ -252,6 +253,19 @@ public class MetadataObjectWriter
             if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.CommonModule)
             {
                 writer.writeElement(IYamlElements.ELEMENT_KIND, IMetadataYamlElements.COMMON_MODULE, group);
+
+                CommonModule commonModule = (CommonModule)mdObject;
+                if (commonModule.isServer() && commonModule.isClientManagedApplication())
+                {
+                    writer.writeElement(IMetadataYamlElements.CommonModule.ENVIRONMENT,
+                        IMetadataYamlElements.CommonModule.CLIENT_SERVER, group);
+                }
+                else if (commonModule.isClientManagedApplication())
+                {
+                    writer.writeElement(IMetadataYamlElements.CommonModule.ENVIRONMENT,
+                        IMetadataYamlElements.CommonModule.CLIENT, group);
+                }
+
             }
             else if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.HTTPService)
             {

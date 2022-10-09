@@ -41,4 +41,11 @@ public class IMetadataYamlElements
         public static final QName VENDOR = new QName("Разработчик"); //$NON-NLS-1$
     }
 
+    public static class CommonModule
+    {
+        public static final QName ENVIRONMENT = new QName("МестоИсполнения"); //$NON-NLS-1$
+        public static final QName CLIENT = new QName("Клиент"); //$NON-NLS-1$
+        public static final QName CLIENT_SERVER = new QName("КлиентИСервер"); //$NON-NLS-1$
+        public static final QName SERVER_CALL = new QName("ДоступенСКлиента"); //$NON-NLS-1$
+    }
 }

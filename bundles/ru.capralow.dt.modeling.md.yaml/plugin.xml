@@ -3,11 +3,90 @@
 <plugin>
    <extension
          point="ru.capralow.dt.modeling.yaml.exporter">
+         
       <exporter
             class="ru.capralow.dt.modeling.md.internal.yaml.ExecutableExtensionFactory:ru.capralow.dt.modeling.md.yaml.impl.MetadataYamlExporter">
          <runtime>
             <since value="com._1c.g5.v8.dt.platform.runtime.8.3.8"/>
          </runtime>
       </exporter>
+      
+      <exporter
+            class="ru.capralow.dt.modeling.md.internal.yaml.ExecutableExtensionFactory:ru.capralow.dt.modeling.md.yaml.impl.BasicCommandYamlExporter">
+         <runtime>
+            <since value="com._1c.g5.v8.dt.platform.runtime.8.3.8"/>
+         </runtime>
+      </exporter>
+      
+      <exporter
+            class="ru.capralow.dt.modeling.md.internal.yaml.ExecutableExtensionFactory:ru.capralow.dt.modeling.md.yaml.impl.CommonPictureYamlExporter">
+         <runtime>
+            <since value="com._1c.g5.v8.dt.platform.runtime.8.3.8"/>
+         </runtime>
+      </exporter>
+      
+      <exporter
+            class="ru.capralow.dt.modeling.md.internal.yaml.ExecutableExtensionFactory:ru.capralow.dt.modeling.md.yaml.impl.ExchangePlanYamlExporter">
+         <runtime>
+            <since value="com._1c.g5.v8.dt.platform.runtime.8.3.8"/>
+         </runtime>
+      </exporter>
+      
+      <exporter
+            class="ru.capralow.dt.modeling.md.internal.yaml.ExecutableExtensionFactory:ru.capralow.dt.modeling.md.yaml.impl.FlowchartYamlExporter">
+         <runtime>
+            <since value="com._1c.g5.v8.dt.platform.runtime.8.3.8"/>
+         </runtime>
+      </exporter>
+      
+      <exporter
+            class="ru.capralow.dt.modeling.md.internal.yaml.ExecutableExtensionFactory:ru.capralow.dt.modeling.md.yaml.impl.MetadataHelpYamlExporter">
+         <runtime>
+            <since value="com._1c.g5.v8.dt.platform.runtime.8.3.8"/>
+         </runtime>
+      </exporter>
+      
+      <exporter
+            class="ru.capralow.dt.modeling.md.internal.yaml.ExecutableExtensionFactory:ru.capralow.dt.modeling.md.yaml.impl.MetadataPictureYamlExporter">
+         <runtime>
+            <since value="com._1c.g5.v8.dt.platform.runtime.8.3.8"/>
+         </runtime>
+      </exporter>
+      
+      <exporter
+            class="ru.capralow.dt.modeling.md.internal.yaml.ExecutableExtensionFactory:ru.capralow.dt.modeling.md.yaml.impl.ParentConfigurationsBinaryExporter">
+         <runtime>
+            <since value="com._1c.g5.v8.dt.platform.runtime.8.3.8"/>
+         </runtime>
+      </exporter>
+      
+      <exporter
+            class="ru.capralow.dt.modeling.md.internal.yaml.ExecutableExtensionFactory:ru.capralow.dt.modeling.md.yaml.impl.PredefinedYamlExporter">
+         <runtime>
+            <since value="com._1c.g5.v8.dt.platform.runtime.8.3.8"/>
+         </runtime>
+      </exporter>
+      
+      <exporter
+            class="ru.capralow.dt.modeling.md.internal.yaml.ExecutableExtensionFactory:ru.capralow.dt.modeling.md.yaml.impl.TemplateYamlExporter">
+         <runtime>
+            <since value="com._1c.g5.v8.dt.platform.runtime.8.3.8"/>
+         </runtime>
+      </exporter>
+      
+      <exporter
+            class="ru.capralow.dt.modeling.md.internal.yaml.ExecutableExtensionFactory:ru.capralow.dt.modeling.md.yaml.impl.WsReferenceYamlExporter">
+         <runtime>
+            <since value="com._1c.g5.v8.dt.platform.runtime.8.3.8"/>
+         </runtime>
+      </exporter>
+      
+      <exporter
+            class="ru.capralow.dt.modeling.md.internal.yaml.ExecutableExtensionFactory:ru.capralow.dt.modeling.md.yaml.impl.XdtoPackageYamlExporter">
+         <runtime>
+            <since value="com._1c.g5.v8.dt.platform.runtime.8.3.8"/>
+         </runtime>
+      </exporter>
+      
    </extension>
 </plugin>

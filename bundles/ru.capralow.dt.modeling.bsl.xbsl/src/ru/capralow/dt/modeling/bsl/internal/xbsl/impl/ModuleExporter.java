@@ -308,7 +308,47 @@ public class ModuleExporter
 
                                 if (method instanceof Function)
                                 {
-                                    methodText += ":любой"; //$NON-NLS-1$
+                                    methodText += ":"; //$NON-NLS-1$
+
+                                    List<TypeItem> paramTypes =
+                                        typesComputer.computeTypes(method, method.environments());
+
+                                    HashSet<String> params = new HashSet<>();
+                                    boolean hasUndefined = false;
+                                    for (TypeItem paramType : paramTypes)
+                                    {
+                                        if (paramType.eIsProxy())
+                                        {
+                                            paramType = (TypeItem)EcoreUtil2.resolve(paramType, configuration);
+                                        }
+
+                                        String typeName = getTypeName(paramType.getNameRu());
+                                        switch (typeName)
+                                        {
+                                        case "?": //$NON-NLS-1$
+                                            hasUndefined = true;
+                                            break;
+
+                                        case "": //$NON-NLS-1$
+                                            break;
+
+                                        default:
+                                            params.add(typeName);
+                                        }
+                                    }
+
+                                    if (params.isEmpty())
+                                    {
+                                        methodText += "любой"; //$NON-NLS-1$
+                                    }
+                                    else
+                                    {
+                                        methodText += String.join("|", params); //$NON-NLS-1$
+                                        if (hasUndefined)
+                                        {
+                                            methodText += "?"; //$NON-NLS-1$
+                                        }
+                                    }
                                 }
 
                                 methodText += Strings.newLine();
@@ -373,17 +413,26 @@ public class ModuleExporter
         case "Запрос": //$NON-NLS-1$
             return "Запрос"; //$NON-NLS-1$
 
+        case "ЛюбаяСсылка": //$NON-NLS-1$
+            return "Сущность.Ссылка"; //$NON-NLS-1$
+
         case "Массив": //$NON-NLS-1$
+        case "ФиксированныйМассив": //$NON-NLS-1$
             return "Массив<Неизвестно>"; //$NON-NLS-1$
 
         case "Соответствие": //$NON-NLS-1$
+        case "ФиксированноеСоответствие": //$NON-NLS-1$
             return "Соответствие<Неизвестно,Неизвестно>"; //$NON-NLS-1$
 
         case "Структура": //$NON-NLS-1$
+        case "ФиксированнаяСтруктура": //$NON-NLS-1$
             return "Соответствие<Строка,Неизвестно>"; //$NON-NLS-1$
 
         case "УникальныйИдентификатор": //$NON-NLS-1$
             return "Ууид"; //$NON-NLS-1$
+
+        case "УправляемаяФорма": //$NON-NLS-1$
+            return "Форма"; //$NON-NLS-1$
 
         default:
             return typeName.replace("Ссылка.", ""); //$NON-NLS-1$ //$NON-NLS-2$
@@ -482,12 +531,34 @@ public class ModuleExporter
                 result += ReturnStringFromExpression(params.get(2), configuration);
                 break;
 
+            case "врег": //$NON-NLS-1$
+                result += ReturnStringFromExpression(params.get(0), configuration);
+                result += ".ВВерхнийРегистр()"; //$NON-NLS-1$
+                break;
+
+            case "заполнитьзначениясвойств": //$NON-NLS-1$
+                result += ReturnStringFromExpression(params.get(0), configuration);
+                result += ".ВставитьВсе("; //$NON-NLS-1$
+                for (int i = 1; i < params.size(); i++)
+                {
+                    if (!firstParam)
+                    {
+                        result += ", "; //$NON-NLS-1$
+                    }
+                    result += ReturnStringFromExpression(params.get(i), configuration);
+                    firstParam = false;
+                }
+                result += ")"; //$NON-NLS-1$
+
+                break;
+
             case "значениезаполнено": //$NON-NLS-1$
                 result += ReturnStringFromExpression(params.get(0), configuration);
                 result += ".Пусто()"; //$NON-NLS-1$
                 break;
 
             case "кодсимвола": //$NON-NLS-1$
+                result += "Символы.ПолучитьКод("; //$NON-NLS-1$
                 result += ReturnStringFromExpression(params.get(0), configuration);
                 result += ".Символ("; //$NON-NLS-1$
                 for (int i = 1; i < params.size(); i++)
@@ -499,7 +570,7 @@ public class ModuleExporter
                     result += ReturnStringFromExpression(params.get(i), configuration);
                     firstParam = false;
                 }
-                result += ").ВБайты()"; //$NON-NLS-1$
+                result += "))"; //$NON-NLS-1$
 
                 break;
 
@@ -517,6 +588,11 @@ public class ModuleExporter
                 }
                 result += ")"; //$NON-NLS-1$
 
+                break;
+
+            case "нрег": //$NON-NLS-1$
+                result += ReturnStringFromExpression(params.get(0), configuration);
+                result += ".ВНижнийРегистр()"; //$NON-NLS-1$
                 break;
 
             case "прав": //$NON-NLS-1$
@@ -606,7 +682,7 @@ public class ModuleExporter
 
             case "стрразделить": //$NON-NLS-1$
                 result += ReturnStringFromExpression(params.get(0), configuration);
-                result += ".Заменить("; //$NON-NLS-1$
+                result += ".Разделить("; //$NON-NLS-1$
                 for (int i = 1; i < params.size(); i++)
                 {
                     if (!firstParam)

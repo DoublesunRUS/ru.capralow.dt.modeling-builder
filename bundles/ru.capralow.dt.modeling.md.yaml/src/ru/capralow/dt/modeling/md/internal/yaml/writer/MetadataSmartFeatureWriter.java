@@ -227,6 +227,10 @@ public class MetadataSmartFeatureWriter
         builder.put(MdClassPackage.Literals.COMMON_MODULE__PRIVILEGED, ISpecifiedElementWriter.ZeroWriter.class);
         builder.put(MdClassPackage.Literals.COMMON_MODULE__RETURN_VALUES_REUSE,
             ISpecifiedElementWriter.ZeroWriter.class);
+        builder.put(MdClassPackage.Literals.COMMON_MODULE__CLIENT_MANAGED_APPLICATION,
+            ISpecifiedElementWriter.ZeroWriter.class);
+        builder.put(MdClassPackage.Literals.COMMON_MODULE__SERVER, ISpecifiedElementWriter.ZeroWriter.class);
+        builder.put(MdClassPackage.Literals.COMMON_MODULE__SERVER_CALL, MetadataObjectWriter.class);
 
         builder.put(MdClassPackage.Literals.CATALOG__ATTRIBUTES, CatalogAttributeWriter.class);
         builder.put(MdClassPackage.Literals.CATALOG__COMMANDS, ISpecifiedElementWriter.ZeroWriter.class);

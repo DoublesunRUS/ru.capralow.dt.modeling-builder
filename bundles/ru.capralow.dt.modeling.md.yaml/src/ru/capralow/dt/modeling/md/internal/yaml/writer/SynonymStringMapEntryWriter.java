@@ -45,6 +45,11 @@ public class SynonymStringMapEntryWriter
         {
             featureName = IMetadataYamlElements.Application.SYNONYM;
         }
+        else if (eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.CommonModule
+            && feature == MdClassPackage.Literals.MD_OBJECT__SYNONYM)
+        {
+            return;
+        }
 
         @SuppressWarnings("unchecked")
         EMap<String, String> localStringMap = (EMap<String, String>)eObject.eGet(feature);

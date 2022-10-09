@@ -53,22 +53,22 @@ public class MetadataYamlExporter
 
         res = res && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicTabularSection)
             && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicTemplate)
-            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.ExchangePlan)
-            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.WSReference)
             && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.CommonPicture)
             && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Column)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Dimension)
             && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.EnumValue)
-            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.RecalculationDimension)
-            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.XDTOPackage)
-            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.URLTemplate)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.ExchangePlan)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Field)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Function)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.IntegrationServiceChannel)
             && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Method)
             && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Operation)
             && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Parameter)
-            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Field)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.RecalculationDimension)
             && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Resource)
-            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Dimension)
-            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Function)
-            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.IntegrationServiceChannel);
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.URLTemplate)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.WSReference)
+            && !(eObject instanceof com._1c.g5.v8.dt.metadata.mdclass.XDTOPackage);
 
         return res && super.isAppropriate(version, eObject);
     }

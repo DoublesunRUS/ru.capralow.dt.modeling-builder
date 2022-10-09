@@ -50,17 +50,56 @@ public abstract class BaseYamlExportFileSystemSupport
         foldersBuilder.put(MdClassPackage.Literals.COMMON_MODULE, "-"); //$NON-NLS-1$
         foldersBuilder.put(MdClassPackage.Literals.HTTP_SERVICE, "HTTPСервис"); //$NON-NLS-1$
         foldersBuilder.put(MdClassPackage.Literals.CATALOG, "Справочник"); //$NON-NLS-1$
+        foldersBuilder.put(MdClassPackage.Literals.CHART_OF_CHARACTERISTIC_TYPES, "ПланВидовХарактеристик"); //$NON-NLS-1$
+        foldersBuilder.put(MdClassPackage.Literals.CHART_OF_ACCOUNTS, "ПланСчетов"); //$NON-NLS-1$
+        foldersBuilder.put(MdClassPackage.Literals.CHART_OF_CALCULATION_TYPES, "ПланВидовРасчета"); //$NON-NLS-1$
         foldersBuilder.put(MdClassPackage.Literals.DOCUMENT, "Документ"); //$NON-NLS-1$
         foldersBuilder.put(MdClassPackage.Literals.ENUM, "Перечисление"); //$NON-NLS-1$
         foldersBuilder.put(MdClassPackage.Literals.REPORT, "Отчет"); //$NON-NLS-1$
         foldersBuilder.put(MdClassPackage.Literals.DATA_PROCESSOR, "Обработка"); //$NON-NLS-1$
         foldersBuilder.put(MdClassPackage.Literals.INFORMATION_REGISTER, "РегистрСведений"); //$NON-NLS-1$
         foldersBuilder.put(MdClassPackage.Literals.ACCUMULATION_REGISTER, "РегистрНакопления"); //$NON-NLS-1$
-        foldersBuilder.put(MdClassPackage.Literals.CHART_OF_CHARACTERISTIC_TYPES, "ПланВидовХарактеристик"); //$NON-NLS-1$
-        foldersBuilder.put(MdClassPackage.Literals.CHART_OF_ACCOUNTS, "ПланСчетов"); //$NON-NLS-1$
         foldersBuilder.put(MdClassPackage.Literals.ACCOUNTING_REGISTER, "РегистрБухгалтерии"); //$NON-NLS-1$
-        foldersBuilder.put(MdClassPackage.Literals.CHART_OF_CALCULATION_TYPES, "ПланВидовРасчета"); //$NON-NLS-1$
         foldersBuilder.put(MdClassPackage.Literals.CALCULATION_REGISTER, "РегистрРасчета"); //$NON-NLS-1$
+
+        foldersBuilder.put(MdClassPackage.Literals.LANGUAGE, "Languages");
+        foldersBuilder.put(MdClassPackage.Literals.SUBSYSTEM, "Subsystems");
+        foldersBuilder.put(MdClassPackage.Literals.STYLE_ITEM, "StyleItems");
+        foldersBuilder.put(MdClassPackage.Literals.STYLE, "Styles");
+        foldersBuilder.put(MdClassPackage.Literals.COMMON_PICTURE, "CommonPictures");
+        foldersBuilder.put(MdClassPackage.Literals.INTERFACE, "Interfaces");
+        foldersBuilder.put(MdClassPackage.Literals.SESSION_PARAMETER, "SessionParameters");
+        foldersBuilder.put(MdClassPackage.Literals.ROLE, "Roles");
+        foldersBuilder.put(MdClassPackage.Literals.COMMON_TEMPLATE, "CommonTemplates");
+        foldersBuilder.put(MdClassPackage.Literals.FILTER_CRITERION, "FilterCriteria");
+        foldersBuilder.put(MdClassPackage.Literals.COMMON_ATTRIBUTE, "CommonAttributes");
+        foldersBuilder.put(MdClassPackage.Literals.EXCHANGE_PLAN, "ExchangePlans");
+        foldersBuilder.put(MdClassPackage.Literals.XDTO_PACKAGE, "XDTOPackages");
+        foldersBuilder.put(MdClassPackage.Literals.WEB_SERVICE, "WebServices");
+        foldersBuilder.put(MdClassPackage.Literals.WS_REFERENCE, "WSReferences");
+        foldersBuilder.put(MdClassPackage.Literals.EVENT_SUBSCRIPTION, "EventSubscriptions");
+        foldersBuilder.put(MdClassPackage.Literals.SCHEDULED_JOB, "ScheduledJobs");
+        foldersBuilder.put(MdClassPackage.Literals.SETTINGS_STORAGE, "SettingsStorages");
+        foldersBuilder.put(MdClassPackage.Literals.FUNCTIONAL_OPTION, "FunctionalOptions");
+        foldersBuilder.put(MdClassPackage.Literals.FUNCTIONAL_OPTIONS_PARAMETER, "FunctionalOptionsParameters");
+        foldersBuilder.put(MdClassPackage.Literals.DEFINED_TYPE, "DefinedTypes");
+        foldersBuilder.put(MdClassPackage.Literals.COMMON_COMMAND, "CommonCommands");
+        foldersBuilder.put(MdClassPackage.Literals.COMMAND_GROUP, "CommandGroups");
+        foldersBuilder.put(MdClassPackage.Literals.CONSTANT, "Constants");
+        foldersBuilder.put(MdClassPackage.Literals.COMMON_FORM, "CommonForms");
+        foldersBuilder.put(MdClassPackage.Literals.DOCUMENT_NUMERATOR, "DocumentNumerators");
+        foldersBuilder.put(MdClassPackage.Literals.SEQUENCE, "Sequences");
+        foldersBuilder.put(MdClassPackage.Literals.DOCUMENT_JOURNAL, "DocumentJournals");
+        foldersBuilder.put(MdClassPackage.Literals.EXTERNAL_REPORT, "ExternalReports");
+        foldersBuilder.put(MdClassPackage.Literals.EXTERNAL_DATA_PROCESSOR, "ExternalDataProcessors");
+        foldersBuilder.put(MdClassPackage.Literals.BUSINESS_PROCESS, "BusinessProcesses");
+        foldersBuilder.put(MdClassPackage.Literals.TASK, "Tasks");
+        foldersBuilder.put(MdClassPackage.Literals.EXTERNAL_DATA_SOURCE, "ExternalDataSources");
+        foldersBuilder.put(MdClassPackage.Literals.CUBE, "Cubes");
+        foldersBuilder.put(MdClassPackage.Literals.DIMENSION_TABLE, "DimensionTables");
+        foldersBuilder.put(MdClassPackage.Literals.TABLE, "Tables");
+        foldersBuilder.put(MdClassPackage.Literals.INTEGRATION_SERVICE, "IntegrationServices");
+        foldersBuilder.put(MdClassPackage.Literals.BOT, "Bots");
         TOP_OBJECT_FOLDER_NAMES = foldersBuilder.build();
     }
 
@@ -163,18 +202,18 @@ public abstract class BaseYamlExportFileSystemSupport
         {
             return containerPath;
         }
-//        if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicTemplate)
-//        {
-//            return containerPath.resolve(TEMPLATES);
-//        }
-//        if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicCommand)
-//        {
-//            return containerPath.resolve("Commands");
-//        }
-//        if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Recalculation)
-//        {
-//            return containerPath.resolve("Recalculations");
-//        }
+        if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicTemplate)
+        {
+            return containerPath;
+        }
+        if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.BasicCommand)
+        {
+            return containerPath;
+        }
+        if (mdObject instanceof com._1c.g5.v8.dt.metadata.mdclass.Recalculation)
+        {
+            return containerPath;
+        }
 
         ExportDebugTrace debugTrace = ExportDebugTrace.getInstance();
         String message = MessageFormat.format("Trying gets target directory for unknown metadata object with uri: {0}",

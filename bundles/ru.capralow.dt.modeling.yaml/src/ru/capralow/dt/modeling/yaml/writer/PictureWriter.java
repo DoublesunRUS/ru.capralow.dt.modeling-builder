@@ -120,7 +120,7 @@ public class PictureWriter
     {
         String pictureExtension = ((IBmObject)picture).bmGetProperty(PICTURE_EXTENSION_KEY);
         pictureExtension =
-            ("picture".equals(pictureExtension) || pictureExtension == null) ? "" : ("." + pictureExtension);
+            ("picture".equals(pictureExtension) || pictureExtension == null) ? "" : ("." + pictureExtension); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
         String pictureName = String.valueOf(Strings.toFirstUpper(feature.getName())) + pictureExtension;
         Point transparentPixel = picture.getTransparentPixel();
         writePictureDefContent(writer, pictureName, transparentPixel, group);
@@ -135,7 +135,7 @@ public class PictureWriter
         boolean loadTransparent = !(!(referencePicture instanceof com._1c.g5.v8.dt.platform.model.PlatformPicture)
             && (!(referencePicture instanceof com._1c.g5.v8.dt.metadata.mdclass.CommonPicture)
                 || ((PictureDef)referencePicture).getTransparentPixel() == null)
-            && (!referencePicture.eIsProxy() || !reference.startsWith("StdPicture.")));
+            && (!referencePicture.eIsProxy() || !reference.startsWith("StdPicture."))); //$NON-NLS-1$
         writePictureRefContent(writer, reference, loadTransparent, group);
     }
 
