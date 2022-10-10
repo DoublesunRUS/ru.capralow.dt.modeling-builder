@@ -35,7 +35,9 @@ import com._1c.g5.v8.dt.bsl.model.BooleanLiteral;
 import com._1c.g5.v8.dt.bsl.model.BreakStatement;
 import com._1c.g5.v8.dt.bsl.model.Conditional;
 import com._1c.g5.v8.dt.bsl.model.ContinueStatement;
+import com._1c.g5.v8.dt.bsl.model.DateLiteral;
 import com._1c.g5.v8.dt.bsl.model.DynamicFeatureAccess;
+import com._1c.g5.v8.dt.bsl.model.EmptyExpression;
 import com._1c.g5.v8.dt.bsl.model.EmptyStatement;
 import com._1c.g5.v8.dt.bsl.model.ExecuteStatement;
 import com._1c.g5.v8.dt.bsl.model.Expression;
@@ -49,6 +51,7 @@ import com._1c.g5.v8.dt.bsl.model.IndexAccess;
 import com._1c.g5.v8.dt.bsl.model.Invocation;
 import com._1c.g5.v8.dt.bsl.model.Method;
 import com._1c.g5.v8.dt.bsl.model.Module;
+import com._1c.g5.v8.dt.bsl.model.NullLiteral;
 import com._1c.g5.v8.dt.bsl.model.NumberLiteral;
 import com._1c.g5.v8.dt.bsl.model.OperatorStyleCreator;
 import com._1c.g5.v8.dt.bsl.model.RaiseStatement;
@@ -417,16 +420,22 @@ public class ModuleExporter
             return "Сущность.Ссылка"; //$NON-NLS-1$
 
         case "Массив": //$NON-NLS-1$
-        case "ФиксированныйМассив": //$NON-NLS-1$
             return "Массив<Неизвестно>"; //$NON-NLS-1$
 
+        case "ФиксированныйМассив": //$NON-NLS-1$
+            return "ЧитаемыйМассив<Неизвестно>"; //$NON-NLS-1$
+
         case "Соответствие": //$NON-NLS-1$
-        case "ФиксированноеСоответствие": //$NON-NLS-1$
             return "Соответствие<Неизвестно,Неизвестно>"; //$NON-NLS-1$
 
+        case "ФиксированноеСоответствие": //$NON-NLS-1$
+            return "ЧитаемоеСоответствие<Неизвестно,Неизвестно>"; //$NON-NLS-1$
+
         case "Структура": //$NON-NLS-1$
-        case "ФиксированнаяСтруктура": //$NON-NLS-1$
             return "Соответствие<Строка,Неизвестно>"; //$NON-NLS-1$
+
+        case "ФиксированнаяСтруктура": //$NON-NLS-1$
+            return "ЧитаемоеСоответствие<Строка,Неизвестно>"; //$NON-NLS-1$
 
         case "УникальныйИдентификатор": //$NON-NLS-1$
             return "Ууид"; //$NON-NLS-1$
@@ -435,7 +444,12 @@ public class ModuleExporter
             return "Форма"; //$NON-NLS-1$
 
         default:
-            return typeName.replace("Ссылка.", ""); //$NON-NLS-1$ //$NON-NLS-2$
+            if (typeName.contains("Ссылка.")) //$NON-NLS-1$
+            {
+                return typeName.replace("Ссылка.", "") + ".Ссылка"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+            }
+
+            return typeName;
         }
     }
 
@@ -698,7 +712,7 @@ public class ModuleExporter
 
             case "тип": //$NON-NLS-1$
                 result += "Тип<"; //$NON-NLS-1$
-                result += ReturnStringFromExpression(params.get(0), configuration).replace("\"", ""); //$NON-NLS-1$ //$NON-NLS-2$
+                result += getTypeName(ReturnStringFromExpression(params.get(0), configuration).replace("\"", "")); //$NON-NLS-1$ //$NON-NLS-2$
                 result += ">"; //$NON-NLS-1$
                 break;
 
@@ -770,6 +784,7 @@ public class ModuleExporter
             {
                 String line = lines.get(0);
                 line = line.substring(1, line.length() - 1);
+                line = line.replace("%", "\\%"); //$NON-NLS-1$ //$NON-NLS-2$
 
                 return "\"" + line.replace("\"\"", "\\\"") + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
             }
@@ -795,6 +810,7 @@ public class ModuleExporter
                 }
 
                 result = result.substring(0, result.length() - 1);
+                result = result.replace("%", "\\%"); //$NON-NLS-1$ //$NON-NLS-2$
 
                 return Strings.newLine() + offsetChars + "\"" + result.replace("\"\"", "\\\"") + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
             }
@@ -808,9 +824,21 @@ public class ModuleExporter
             return ReturnStringFromExpression(((IndexAccess)expression).getSource(), configuration) + "[" //$NON-NLS-1$
                 + ReturnStringFromExpression(((IndexAccess)expression).getIndex(), configuration) + "]"; //$NON-NLS-1$
         }
-        else if (expression != null)
+        else if (expression instanceof EmptyExpression)
         {
             return ""; //$NON-NLS-1$
+        }
+        else if (expression instanceof NullLiteral)
+        {
+            return "Null"; //$NON-NLS-1$
+        }
+        else if (expression instanceof DateLiteral)
+        {
+            return "Дата{" + ((DateLiteral)expression).getValue() + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+        }
+        else if (expression != null)
+        {
+            throw new ExportException("Unknown expression: " + expression.getClass());
         }
 
         return ""; //$NON-NLS-1$
