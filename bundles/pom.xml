@@ -22,6 +22,7 @@
 		<module>ru.capralow.dt.modeling.yaml</module>
 		<module>ru.capralow.dt.modeling.md.yaml</module>
         <module>ru.capralow.dt.modeling.bsl.xbsl</module>
+        <module>ru.capralow.dt.modeling.bsl.yaml</module>
 	</modules>
 
 	<build>

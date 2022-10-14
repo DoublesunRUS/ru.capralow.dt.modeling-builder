@@ -27,9 +27,13 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.URIConverter;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.EcoreUtil2;
-import org.eclipse.xtext.naming.IQualifiedNameProvider;
 import org.eclipse.xtext.util.Strings;
 
+import com._1c.g5.v8.dt.bsl.documentation.comment.BslCommentUtils;
+import com._1c.g5.v8.dt.bsl.documentation.comment.BslDocumentationComment;
+import com._1c.g5.v8.dt.bsl.documentation.comment.BslMultiLineCommentDocumentationProvider;
+import com._1c.g5.v8.dt.bsl.documentation.comment.IDescriptionPart;
+import com._1c.g5.v8.dt.bsl.documentation.comment.TextPart;
 import com._1c.g5.v8.dt.bsl.model.BinaryExpression;
 import com._1c.g5.v8.dt.bsl.model.BooleanLiteral;
 import com._1c.g5.v8.dt.bsl.model.BreakStatement;
@@ -72,7 +76,6 @@ import com._1c.g5.v8.dt.bsl.util.BslUtil;
 import com._1c.g5.v8.dt.common.FileUtil;
 import com._1c.g5.v8.dt.core.filesystem.IProjectFileSystemSupport;
 import com._1c.g5.v8.dt.core.filesystem.IProjectFileSystemSupportProvider;
-import com._1c.g5.v8.dt.core.platform.IBmModelManager;
 import com._1c.g5.v8.dt.core.platform.IConfigurationAware;
 import com._1c.g5.v8.dt.core.platform.IResourceLookup;
 import com._1c.g5.v8.dt.core.platform.IV8Project;
@@ -133,10 +136,7 @@ public class ModuleExporter
     private IV8ProjectManager v8ProjectManager;
 
     @Inject
-    public IBmModelManager bmModelManager;
-
-    @Inject
-    public IQualifiedNameProvider qualifiedNameProvider;
+    private BslMultiLineCommentDocumentationProvider commentProvider;
 
     @Inject
     public ModuleExporter(TypesComputer typesComputer)
@@ -242,7 +242,19 @@ public class ModuleExporter
                             EList<Method> methods = module.allMethods();
                             for (Method method : methods)
                             {
+                                BslDocumentationComment comment =
+                                    BslCommentUtils.parseTemplateComment(method, true, commentProvider);
+
                                 String methodText = ""; //$NON-NLS-1$
+
+                                for (IDescriptionPart part : comment.getDescription().getParts())
+                                {
+                                    if (part instanceof TextPart)
+                                    {
+                                        String partText = ((TextPart)part).getText();
+                                        methodText += "// " + partText + Strings.newLine(); //$NON-NLS-1$
+                                    }
+                                }
 
                                 if (method.isExport())
                                 {

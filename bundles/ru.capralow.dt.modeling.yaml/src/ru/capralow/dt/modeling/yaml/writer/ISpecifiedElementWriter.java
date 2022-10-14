@@ -16,8 +16,8 @@ public interface ISpecifiedElementWriter
 {
     String SMART_ELEMENT_WRITER = "SmartSpecifiedElementWriter"; //$NON-NLS-1$
 
-    void write(YamlStreamWriter exportXmlStreamWriter, EObject eObject, EStructuralFeature eStructuralFeature,
-        boolean writeEmpty, Version version, Map<String, Object> group) throws ExportException;
+    void write(YamlStreamWriter writer, EObject eObject, EStructuralFeature eStructuralFeature, boolean writeEmpty,
+        Version version, Map<String, Object> group) throws ExportException;
 
     class ZeroWriter
         implements ISpecifiedElementWriter

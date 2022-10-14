@@ -188,6 +188,28 @@ public class YamlStreamWriter
         }
     }
 
+    public void removeEmptyList(String groupName, Map<String, Object> parentGroup)
+    {
+        if (parentGroup != null)
+        {
+            @SuppressWarnings("unchecked")
+            List<Object> group = (List<Object>)parentGroup.get(groupName);
+            if (group.isEmpty())
+            {
+                parentGroup.remove(groupName);
+            }
+        }
+        else
+        {
+            @SuppressWarnings("unchecked")
+            List<Object> group = (List<Object>)data.get(groupName);
+            if (group.isEmpty())
+            {
+                data.remove(groupName);
+            }
+        }
+    }
+
     public void writeElement(QName qName, Object value, Map<String, Object> group) throws ExportException
     {
         if (qName == null || value == null)

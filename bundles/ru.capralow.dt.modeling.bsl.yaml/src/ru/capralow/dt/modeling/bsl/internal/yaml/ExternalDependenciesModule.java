@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2022, Aleksandr Kapralov
  */
-package ru.capralow.dt.modeling.bsl.internal.xbsl;
+package ru.capralow.dt.modeling.bsl.internal.yaml;
 
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.emf.common.util.URI;
@@ -48,9 +48,9 @@ public class ExternalDependenciesModule
         URI uri = URI.createURI("*.bsl"); //$NON-NLS-1$
         final IResourceServiceProvider rsp = IResourceServiceProvider.Registry.INSTANCE.getResourceServiceProvider(uri);
 
-        bind(TypesComputer.class).toProvider(() -> rsp.get(TypesComputer.class));
-        bind(DynamicFeatureAccessComputer.class).toProvider(() -> rsp.get(DynamicFeatureAccessComputer.class));
         bind(BslMultiLineCommentDocumentationProvider.class)
             .toProvider(() -> rsp.get(BslMultiLineCommentDocumentationProvider.class));
+        bind(DynamicFeatureAccessComputer.class).toProvider(() -> rsp.get(DynamicFeatureAccessComputer.class));
+        bind(TypesComputer.class).toProvider(() -> rsp.get(TypesComputer.class));
     }
 }

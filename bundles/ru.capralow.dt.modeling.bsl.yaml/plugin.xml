@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension1
+   <extension
          point="ru.capralow.dt.modeling.yaml.exporter">
       <exporter
-            class="ru.capralow.dt.modeling.bsl.internal.xbsl.ExecutableExtensionFactory:ru.capralow.dt.modeling.bsl.internal.xbsl.impl.ModuleExporter">
+            class="ru.capralow.dt.modeling.bsl.internal.yaml.ExecutableExtensionFactory:ru.capralow.dt.modeling.bsl.internal.yaml.impl.ModuleExporter">
          <runtime>
             <since value="com._1c.g5.v8.dt.platform.runtime.8.3.8"/>
          </runtime>
       </exporter>
-   </extension1>
+   </extension>
 </plugin>
